@@ -138,7 +138,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-4.
   - **Hecho cuando:** los cinco códigos de error devuelven el estado correcto y un JSON con solo `code` y `message` en inglés.
 
-- [ ] **T32. Implementar la ruta `GET /v1/extract`.**
+- [x] **T32. Implementar la ruta `GET /v1/extract`.**
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** la ruta valida la consulta, ejecuta el caso de uso de extracción y devuelve el contrato `ExtractionDocument` v1 o el error normalizado.
 
