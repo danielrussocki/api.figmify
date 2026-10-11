@@ -60,7 +60,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2.
   - **Hecho cuando:** cada extracción crea un contexto con viewport, escala, idioma, zona horaria, esquema de color y preferencias definidos en el plan.
 
-- [ ] **T14. Detectar y clasificar redirecciones HTTP de la navegación principal.**
+- [x] **T14. Detectar y clasificar redirecciones HTTP de la navegación principal.**
   - **RF:** RF-4.
   - **Hecho cuando:** una respuesta 3xx del documento principal termina la extracción con `REDIRECT_NOT_ALLOWED` y sin documento parcial.
 

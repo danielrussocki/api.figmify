@@ -21,6 +21,15 @@ export interface RedirectNotAllowedError extends BaseApplicationError {
   code: 'REDIRECT_NOT_ALLOWED';
 }
 
+export class MainDocumentRedirectError extends Error implements RedirectNotAllowedError {
+  readonly code = 'REDIRECT_NOT_ALLOWED' as const;
+
+  constructor() {
+    super('The main document navigation must not redirect.');
+    this.name = 'MainDocumentRedirectError';
+  }
+}
+
 export interface UpstreamFailureError extends BaseApplicationError {
   code: 'UPSTREAM_FAILURE';
 }

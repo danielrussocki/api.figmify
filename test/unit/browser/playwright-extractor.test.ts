@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
 import type { ExtractionRequest } from '../../../src/contracts/extraction/extraction-port.js';
-import type { Browser, BrowserContext } from 'playwright';
+import type { Browser, BrowserContext, Page, Response } from 'playwright';
 
 const request: ExtractionRequest = {
   url: 'https://example.com/page',
@@ -18,6 +18,24 @@ function createBrowser() {
     context,
     newContext,
   };
+}
+
+function createPage(response: Response, mainFrame = {}) {
+  let responseListener: ((response: Response) => void) | undefined;
+  const page = {
+    mainFrame: vi.fn().mockReturnValue(mainFrame),
+    on: vi.fn((event: string, listener: (eventResponse: Response) => void) => {
+      if (event === 'response') {
+        responseListener = listener;
+      }
+    }),
+    off: vi.fn(),
+    goto: vi.fn().mockImplementation(async () => {
+      responseListener?.(response);
+    }),
+  } as unknown as Page;
+
+  return { page };
 }
 
 describe('PlaywrightExtractor', () => {
@@ -63,5 +81,41 @@ describe('PlaywrightExtractor', () => {
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     });
+  });
+
+  test('rejects an HTTP redirect for the main document navigation', async () => {
+    const { browser } = createBrowser();
+    const requestFrame = {};
+    const response = {
+      status: vi.fn().mockReturnValue(302),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn().mockReturnValue(requestFrame),
+      }),
+    } as unknown as Response;
+    const { page } = createPage(response, requestFrame);
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'REDIRECT_NOT_ALLOWED',
+    });
+
+    expect(page.goto).toHaveBeenCalledWith(request.url);
+    expect(page.off).toHaveBeenCalledWith('response', expect.any(Function));
+  });
+
+  test('does not classify a redirect response from a secondary request as a main navigation redirect', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(301),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(false),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page } = createPage(response);
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).resolves.toBeUndefined();
   });
 });

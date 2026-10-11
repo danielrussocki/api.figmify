@@ -1,5 +1,6 @@
-import type { Browser, BrowserContext } from 'playwright';
+import type { Browser, BrowserContext, Page, Response } from 'playwright';
 
+import { MainDocumentRedirectError } from '../contracts/errors/application-error.js';
 import type { ExtractionRequest } from '../contracts/extraction/extraction-port.js';
 import { FIXED_RENDERING_ENVIRONMENT } from '../contracts/extraction/defaults.js';
 
@@ -24,5 +25,28 @@ export class PlaywrightExtractor {
       contrast: FIXED_RENDERING_ENVIRONMENT.contrast,
       userAgent: FIXED_RENDERING_ENVIRONMENT.userAgent,
     });
+  }
+
+  async navigateMainDocument(page: Page, url: string): Promise<void> {
+    let redirected = false;
+    const detectMainDocumentRedirect = (response: Response): void => {
+      const navigationRequest = response.request();
+      const isMainDocumentNavigation =
+        navigationRequest.isNavigationRequest() && navigationRequest.frame() === page.mainFrame();
+
+      if (isMainDocumentNavigation && response.status() >= 300 && response.status() < 400) {
+        redirected = true;
+      }
+    };
+
+    page.on('response', detectMainDocumentRedirect);
+    try {
+      await page.goto(url);
+      if (redirected) {
+        throw new MainDocumentRedirectError();
+      }
+    } finally {
+      page.off('response', detectMainDocumentRedirect);
+    }
   }
 }
