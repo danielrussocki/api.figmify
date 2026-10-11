@@ -34,7 +34,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** una consulta válida produce una URL y viewport normalizados, y los parámetros omitidos reciben los tres valores predeterminados.
 
-- [ ] **T8. Probar la normalización de consulta para valores predeterminados y límites válidos.**
+- [x] **T8. Probar la normalización de consulta para valores predeterminados y límites válidos.**
   - **RF:** RF-1.
   - **Hecho cuando:** las pruebas cubren valores omitidos, dimensiones 1 y 3840, y escalas 1, 2 y 3.
 

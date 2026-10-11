@@ -33,4 +33,33 @@ describe('normalizeExtractionQuery', () => {
       },
     });
   });
+
+  test.each([
+    [1, 1],
+    [3840, 3840],
+  ])('accepts viewport dimensions at the valid boundary %i', (width, height) => {
+    expect(
+      normalizeExtractionQuery({
+        url: 'https://example.com',
+        width: String(width),
+        height: String(height),
+      }),
+    ).toMatchObject({
+      viewport: { width, height, deviceScaleFactor: 1 },
+    });
+  });
+
+  test.each([1, 2, 3])(
+    'accepts the allowed device scale factor %i',
+    (deviceScaleFactor) => {
+      expect(
+        normalizeExtractionQuery({
+          url: 'https://example.com',
+          deviceScaleFactor: String(deviceScaleFactor),
+        }),
+      ).toMatchObject({
+        viewport: { deviceScaleFactor },
+      });
+    },
+  );
 });
