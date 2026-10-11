@@ -112,7 +112,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Transformación para Figma
 
-- [ ] **T26. Crear el catálogo determinista de colores sólidos RGBA.**
+- [x] **T26. Crear el catálogo determinista de colores sólidos RGBA.**
   - **RF:** RF-3.
   - **Hecho cuando:** colores RGBA idénticos generan una única entrada con ID estable, y gradientes, imágenes, filtros y modos de mezcla no generan estilos de color.
 
