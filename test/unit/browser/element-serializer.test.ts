@@ -9,7 +9,7 @@ interface ElementFixture {
   hasAttribute(name: string): boolean;
   ownerDocument?: {
     defaultView?: {
-      getComputedStyle(element: Element): {
+      getComputedStyle(element: Element, pseudoElement?: string): {
         getPropertyValue(property: string): unknown;
         display?: string;
         visibility?: string;
@@ -146,6 +146,74 @@ describe('serializeElement', () => {
     const serialized = serializeElement(root as unknown as Element);
 
     expect(serialized.styles).toEqual({ display: 'block' });
+  });
+
+  test('serializes computed ::before and ::after content with only permitted visual styles', () => {
+    const root = element('DIV');
+    root.ownerDocument = {
+      defaultView: {
+        getComputedStyle: (_element, pseudoElement) => {
+          const values = pseudoElement === '::before'
+            ? {
+                content: '"Before content"',
+                display: 'inline-block',
+                color: 'rgb(1, 2, 3)',
+                'not-permitted': 'must not be serialized',
+              }
+            : pseudoElement === '::after'
+              ? {
+                  content: '"After content"',
+                  'font-size': '16px',
+                  opacity: '0.5',
+                }
+              : {};
+
+          return {
+            getPropertyValue: (property) => values[property as keyof typeof values] ?? '',
+          };
+        },
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.pseudoElements).toEqual({
+      before: {
+        content: 'Before content',
+        styles: {
+          display: 'inline-block',
+          color: 'rgb(1, 2, 3)',
+        },
+      },
+      after: {
+        content: 'After content',
+        styles: {
+          'font-size': '16px',
+          opacity: '0.5',
+        },
+      },
+    });
+  });
+
+  test('returns null for pseudo-elements without generated content', () => {
+    const root = element('DIV');
+    root.ownerDocument = {
+      defaultView: {
+        getComputedStyle: (_element, pseudoElement) => ({
+          getPropertyValue: (property) => {
+            if (property !== 'content') {
+              return '';
+            }
+
+            return pseudoElement === '::before' ? 'none' : 'normal';
+          },
+        }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.pseudoElements).toEqual({ before: null, after: null });
   });
 
   test('keeps only permitted visual and semantic attributes', () => {

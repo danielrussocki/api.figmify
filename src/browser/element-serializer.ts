@@ -1,4 +1,4 @@
-import type { ExtractionNode } from '../contracts/extraction/extraction-document.js';
+import type { ExtractionNode, PseudoElement } from '../contracts/extraction/extraction-document.js';
 import { VISUAL_PROPERTIES } from './visual-properties.js';
 
 const ALLOWED_ATTRIBUTE_NAMES = [
@@ -51,8 +51,8 @@ export function serializeElement(element: Element): ExtractionNode {
     text: readRenderedText(currentElement),
     styles: readVisualStyles(currentElement),
     pseudoElements: {
-      before: null,
-      after: null,
+      before: readPseudoElement(currentElement, '::before'),
+      after: readPseudoElement(currentElement, '::after'),
     },
     children: Array.from(currentElement.children, serialize),
   });
@@ -166,6 +166,61 @@ function readVisualStyles(element: Element): Record<string, string> {
     return {};
   }
 
+  return selectVisualStyles(computedStyles);
+}
+
+function readPseudoElement(element: Element, pseudoElement: '::before' | '::after'): PseudoElement | null {
+  const view = element.ownerDocument?.defaultView;
+
+  if (view === null || view === undefined) {
+    return null;
+  }
+
+  let computedStyles: CSSStyleDeclaration;
+  try {
+    computedStyles = view.getComputedStyle(element, pseudoElement);
+  } catch {
+    return null;
+  }
+
+  const content = readPseudoContent(computedStyles);
+
+  if (content === null) {
+    return null;
+  }
+
+  return {
+    content,
+    styles: selectVisualStyles(computedStyles),
+  };
+}
+
+function readPseudoContent(computedStyles: CSSStyleDeclaration): string | null {
+  let value: unknown;
+  try {
+    value = computedStyles.getPropertyValue('content');
+  } catch {
+    return null;
+  }
+
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const content = value.trim();
+
+  if (content.length === 0 || content === 'none' || content === 'normal') {
+    return null;
+  }
+
+  if ((content.startsWith('"') && content.endsWith('"')) || (content.startsWith("'") && content.endsWith("'"))) {
+    return content.slice(1, -1).replace(/\\([\\"'])/g, '$1');
+  }
+
+  return content;
+}
+
+function selectVisualStyles(computedStyles: CSSStyleDeclaration): Record<string, string> {
   const styles: Record<string, string> = {};
 
   for (const property of VISUAL_PROPERTIES) {

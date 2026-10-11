@@ -98,7 +98,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** solo se incluyen los atributos permitidos, las URL de recursos están resueltas de forma absoluta y no se descarga ningún recurso adicional.
 
-- [ ] **T23. Implementar la serialización de `::before` y `::after`.**
+- [x] **T23. Implementar la serialización de `::before` y `::after`.**
   - **RF:** RF-2.
   - **Hecho cuando:** cada nodo incluye ambos campos como `null` o como un objeto con `content` y propiedades visuales permitidas.
 
