@@ -56,7 +56,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** el caso de uso acepta una solicitud normalizada, aplica la política de URL y depende de un puerto de extracción, no de Playwright directamente.
 
-- [ ] **T13. Crear el adaptador Playwright con viewport y entorno fijo.**
+- [x] **T13. Crear el adaptador Playwright con viewport y entorno fijo.**
   - **RF:** RF-1, RF-2.
   - **Hecho cuando:** cada extracción crea un contexto con viewport, escala, idioma, zona horaria, esquema de color y preferencias definidos en el plan.
 
