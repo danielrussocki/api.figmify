@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
 import type { ExtractionRequest } from '../../../src/contracts/extraction/extraction-port.js';
-import type { Browser, BrowserContext, Frame, Page, Response } from 'playwright';
+import type { Browser, BrowserContext, Frame, Page, Request, Response, Route } from 'playwright';
 
 const request: ExtractionRequest = {
   url: 'https://example.com/page',
@@ -28,6 +28,7 @@ function createPage(
 ) {
   let responseListener: ((response: Response) => void) | undefined;
   let frameNavigationListener: ((frame: Frame) => void) | undefined;
+  let routeHandler: ((route: Route) => Promise<void>) | undefined;
   const waitForLoadState = vi.fn().mockResolvedValue(undefined);
   const waitForTimeout = vi.fn().mockResolvedValue(undefined);
   const page = {
@@ -40,6 +41,10 @@ function createPage(
       }
     }),
     off: vi.fn(),
+    route: vi.fn((_: string, handler: (route: Route) => Promise<void>) => {
+      routeHandler = handler;
+    }),
+    unroute: vi.fn(),
     waitForLoadState,
     waitForTimeout,
     goto: vi.fn().mockImplementation(async () => {
@@ -57,6 +62,7 @@ function createPage(
     waitForLoadState,
     waitForTimeout,
     emitMainFrameNavigation: () => frameNavigationListener?.(mainFrame as Frame),
+    applyRoute: (route: Route) => routeHandler?.(route),
   };
 }
 
@@ -177,6 +183,45 @@ describe('PlaywrightExtractor', () => {
     await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
       code: 'REDIRECT_NOT_ALLOWED',
     });
+  });
+
+  test('blocks a non-public main navigation destination in production before it loads', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page, applyRoute, waitForLoadState, waitForTimeout } = createPage(response);
+    const abort = vi.fn().mockResolvedValue(undefined);
+    const continueRequest = vi.fn().mockResolvedValue(undefined);
+    const blockedRequest = {
+      isNavigationRequest: vi.fn().mockReturnValue(true),
+      frame: vi.fn().mockReturnValue(page.mainFrame()),
+      url: vi.fn().mockReturnValue('http://127.0.0.1/private'),
+    } as unknown as Request;
+    const route = {
+      request: vi.fn().mockReturnValue(blockedRequest),
+      abort,
+      continue: continueRequest,
+    } as unknown as Route;
+    vi.mocked(page.goto).mockImplementation(async () => {
+      await applyRoute(route);
+      throw new Error('net::ERR_FAILED');
+    });
+    const extractor = new PlaywrightExtractor(browser, 'production');
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'URL_NOT_PUBLIC',
+      message: 'The URL must resolve to a public address.',
+    });
+
+    expect(abort).toHaveBeenCalledTimes(1);
+    expect(continueRequest).not.toHaveBeenCalled();
+    expect(waitForLoadState).not.toHaveBeenCalled();
+    expect(waitForTimeout).not.toHaveBeenCalled();
   });
 
   test('waits for load and an additional 30 seconds before completing navigation', async () => {

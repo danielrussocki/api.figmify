@@ -76,7 +76,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-4.
   - **Hecho cuando:** cada fallo citado se expone al caso de uso como `UPSTREAM_FAILURE` y no contiene detalles internos.
 
-- [ ] **T18. Volver a aplicar la política de URL pública en cada destino de navegación principal.**
+- [x] **T18. Volver a aplicar la política de URL pública en cada destino de navegación principal.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** un destino principal no público en producción no llega a cargarse y devuelve `URL_NOT_PUBLIC`.
 
