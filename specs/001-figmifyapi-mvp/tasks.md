@@ -120,7 +120,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3.
   - **Hecho cuando:** una misma tupla de las siete propiedades tipográficas genera un único estilo con ID estable.
 
-- [ ] **T28. Implementar la transformación de un nodo extraído a nodo Figma.**
+- [x] **T28. Implementar la transformación de un nodo extraído a nodo Figma.**
   - **RF:** RF-3.
   - **Hecho cuando:** la transformación conserva `sourceId`, estructura, texto, atributos y recursos, y asigna un tipo permitido de Figma.
 
