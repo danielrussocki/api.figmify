@@ -201,6 +201,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** las pruebas verifican que el ensamblador expone `GET /v1/extract` y `GET /v1/figma` con sus dependencias reales o sustituidas de forma controlada, y que el punto de entrada escucha la configuración válida y rechaza una configuración inválida sin abrir un puerto.
 
-- [ ] **T47. Validar la ejecución local de la API.**
+- [x] **T47. Validar la ejecución local de la API.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `pnpm test` pasa, `pnpm build` genera el punto de entrada ejecutable y una ejecución manual confirma que el proceso acepta solicitudes en el host y puerto configurados, sin persistir datos.
