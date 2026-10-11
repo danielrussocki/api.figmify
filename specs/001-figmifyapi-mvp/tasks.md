@@ -24,7 +24,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-4.
   - **Hecho cuando:** existen representaciones tipadas para `INVALID_REQUEST`, `URL_NOT_PUBLIC`, `REDIRECT_NOT_ALLOWED`, `UPSTREAM_FAILURE` e `INTERNAL_ERROR`.
 
-- [ ] **T6. Definir constantes para la vista predeterminada, el entorno fijo y las propiedades visuales permitidas.**
+- [x] **T6. Definir constantes para la vista predeterminada, el entorno fijo y las propiedades visuales permitidas.**
   - **RF:** RF-1, RF-2.
   - **Hecho cuando:** las constantes contienen 1920×1080@1, los valores fijos de entorno y la lista cerrada de propiedades de `plan.md`.
 
