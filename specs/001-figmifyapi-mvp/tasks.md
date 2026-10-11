@@ -20,7 +20,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3.
   - **Hecho cuando:** los tipos representan `FigmaDocument` v1, nodos Figma, `sourceId`, catálogos de color y tipografía, e IDs de estilos.
 
-- [ ] **T5. Crear el contrato de errores de aplicación y las cinco categorías de error normalizadas.**
+- [x] **T5. Crear el contrato de errores de aplicación y las cinco categorías de error normalizadas.**
   - **RF:** RF-4.
   - **Hecho cuando:** existen representaciones tipadas para `INVALID_REQUEST`, `URL_NOT_PUBLIC`, `REDIRECT_NOT_ALLOWED`, `UPSTREAM_FAILURE` e `INTERNAL_ERROR`.
 
