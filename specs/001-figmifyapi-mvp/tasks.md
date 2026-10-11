@@ -16,7 +16,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2.
   - **Hecho cuando:** los tipos representan `schemaVersion`, fuente, viewport, entorno, nodo, pseudoelementos y recursos descritos en `plan.md`.
 
-- [ ] **T4. Crear los contratos TypeScript de documento Figma v1, estilos de color y estilos tipográficos.**
+- [x] **T4. Crear los contratos TypeScript de documento Figma v1, estilos de color y estilos tipográficos.**
   - **RF:** RF-3.
   - **Hecho cuando:** los tipos representan `FigmaDocument` v1, nodos Figma, `sourceId`, catálogos de color y tipografía, e IDs de estilos.
 
