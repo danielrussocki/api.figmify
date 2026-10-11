@@ -30,7 +30,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Validación y seguridad
 
-- [ ] **T7. Implementar el análisis y la normalización de parámetros de consulta.**
+- [x] **T7. Implementar el análisis y la normalización de parámetros de consulta.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** una consulta válida produce una URL y viewport normalizados, y los parámetros omitidos reciben los tres valores predeterminados.
 
