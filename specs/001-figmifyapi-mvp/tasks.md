@@ -142,7 +142,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** la ruta valida la consulta, ejecuta el caso de uso de extracción y devuelve el contrato `ExtractionDocument` v1 o el error normalizado.
 
-- [ ] **T33. Implementar la ruta `GET /v1/figma`.**
+- [x] **T33. Implementar la ruta `GET /v1/figma`.**
   - **RF:** RF-1, RF-3, RF-4.
   - **Hecho cuando:** la ruta valida la consulta, ejecuta el caso de uso Figma y devuelve `FigmaDocument` v1 o el error normalizado.
 
