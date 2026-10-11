@@ -150,7 +150,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-4.
   - **Hecho cuando:** existen fixtures controladas para texto, elementos ocultos, pseudoelementos, Shadow DOM abierto/cerrado, iframe, carga asíncrona, recursos fallidos y recursos secundarios redirigidos.
 
-- [ ] **T35. Añadir pruebas unitarias de serialización del documento.**
+- [x] **T35. Añadir pruebas unitarias de serialización del documento.**
   - **RF:** RF-2.
   - **Hecho cuando:** las pruebas verifican orden, IDs, texto nulo, ocultos, estilos permitidos, atributos, recursos, pseudoelementos y ambos tipos de Shadow DOM.
 
