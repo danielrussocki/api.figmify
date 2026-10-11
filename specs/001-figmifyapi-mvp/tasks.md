@@ -154,7 +154,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** las pruebas verifican orden, IDs, texto nulo, ocultos, estilos permitidos, atributos, recursos, pseudoelementos y ambos tipos de Shadow DOM.
 
-- [ ] **T36. Añadir pruebas unitarias de transformación Figma.**
+- [x] **T36. Añadir pruebas unitarias de transformación Figma.**
   - **RF:** RF-3.
   - **Hecho cuando:** las pruebas verifican esquema v1, `sourceId`, tipos de nodo, deduplicación exacta de color y tipografía, y exclusiones de estilos de color.
 
