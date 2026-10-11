@@ -46,7 +46,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** la política rechaza localhost y direcciones IPv4 e IPv6 loopback, privadas, link-local, multicast, no especificadas, reservadas y de documentación.
 
-- [ ] **T11. Probar la política de URL pública en producción y desarrollo.**
+- [x] **T11. Probar la política de URL pública en producción y desarrollo.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las pruebas confirman `URL_NOT_PUBLIC` en producción y permiten direcciones no públicas en desarrollo.
 
