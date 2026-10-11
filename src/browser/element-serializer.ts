@@ -1,4 +1,5 @@
 import type { ExtractionNode } from '../contracts/extraction/extraction-document.js';
+import { VISUAL_PROPERTIES } from './visual-properties.js';
 
 /**
  * Serializes an element subtree with the fields that are independent of later
@@ -13,7 +14,7 @@ export function serializeElement(element: Element): ExtractionNode {
     attributes: {},
     resources: [],
     text: readRenderedText(currentElement),
-    styles: {},
+    styles: readVisualStyles(currentElement),
     pseudoElements: {
       before: null,
       after: null,
@@ -22,6 +23,37 @@ export function serializeElement(element: Element): ExtractionNode {
   });
 
   return serialize(element);
+}
+
+function readVisualStyles(element: Element): Record<string, string> {
+  const view = element.ownerDocument?.defaultView;
+
+  if (view === null || view === undefined) {
+    return {};
+  }
+
+  let computedStyles: CSSStyleDeclaration;
+  try {
+    computedStyles = view.getComputedStyle(element);
+  } catch {
+    return {};
+  }
+
+  const styles: Record<string, string> = {};
+
+  for (const property of VISUAL_PROPERTIES) {
+    try {
+      const value: unknown = computedStyles.getPropertyValue(property);
+
+      if (typeof value === 'string' && value.trim().length > 0) {
+        styles[property] = value;
+      }
+    } catch {
+      // Omit computed values that cannot be determined or serialized.
+    }
+  }
+
+  return styles;
 }
 
 function readRenderedText(element: Element): string | null {

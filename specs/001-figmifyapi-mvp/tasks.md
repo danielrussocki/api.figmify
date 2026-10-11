@@ -90,7 +90,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** los nodos ocultos se mantienen en el árbol y los nodos sin texto renderizado devuelven `text: null`.
 
-- [ ] **T21. Implementar la lectura de la lista cerrada de propiedades visuales computadas.**
+- [x] **T21. Implementar la lectura de la lista cerrada de propiedades visuales computadas.**
   - **RF:** RF-2.
   - **Hecho cuando:** `styles` solo contiene propiedades de la lista del plan y omite valores no serializables o indeterminables.
 

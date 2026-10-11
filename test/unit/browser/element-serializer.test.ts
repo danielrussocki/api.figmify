@@ -7,6 +7,15 @@ interface ElementFixture {
   children: ElementFixture[];
   innerText?: string;
   hasAttribute(name: string): boolean;
+  ownerDocument?: {
+    defaultView?: {
+      getComputedStyle(element: Element): {
+        getPropertyValue(property: string): unknown;
+        display?: string;
+        visibility?: string;
+      };
+    };
+  };
 }
 
 function element(
@@ -93,5 +102,49 @@ describe('serializeElement', () => {
       tagName: 'p',
       text: null,
     });
+  });
+
+  test('reads only permitted computed visual properties', () => {
+    const root = element('DIV');
+    root.ownerDocument = {
+      defaultView: {
+        getComputedStyle: () => ({
+          getPropertyValue: (property) => ({
+            display: 'flex',
+            'font-size': '16px',
+            color: 'rgb(1, 2, 3)',
+            'not-permitted': 'must not be serialized',
+          })[property] ?? '',
+        }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.styles).toEqual({
+      display: 'flex',
+      'font-size': '16px',
+      color: 'rgb(1, 2, 3)',
+    });
+  });
+
+  test('omits indeterminable and non-serializable computed values', () => {
+    const root = element('DIV');
+    root.ownerDocument = {
+      defaultView: {
+        getComputedStyle: () => ({
+          getPropertyValue: (property) => ({
+            display: 'block',
+            position: '',
+            opacity: undefined,
+            color: { value: 'red' },
+          })[property],
+        }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.styles).toEqual({ display: 'block' });
   });
 });
