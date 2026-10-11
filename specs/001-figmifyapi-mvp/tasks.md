@@ -128,7 +128,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3.
   - **Hecho cuando:** el resultado contiene `schemaVersion: "1.0"`, catálogos de estilos, árbol Figma y referencias correctas a estilos reutilizables.
 
-- [ ] **T30. Crear el caso de uso de documento Figma a partir del puerto de extracción.**
+- [x] **T30. Crear el caso de uso de documento Figma a partir del puerto de extracción.**
   - **RF:** RF-1, RF-3, RF-4.
   - **Hecho cuando:** el caso de uso recibe el documento extraído y lo transforma sin que el transformador importe módulos HTTP ni Playwright.
 
