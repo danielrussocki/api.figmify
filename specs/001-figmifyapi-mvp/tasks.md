@@ -193,7 +193,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `src/main.ts` crea la aplicación mediante el ensamblador, lee la configuración operativa especificada y ejecuta `listen`; los fallos de arranque se registran en inglés y finalizan el proceso con un código distinto de cero.
 
-- [ ] **T45. Gestionar el cierre ordenado del proceso y de los recursos de la aplicación.**
+- [x] **T45. Gestionar el cierre ordenado del proceso y de los recursos de la aplicación.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** las señales de terminación cierran Fastify y los recursos de Playwright que permanezcan abiertos, sin persistir datos ni dejar el proceso escuchando.
 

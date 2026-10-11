@@ -31,7 +31,8 @@ describe('server entry point', () => {
 
   test('creates the application and listens using the configured address', async () => {
     const listen = vi.fn(async () => undefined);
-    const createApplication = vi.fn(async () => ({ listen }));
+    const close = vi.fn(async () => undefined);
+    const createApplication = vi.fn(async () => ({ listen, close }));
 
     await startServer({
       createApplication,
@@ -67,7 +68,7 @@ describe('server entry point', () => {
     const exit = vi.fn();
 
     await startServer({
-      createApplication: async () => ({ listen }),
+      createApplication: async () => ({ listen, close: async () => undefined }),
       environment: {},
       logError,
       exit,
@@ -75,5 +76,55 @@ describe('server entry point', () => {
 
     expect(logError).toHaveBeenCalledWith('Failed to start HTTP server.');
     expect(exit).toHaveBeenCalledWith(1);
+  });
+
+  test('closes the application and exits cleanly when a termination signal is received', async () => {
+    const listen = vi.fn(async () => undefined);
+    const close = vi.fn(async () => undefined);
+    const on = vi.fn();
+    const logError = vi.fn();
+    const exit = vi.fn();
+
+    await startServer({
+      createApplication: async () => ({ listen, close }),
+      environment: {},
+      on,
+      logError,
+      exit,
+    });
+
+    expect(on).toHaveBeenCalledTimes(2);
+    expect(on).toHaveBeenCalledWith('SIGINT', expect.any(Function));
+    expect(on).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
+
+    const shutdown = on.mock.calls[0]?.[1] as (() => void) | undefined;
+    expect(shutdown).toBeDefined();
+    shutdown?.();
+    await vi.waitFor(() => expect(close).toHaveBeenCalledOnce());
+    expect(exit).toHaveBeenCalledWith(0);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  test('logs an English error and exits unsuccessfully when orderly shutdown fails', async () => {
+    const listen = vi.fn(async () => undefined);
+    const close = vi.fn(async () => {
+      throw new Error('close failed');
+    });
+    const on = vi.fn();
+    const logError = vi.fn();
+    const exit = vi.fn();
+
+    await startServer({
+      createApplication: async () => ({ listen, close }),
+      environment: {},
+      on,
+      logError,
+      exit,
+    });
+
+    const shutdown = on.mock.calls[0]?.[1] as (() => void) | undefined;
+    shutdown?.();
+    await vi.waitFor(() => expect(exit).toHaveBeenCalledWith(1));
+    expect(logError).toHaveBeenCalledWith('Failed to close HTTP server.');
   });
 });

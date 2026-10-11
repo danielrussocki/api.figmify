@@ -27,6 +27,9 @@ export async function createApplication(
   registerApplicationErrorHandler(application);
   registerExtractRoute(application, extractDocument);
   registerFigmaRoute(application, createFigmaDocument);
+  application.addHook('onClose', async () => {
+    await browser.close();
+  });
 
   return application;
 }

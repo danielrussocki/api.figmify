@@ -12,7 +12,7 @@ describe('application bootstrap', () => {
   });
 
   test('creates Fastify with the browser-backed use cases, error handler, and both routes', async () => {
-    const browser = {} as Browser;
+    const browser = { close: vi.fn(async () => undefined) } as unknown as Browser;
     const launchBrowser = vi.fn(async () => browser);
     const application = await createApplication({
       environment: 'development',
@@ -36,5 +36,9 @@ describe('application bootstrap', () => {
       code: 'INVALID_REQUEST',
       message: 'The url query parameter must be an absolute HTTP or HTTPS URL.',
     });
+
+    await application.close();
+    expect(browser.close).toHaveBeenCalledOnce();
+    applications.pop();
   });
 });
