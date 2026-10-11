@@ -52,7 +52,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Navegación y extracción Playwright
 
-- [ ] **T12. Crear el puerto de extracción y el caso de uso de extracción sin Figma.**
+- [x] **T12. Crear el puerto de extracción y el caso de uso de extracción sin Figma.**
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** el caso de uso acepta una solicitud normalizada, aplica la política de URL y depende de un puerto de extracción, no de Playwright directamente.
 

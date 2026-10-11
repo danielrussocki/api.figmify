@@ -1,4 +1,5 @@
 import type { Viewport } from '../../contracts/extraction/extraction-document.js';
+import type { ExtractionRequest } from '../../contracts/extraction/extraction-port.js';
 import { DEFAULT_VIEWPORT } from '../../contracts/extraction/defaults.js';
 
 export interface ExtractionQuery {
@@ -8,10 +9,7 @@ export interface ExtractionQuery {
   deviceScaleFactor?: unknown;
 }
 
-export interface NormalizedExtractionRequest {
-  url: string;
-  viewport: Viewport;
-}
+export type NormalizedExtractionRequest = ExtractionRequest;
 
 export class QueryNormalizationError extends Error {
   readonly code = 'INVALID_REQUEST' as const;
