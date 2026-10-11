@@ -35,6 +35,30 @@ export async function startBrowserFixtureServer(): Promise<BrowserFixtureServer>
       return;
     }
 
+    if (pathname === '/redirect/http') {
+      response.writeHead(302, { location: '/browser-fixtures.html' });
+      response.end();
+      return;
+    }
+
+    if (pathname === '/redirect/meta-refresh') {
+      response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      response.end('<!doctype html><meta http-equiv="refresh" content="0; url=/browser-fixtures.html">');
+      return;
+    }
+
+    if (pathname === '/redirect/javascript') {
+      response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      response.end('<!doctype html><script>window.location.assign("/browser-fixtures.html")</script>');
+      return;
+    }
+
+    if (pathname === '/errors/upstream') {
+      response.writeHead(503, { 'content-type': 'text/plain; charset=utf-8' });
+      response.end('Fixture upstream failure.');
+      return;
+    }
+
     const fixtureFile = FIXTURE_FILES.get(pathname);
     if (fixtureFile === undefined) {
       response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });

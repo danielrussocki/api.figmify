@@ -158,7 +158,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3.
   - **Hecho cuando:** las pruebas verifican esquema v1, `sourceId`, tipos de nodo, deduplicación exacta de color y tipografía, y exclusiones de estilos de color.
 
-- [ ] **T37. Añadir pruebas de integración del adaptador Playwright.**
+- [x] **T37. Añadir pruebas de integración del adaptador Playwright.**
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** las fixtures verifican espera tras `load`, redirecciones principales, errores de origen, recursos secundarios no bloqueantes e iframe no atravesado.
 
