@@ -178,3 +178,29 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `pnpm test` pasa y la revisión de la implementación confirma que no incorpora base de datos, caché, archivos de resultados ni colas persistentes.
   - **Nota:** `pnpm typecheck` tiene errores preexistentes en el contrato `UpstreamFailureError`; deben resolverse durante esta validación final.
+
+## Ensamblaje y ejecución de la API
+
+- [x] **T42. Especificar el contrato operativo de arranque de la API.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4.
+  - **Hecho cuando:** la especificación versionada documenta las variables de entorno de host y puerto, sus valores predeterminados y el comportamiento ante valores inválidos, antes de implementar el arranque.
+
+- [ ] **T43. Crear el ensamblador de la aplicación Fastify y sus dependencias.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4.
+  - **Hecho cuando:** un módulo de `bootstrap` crea una instancia de Fastify, instancia el adaptador Playwright y los casos de uso, registra el manejador global de errores y ambas rutas, sin que `main.ts` contenga lógica de rutas ni de extracción.
+
+- [ ] **T44. Implementar el punto de entrada que inicia el servidor HTTP.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4.
+  - **Hecho cuando:** `src/main.ts` crea la aplicación mediante el ensamblador, lee la configuración operativa especificada y ejecuta `listen`; los fallos de arranque se registran en inglés y finalizan el proceso con un código distinto de cero.
+
+- [ ] **T45. Gestionar el cierre ordenado del proceso y de los recursos de la aplicación.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4.
+  - **Hecho cuando:** las señales de terminación cierran Fastify y los recursos de Playwright que permanezcan abiertos, sin persistir datos ni dejar el proceso escuchando.
+
+- [ ] **T46. Probar el ensamblaje y el arranque del servidor.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4.
+  - **Hecho cuando:** las pruebas verifican que el ensamblador expone `GET /v1/extract` y `GET /v1/figma` con sus dependencias reales o sustituidas de forma controlada, y que el punto de entrada escucha la configuración válida y rechaza una configuración inválida sin abrir un puerto.
+
+- [ ] **T47. Validar la ejecución local de la API.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4.
+  - **Hecho cuando:** `pnpm test` pasa, `pnpm build` genera el punto de entrada ejecutable y una ejecución manual confirma que el proceso acepta solicitudes en el host y puerto configurados, sin persistir datos.

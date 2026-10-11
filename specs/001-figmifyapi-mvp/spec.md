@@ -3,6 +3,21 @@
 ## Contexto y objetivo
 Figmify API permite obtener la representación visual de una página web pública HTTP/HTTPS sin almacenar datos. El MVP ofrece una salida con las propiedades visuales computadas y otra adaptada al consumo de un plugin de Figma, para que este pueda recrear la página y definir estilos reutilizables de color y tipografía.
 
+## Contrato operativo de arranque
+
+El proceso HTTP se configura exclusivamente mediante las variables de entorno `HOST` y `PORT`. Si una variable no está definida, se usa su valor predeterminado. Esta configuración se valida antes de crear un listener HTTP.
+
+| Variable | Valor predeterminado | Valor válido |
+| --- | --- | --- |
+| `HOST` | `127.0.0.1` | Un nombre de host o dirección IP no vacía y sin espacios al inicio o al final. |
+| `PORT` | `3000` | Un entero decimal sin signo entre `1` y `65535`. |
+
+Un valor definido de `HOST` vacío o con espacios externos es inválido. Un valor definido de `PORT` que no sea una secuencia decimal de dígitos, que tenga signo, decimales, espacios, o que esté fuera del intervalo de `1` a `65535`, es inválido.
+
+Ante una configuración inválida, el proceso registrará en inglés `Invalid HOST configuration.` o `Invalid PORT configuration.` según corresponda, terminará con un código de salida distinto de cero y no abrirá ningún puerto. Los errores de enlace posteriores a una configuración válida también se registrarán en inglés y terminarán el proceso con un código de salida distinto de cero.
+
+El valor predeterminado limita el listener a la máquina local. Para aceptar conexiones de red, por ejemplo en un contenedor, se debe configurar explícitamente `HOST=0.0.0.0`; esta variable no modifica la política de URL pública de las solicitudes.
+
 ## Usuarios
 - Desarrolladores de plugins de Figma que necesitan una fuente estructurada para recrear una página web.
 - Diseñadores o desarrolladores que desean inspeccionar los estilos computados de una página pública.
