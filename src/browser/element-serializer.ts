@@ -2,7 +2,7 @@ import type { ExtractionNode } from '../contracts/extraction/extraction-document
 
 /**
  * Serializes an element subtree with the fields that are independent of later
- * extraction concerns such as text, styles, attributes, and resources.
+ * extraction concerns such as styles, attributes, and resources.
  */
 export function serializeElement(element: Element): ExtractionNode {
   let nextId = 1;
@@ -12,7 +12,7 @@ export function serializeElement(element: Element): ExtractionNode {
     tagName: currentElement.tagName.toLowerCase(),
     attributes: {},
     resources: [],
-    text: null,
+    text: readRenderedText(currentElement),
     styles: {},
     pseudoElements: {
       before: null,
@@ -22,4 +22,38 @@ export function serializeElement(element: Element): ExtractionNode {
   });
 
   return serialize(element);
+}
+
+function readRenderedText(element: Element): string | null {
+  if (!isRendered(element)) {
+    return null;
+  }
+
+  const text = (element as HTMLElement).innerText;
+
+  return typeof text === 'string' && text.trim().length > 0 ? text : null;
+}
+
+function isRendered(element: Element): boolean {
+  let current: Element | null = element;
+
+  while (current !== null) {
+    if (current.hasAttribute('hidden')) {
+      return false;
+    }
+
+    const styles = current.ownerDocument?.defaultView?.getComputedStyle(current);
+
+    if (styles?.display === 'none') {
+      return false;
+    }
+
+    if (current === element && (styles?.visibility === 'hidden' || styles?.visibility === 'collapse')) {
+      return false;
+    }
+
+    current = current.parentElement ?? null;
+  }
+
+  return true;
 }

@@ -5,10 +5,22 @@ import { serializeElement } from '../../../src/browser/element-serializer.js';
 interface ElementFixture {
   tagName: string;
   children: ElementFixture[];
+  innerText?: string;
+  hasAttribute(name: string): boolean;
 }
 
-function element(tagName: string, children: ElementFixture[] = []): ElementFixture {
-  return { tagName, children };
+function element(
+  tagName: string,
+  children: ElementFixture[] = [],
+  innerText?: string,
+  hidden = false,
+): ElementFixture {
+  return {
+    tagName,
+    children,
+    innerText,
+    hasAttribute: (name) => hidden && name === 'hidden',
+  };
 }
 
 describe('serializeElement', () => {
@@ -51,6 +63,35 @@ describe('serializeElement', () => {
       styles: {},
       pseudoElements: { before: null, after: null },
       children: [],
+    });
+  });
+
+  test('extracts rendered text and returns null when an element has no rendered text', () => {
+    const root = element(
+      'MAIN',
+      [
+        element('H1', [], 'Welcome'),
+        element('P', [], '   '),
+      ],
+      'Welcome',
+    );
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.text).toBe('Welcome');
+    expect(serialized.children[0]?.text).toBe('Welcome');
+    expect(serialized.children[1]?.text).toBeNull();
+  });
+
+  test('keeps hidden elements in the tree and returns null for their non-rendered text', () => {
+    const root = element('MAIN', [element('P', [], 'Hidden content', true)]);
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.children).toHaveLength(1);
+    expect(serialized.children[0]).toMatchObject({
+      tagName: 'p',
+      text: null,
     });
   });
 });

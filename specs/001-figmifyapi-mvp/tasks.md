@@ -86,7 +86,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** cada nodo incluye ID interno único, etiqueta, hijos ordenados, `attributes`, `resources`, `text`, `styles` y `pseudoElements`.
 
-- [ ] **T20. Implementar la extracción de texto renderizado y la inclusión de elementos ocultos.**
+- [x] **T20. Implementar la extracción de texto renderizado y la inclusión de elementos ocultos.**
   - **RF:** RF-2.
   - **Hecho cuando:** los nodos ocultos se mantienen en el árbol y los nodos sin texto renderizado devuelven `text: null`.
 
