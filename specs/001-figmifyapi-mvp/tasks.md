@@ -134,7 +134,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## HTTP y pruebas de aceptación
 
-- [ ] **T31. Crear el manejador global que traduce errores de aplicación al contrato HTTP.**
+- [x] **T31. Crear el manejador global que traduce errores de aplicación al contrato HTTP.**
   - **RF:** RF-4.
   - **Hecho cuando:** los cinco códigos de error devuelven el estado correcto y un JSON con solo `code` y `message` en inglés.
 
