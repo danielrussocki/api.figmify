@@ -174,7 +174,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3.
   - **Hecho cuando:** ejemplos representativos de extracción y Figma se validan contra los contratos versionados 1.0.
 
-- [ ] **T41. Ejecutar la suite completa y verificar que no se persisten datos.**
+- [x] **T41. Ejecutar la suite completa y verificar que no se persisten datos.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `pnpm test` pasa y la revisión de la implementación confirma que no incorpora base de datos, caché, archivos de resultados ni colas persistentes.
   - **Nota:** `pnpm typecheck` tiene errores preexistentes en el contrato `UpstreamFailureError`; deben resolverse durante esta validación final.

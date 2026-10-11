@@ -34,7 +34,7 @@ export interface UpstreamFailureError extends BaseApplicationError {
   code: 'UPSTREAM_FAILURE';
 }
 
-export class UpstreamFailureError extends Error {
+export class UpstreamFailureException extends Error implements UpstreamFailureError {
   readonly code = 'UPSTREAM_FAILURE' as const;
 
   constructor() {

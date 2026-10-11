@@ -2,10 +2,14 @@ import { chromium, type Browser, type BrowserContext, type Page } from 'playwrig
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
-import type { ExtractionNode } from '../../../src/contracts/extraction/extraction-document.js';
+import type { ExtractionNode, Viewport } from '../../../src/contracts/extraction/extraction-document.js';
 import { startBrowserFixtureServer, type BrowserFixtureServer } from '../../fixtures/browser/server.js';
 
-const requestViewport = { width: 1280, height: 720, deviceScaleFactor: 1 };
+const requestViewport = {
+  width: 1280,
+  height: 720,
+  deviceScaleFactor: 1,
+} satisfies Viewport;
 
 let browser: Browser;
 let fixtureServer: BrowserFixtureServer;

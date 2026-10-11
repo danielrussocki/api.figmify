@@ -2,7 +2,7 @@ import type { Browser, BrowserContext, Frame, Page, Route, Response } from 'play
 
 import {
   MainDocumentRedirectError,
-  UpstreamFailureError,
+  UpstreamFailureException,
 } from '../contracts/errors/application-error.js';
 import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
 import type { ExtractionPort, ExtractionRequest } from '../contracts/extraction/extraction-port.js';
@@ -68,12 +68,12 @@ export class PlaywrightExtractor implements ExtractionPort {
       if (
         error instanceof PublicUrlPolicyError ||
         error instanceof MainDocumentRedirectError ||
-        error instanceof UpstreamFailureError
+        error instanceof UpstreamFailureException
       ) {
         throw error;
       }
 
-      throw new UpstreamFailureError();
+      throw new UpstreamFailureException();
     } finally {
       await page?.close().catch(() => undefined);
       await context.close().catch(() => undefined);
@@ -148,7 +148,7 @@ export class PlaywrightExtractor implements ExtractionPort {
       }
 
       if (response === null || response.status() < 200 || response.status() >= 300) {
-        throw new UpstreamFailureError();
+        throw new UpstreamFailureException();
       }
 
       await page.waitForLoadState('load');
@@ -170,7 +170,7 @@ export class PlaywrightExtractor implements ExtractionPort {
         throw error;
       }
 
-      throw new UpstreamFailureError();
+      throw new UpstreamFailureException();
     } finally {
       page.off('response', detectMainDocumentRedirect);
       page.off('framenavigated', detectSubsequentMainDocumentNavigation);
