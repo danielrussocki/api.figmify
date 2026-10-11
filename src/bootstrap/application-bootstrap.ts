@@ -7,19 +7,28 @@ import { PlaywrightExtractor } from '../browser/playwright-extractor.js';
 import { registerApplicationErrorHandler } from '../http/error-handler/application-error-handler.js';
 import { registerExtractRoute } from '../http/routes/extract-route.js';
 import { registerFigmaRoute } from '../http/routes/figma-route.js';
+import type { ExtractionPort } from '../contracts/extraction/extraction-port.js';
 import type { RuntimeEnvironment } from '../security/url-policy/public-url-policy.js';
 
 export interface ApplicationBootstrapOptions {
   environment?: RuntimeEnvironment;
   launchBrowser?: () => Promise<Browser>;
+  extractor?: ExtractionPort;
 }
 
 export async function createApplication(
   options: ApplicationBootstrapOptions = {},
 ): Promise<FastifyInstance> {
   const environment = options.environment ?? getRuntimeEnvironment();
-  const browser = await (options.launchBrowser ?? (() => chromium.launch()))();
-  const extractor = new PlaywrightExtractor(browser, environment);
+  let browser: Browser | undefined;
+  let extractor: ExtractionPort;
+
+  if (options.extractor !== undefined) {
+    extractor = options.extractor;
+  } else {
+    browser = await (options.launchBrowser ?? (() => chromium.launch()))();
+    extractor = new PlaywrightExtractor(browser, environment);
+  }
   const extractDocument = new ExtractDocumentUseCase(extractor, environment);
   const createFigmaDocument = new CreateFigmaDocumentUseCase(extractor);
   const application = Fastify();
@@ -28,7 +37,7 @@ export async function createApplication(
   registerExtractRoute(application, extractDocument);
   registerFigmaRoute(application, createFigmaDocument);
   application.addHook('onClose', async () => {
-    await browser.close();
+    await browser?.close();
   });
 
   return application;

@@ -197,7 +197,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** las señales de terminación cierran Fastify y los recursos de Playwright que permanezcan abiertos, sin persistir datos ni dejar el proceso escuchando.
 
-- [ ] **T46. Probar el ensamblaje y el arranque del servidor.**
+- [x] **T46. Probar el ensamblaje y el arranque del servidor.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** las pruebas verifican que el ensamblador expone `GET /v1/extract` y `GET /v1/figma` con sus dependencias reales o sustituidas de forma controlada, y que el punto de entrada escucha la configuración válida y rechaza una configuración inválida sin abrir un puerto.
 
