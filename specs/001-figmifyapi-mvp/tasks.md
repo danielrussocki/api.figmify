@@ -146,7 +146,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-3, RF-4.
   - **Hecho cuando:** la ruta valida la consulta, ejecuta el caso de uso Figma y devuelve `FigmaDocument` v1 o el error normalizado.
 
-- [ ] **T34. Crear fixtures web para las pruebas de navegador.**
+- [x] **T34. Crear fixtures web para las pruebas de navegador.**
   - **RF:** RF-2, RF-3, RF-4.
   - **Hecho cuando:** existen fixtures controladas para texto, elementos ocultos, pseudoelementos, Shadow DOM abierto/cerrado, iframe, carga asíncrona, recursos fallidos y recursos secundarios redirigidos.
 

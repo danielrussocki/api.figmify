@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Browser extraction fixtures</title>
+    <link rel="stylesheet" href="/resources/secondary-redirect.css">
+    <style>
+      #hidden-display { display: none; }
+      #pseudo-element::before { content: "Before fixture"; color: rgb(1, 2, 3); }
+      #pseudo-element::after { content: "After fixture"; font-size: 16px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p id="visible-text">Visible fixture text</p>
+      <p id="hidden-attribute" hidden>Hidden attribute text</p>
+      <p id="hidden-display">Display hidden text</p>
+      <p id="pseudo-element">Pseudo-element host</p>
+      <div id="open-shadow-host"></div>
+      <div id="closed-shadow-host"></div>
+      <iframe id="fixture-iframe" src="/iframe.html" title="Fixture iframe"></iframe>
+      <img id="failed-resource" src="/resources/failed-image.png" alt="Missing fixture resource">
+      <template id="async-content-template">
+        <p id="async-content">Asynchronous fixture text</p>
+      </template>
+    </main>
+    <script>
+      const openHost = document.querySelector('#open-shadow-host');
+      openHost.attachShadow({ mode: 'open' }).innerHTML = '<p>Open shadow content</p>';
+
+      const closedHost = document.querySelector('#closed-shadow-host');
+      closedHost.attachShadow({ mode: 'closed' }).innerHTML = '<p>Closed shadow content</p>';
+
+      window.setTimeout(() => {
+        const template = document.querySelector('#async-content-template');
+        document.querySelector('main').append(template.content.cloneNode(true));
+      }, 100);
+    </script>
+  </body>
+</html>
