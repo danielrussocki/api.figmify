@@ -189,7 +189,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** un módulo de `bootstrap` crea una instancia de Fastify, instancia el adaptador Playwright y los casos de uso, registra el manejador global de errores y ambas rutas, sin que `main.ts` contenga lógica de rutas ni de extracción.
 
-- [ ] **T44. Implementar el punto de entrada que inicia el servidor HTTP.**
+- [x] **T44. Implementar el punto de entrada que inicia el servidor HTTP.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `src/main.ts` crea la aplicación mediante el ensamblador, lee la configuración operativa especificada y ejecuta `listen`; los fallos de arranque se registran en inglés y finalizan el proceso con un código distinto de cero.
 
