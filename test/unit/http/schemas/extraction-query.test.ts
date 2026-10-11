@@ -1,6 +1,18 @@
 import { describe, expect, test } from 'vitest';
 
-import { normalizeExtractionQuery } from '../../../../src/http/schemas/extraction-query.js';
+import {
+  normalizeExtractionQuery,
+  type ExtractionQuery,
+} from '../../../../src/http/schemas/extraction-query.js';
+
+function expectInvalidRequest(query: ExtractionQuery): void {
+  try {
+    normalizeExtractionQuery(query);
+    throw new Error('Expected query normalization to fail.');
+  } catch (error) {
+    expect(error).toMatchObject({ code: 'INVALID_REQUEST' });
+  }
+}
 
 describe('normalizeExtractionQuery', () => {
   test('normalizes a valid URL and configured viewport', () => {
@@ -59,6 +71,43 @@ describe('normalizeExtractionQuery', () => {
         }),
       ).toMatchObject({
         viewport: { deviceScaleFactor },
+      });
+    },
+  );
+
+  test('rejects a missing URL', () => {
+    expectInvalidRequest({});
+  });
+
+  test.each(['example.com', '/page'])('rejects a non-absolute URL: %s', (url) => {
+    expectInvalidRequest({ url });
+  });
+
+  test.each(['ftp://example.com/file', 'file:///tmp/page.html', 'javascript:alert(1)'])(
+    'rejects a URL with a non-HTTP(S) scheme: %s',
+    (url) => {
+      expectInvalidRequest({ url });
+    },
+  );
+
+  test.each([
+    ['width', '1.5'],
+    ['height', 'not-a-number'],
+    ['width', '0'],
+    ['height', '3841'],
+  ] as const)('rejects a non-integer or out-of-range %s: %s', (name, value) => {
+    expectInvalidRequest({
+      url: 'https://example.com',
+      [name]: value,
+    });
+  });
+
+  test.each(['0', '4', '1.5', 'not-a-number'])(
+    'rejects a disallowed device scale factor: %s',
+    (deviceScaleFactor) => {
+      expectInvalidRequest({
+        url: 'https://example.com',
+        deviceScaleFactor,
       });
     },
   );

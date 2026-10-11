@@ -38,7 +38,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1.
   - **Hecho cuando:** las pruebas cubren valores omitidos, dimensiones 1 y 3840, y escalas 1, 2 y 3.
 
-- [ ] **T9. Probar la normalización de consulta para entradas inválidas.**
+- [x] **T9. Probar la normalización de consulta para entradas inválidas.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las pruebas verifican ausencia de `url`, URL no absoluta, esquemas no HTTP(S), dimensiones no enteras o fuera de rango y escalas no permitidas, todos con `INVALID_REQUEST`.
 
