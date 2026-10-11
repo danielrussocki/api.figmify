@@ -185,7 +185,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** la especificación versionada documenta las variables de entorno de host y puerto, sus valores predeterminados y el comportamiento ante valores inválidos, antes de implementar el arranque.
 
-- [ ] **T43. Crear el ensamblador de la aplicación Fastify y sus dependencias.**
+- [x] **T43. Crear el ensamblador de la aplicación Fastify y sus dependencias.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** un módulo de `bootstrap` crea una instancia de Fastify, instancia el adaptador Playwright y los casos de uso, registra el manejador global de errores y ambas rutas, sin que `main.ts` contenga lógica de rutas ni de extracción.
 
