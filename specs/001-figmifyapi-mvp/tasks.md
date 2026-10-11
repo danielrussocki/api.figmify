@@ -94,7 +94,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** `styles` solo contiene propiedades de la lista del plan y omite valores no serializables o indeterminables.
 
-- [ ] **T22. Implementar la selección de atributos permitidos y referencias de recursos.**
+- [x] **T22. Implementar la selección de atributos permitidos y referencias de recursos.**
   - **RF:** RF-2.
   - **Hecho cuando:** solo se incluyen los atributos permitidos, las URL de recursos están resueltas de forma absoluta y no se descarga ningún recurso adicional.
 
