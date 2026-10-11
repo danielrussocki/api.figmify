@@ -1,5 +1,5 @@
 import type { ExtractionNode } from '../contracts/extraction/extraction-document.js';
-import type { ColorStyle, FigmaRgbaColor } from '../contracts/figma/figma-document.js';
+import type { ColorStyle, FigmaRgbaColor, TypographyStyle } from '../contracts/figma/figma-document.js';
 
 const COLOR_PROPERTIES = [
   'color',
@@ -17,6 +17,16 @@ const COLOR_EXCLUSION_PROPERTIES = {
   filter: (value: string) => value.trim().toLowerCase() !== 'none',
   'mix-blend-mode': (value: string) => value.trim().toLowerCase() !== 'normal',
 } as const;
+
+const TYPOGRAPHY_PROPERTIES = [
+  'font-family',
+  'font-size',
+  'font-weight',
+  'font-style',
+  'line-height',
+  'letter-spacing',
+  'text-transform',
+] as const;
 
 /**
  * Collects reusable solid colors from an extraction tree. Style IDs derive from
@@ -53,6 +63,101 @@ export function createColorStyleCatalog(root: ExtractionNode): ColorStyle[] {
   visit(root);
 
   return [...colors.values()].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+/**
+ * Collects reusable typography styles from complete computed typography tuples.
+ * IDs derive from normalized values and therefore do not depend on tree order.
+ */
+export function createTypographyStyleCatalog(root: ExtractionNode): TypographyStyle[] {
+  const typographies = new Map<string, TypographyStyle>();
+
+  const visit = (node: ExtractionNode): void => {
+    const typography = readTypographyStyle(node.styles);
+    if (typography !== null) {
+      const key = typographyKey(typography);
+      if (!typographies.has(key)) {
+        typographies.set(key, createTypographyStyle(typography));
+      }
+    }
+
+    for (const child of node.children) {
+      visit(child);
+    }
+
+    for (const child of node.shadowChildren ?? []) {
+      visit(child);
+    }
+  };
+
+  visit(root);
+
+  return [...typographies.values()].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function readTypographyStyle(styles: Record<string, string>): Omit<TypographyStyle, 'id'> | null {
+  const values = TYPOGRAPHY_PROPERTIES.map((property) => styles[property]?.trim());
+  if (values.some((value) => value === undefined || value.length === 0)) {
+    return null;
+  }
+
+  const [fontFamily, fontSize, fontWeight, fontStyle, lineHeight, letterSpacing, textTransform] = values as [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+  ];
+
+  return { fontFamily, fontSize, fontWeight, fontStyle, lineHeight, letterSpacing, textTransform };
+}
+
+function typographyKey(typography: Omit<TypographyStyle, 'id'>): string {
+  return [
+    typography.fontFamily,
+    typography.fontSize,
+    typography.fontWeight,
+    typography.fontStyle,
+    typography.lineHeight,
+    typography.letterSpacing,
+    typography.textTransform,
+  ].join('\u0000');
+}
+
+function createTypographyStyle(typography: Omit<TypographyStyle, 'id'>): TypographyStyle {
+  const idSegments = [
+    primaryFontFamily(typography.fontFamily),
+    normalizeTypographyValue(typography.fontSize),
+    normalizeTypographyValue(typography.fontWeight),
+    normalizeTypographyValue(typography.fontStyle),
+    normalizeTypographyValue(typography.lineHeight),
+    normalizeLetterSpacing(typography.letterSpacing),
+    normalizeTypographyValue(typography.textTransform),
+  ];
+
+  return {
+    id: `type-${idSegments.join('-')}`,
+    ...typography,
+  };
+}
+
+function primaryFontFamily(fontFamily: string): string {
+  return normalizeTypographyValue(fontFamily.split(',', 1)[0]?.replace(/["']/g, '') ?? '');
+}
+
+function normalizeLetterSpacing(value: string): string {
+  return value.trim().toLowerCase() === 'normal' ? '0' : normalizeTypographyValue(value);
+}
+
+function normalizeTypographyValue(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/px$/u, '')
+    .replace(/[^a-z0-9.]+/gu, '-')
+    .replace(/^-+|-+$/gu, '') || 'default';
 }
 
 function hasColorStyleExclusion(styles: Record<string, string>): boolean {

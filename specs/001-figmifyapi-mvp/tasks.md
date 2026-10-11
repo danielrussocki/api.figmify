@@ -116,7 +116,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3.
   - **Hecho cuando:** colores RGBA idénticos generan una única entrada con ID estable, y gradientes, imágenes, filtros y modos de mezcla no generan estilos de color.
 
-- [ ] **T27. Crear el catálogo determinista de estilos tipográficos.**
+- [x] **T27. Crear el catálogo determinista de estilos tipográficos.**
   - **RF:** RF-3.
   - **Hecho cuando:** una misma tupla de las siete propiedades tipográficas genera un único estilo con ID estable.
 

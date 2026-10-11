@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import type { ExtractionNode } from '../../../src/contracts/extraction/extraction-document.js';
-import { createColorStyleCatalog } from '../../../src/figma/style-catalog.js';
+import { createColorStyleCatalog, createTypographyStyleCatalog } from '../../../src/figma/style-catalog.js';
 
 function node(
   id: string,
@@ -71,5 +71,56 @@ describe('createColorStyleCatalog', () => {
     ]));
 
     expect(catalog).toEqual([]);
+  });
+});
+
+describe('createTypographyStyleCatalog', () => {
+  test('deduplicates an identical seven-property typography tuple with a stable ID', () => {
+    const typography = {
+      'font-family': 'Inter, sans-serif',
+      'font-size': '32px',
+      'font-weight': '700',
+      'font-style': 'normal',
+      'line-height': '38.4px',
+      'letter-spacing': 'normal',
+      'text-transform': 'none',
+    };
+    const root = node('node-1', typography, [node('node-2', { ...typography })]);
+    root.shadowChildren = [node('node-3', { ...typography })];
+
+    expect(createTypographyStyleCatalog(root)).toEqual([
+      {
+        id: 'type-inter-32-700-normal-38.4-0-none',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '32px',
+        fontWeight: '700',
+        fontStyle: 'normal',
+        lineHeight: '38.4px',
+        letterSpacing: 'normal',
+        textTransform: 'none',
+      },
+    ]);
+  });
+
+  test('keeps distinct typography tuples separate and ignores incomplete tuples', () => {
+    const base = {
+      'font-family': 'Inter, sans-serif',
+      'font-size': '16px',
+      'font-weight': '400',
+      'font-style': 'normal',
+      'line-height': '24px',
+      'letter-spacing': 'normal',
+      'text-transform': 'none',
+    };
+
+    const catalog = createTypographyStyleCatalog(node('node-1', base, [
+      node('node-2', { ...base, 'font-weight': '700' }),
+      node('node-3', { 'font-family': 'Inter, sans-serif', 'font-size': '16px' }),
+    ]));
+
+    expect(catalog.map((style) => style.id)).toEqual([
+      'type-inter-16-400-normal-24-0-none',
+      'type-inter-16-700-normal-24-0-none',
+    ]);
   });
 });
