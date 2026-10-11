@@ -64,7 +64,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-4.
   - **Hecho cuando:** una respuesta 3xx del documento principal termina la extracción con `REDIRECT_NOT_ALLOWED` y sin documento parcial.
 
-- [ ] **T15. Detectar redirecciones por meta refresh y JavaScript de la navegación principal.**
+- [x] **T15. Detectar redirecciones por meta refresh y JavaScript de la navegación principal.**
   - **RF:** RF-4.
   - **Hecho cuando:** una navegación principal posterior causada por meta refresh o JavaScript termina con `REDIRECT_NOT_ALLOWED`.
 

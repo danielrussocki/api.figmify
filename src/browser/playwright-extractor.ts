@@ -1,4 +1,4 @@
-import type { Browser, BrowserContext, Page, Response } from 'playwright';
+import type { Browser, BrowserContext, Frame, Page, Response } from 'playwright';
 
 import { MainDocumentRedirectError } from '../contracts/errors/application-error.js';
 import type { ExtractionRequest } from '../contracts/extraction/extraction-port.js';
@@ -29,6 +29,7 @@ export class PlaywrightExtractor {
 
   async navigateMainDocument(page: Page, url: string): Promise<void> {
     let redirected = false;
+    let initialMainDocumentNavigationCommitted = false;
     const detectMainDocumentRedirect = (response: Response): void => {
       const navigationRequest = response.request();
       const isMainDocumentNavigation =
@@ -38,8 +39,21 @@ export class PlaywrightExtractor {
         redirected = true;
       }
     };
+    const detectSubsequentMainDocumentNavigation = (frame: Frame): void => {
+      if (frame !== page.mainFrame()) {
+        return;
+      }
+
+      if (initialMainDocumentNavigationCommitted) {
+        redirected = true;
+        return;
+      }
+
+      initialMainDocumentNavigationCommitted = true;
+    };
 
     page.on('response', detectMainDocumentRedirect);
+    page.on('framenavigated', detectSubsequentMainDocumentNavigation);
     try {
       await page.goto(url);
       if (redirected) {
@@ -47,6 +61,7 @@ export class PlaywrightExtractor {
       }
     } finally {
       page.off('response', detectMainDocumentRedirect);
+      page.off('framenavigated', detectSubsequentMainDocumentNavigation);
     }
   }
 }

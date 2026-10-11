@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
 import type { ExtractionRequest } from '../../../src/contracts/extraction/extraction-port.js';
-import type { Browser, BrowserContext, Page, Response } from 'playwright';
+import type { Browser, BrowserContext, Frame, Page, Response } from 'playwright';
 
 const request: ExtractionRequest = {
   url: 'https://example.com/page',
@@ -20,22 +20,36 @@ function createBrowser() {
   };
 }
 
-function createPage(response: Response, mainFrame = {}) {
+function createPage(
+  response: Response,
+  mainFrame = {},
+  additionalMainNavigations = 0,
+) {
   let responseListener: ((response: Response) => void) | undefined;
+  let frameNavigationListener: ((frame: Frame) => void) | undefined;
   const page = {
     mainFrame: vi.fn().mockReturnValue(mainFrame),
-    on: vi.fn((event: string, listener: (eventResponse: Response) => void) => {
+    on: vi.fn((event: string, listener: (eventResponse: Response | Frame) => void) => {
       if (event === 'response') {
-        responseListener = listener;
+        responseListener = listener as (response: Response) => void;
+      } else if (event === 'framenavigated') {
+        frameNavigationListener = listener as (frame: Frame) => void;
       }
     }),
     off: vi.fn(),
     goto: vi.fn().mockImplementation(async () => {
       responseListener?.(response);
+      frameNavigationListener?.(mainFrame as Frame);
+      for (let index = 0; index < additionalMainNavigations; index += 1) {
+        frameNavigationListener?.(mainFrame as Frame);
+      }
     }),
   } as unknown as Page;
 
-  return { page };
+  return {
+    page,
+    emitMainFrameNavigation: () => frameNavigationListener?.(mainFrame as Frame),
+  };
 }
 
 describe('PlaywrightExtractor', () => {
@@ -117,5 +131,42 @@ describe('PlaywrightExtractor', () => {
     const extractor = new PlaywrightExtractor(browser);
 
     await expect(extractor.navigateMainDocument(page, request.url)).resolves.toBeUndefined();
+  });
+
+  test('rejects a subsequent main document navigation caused by meta refresh', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page } = createPage(response, {}, 1);
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'REDIRECT_NOT_ALLOWED',
+    });
+
+    expect(page.on).toHaveBeenCalledWith('framenavigated', expect.any(Function));
+    expect(page.off).toHaveBeenCalledWith('framenavigated', expect.any(Function));
+  });
+
+  test('rejects a subsequent main document navigation caused by JavaScript', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page } = createPage(response, {}, 1);
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'REDIRECT_NOT_ALLOWED',
+    });
   });
 });
