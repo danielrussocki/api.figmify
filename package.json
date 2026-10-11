@@ -24,6 +24,8 @@
   "figmify": {
     "dependencyJustifications": {
       "@types/node": "Provides Node.js type declarations for TypeScript compilation.",
+      "fastify": "Provides the required HTTP framework for the versioned API routes and declarative request validation.",
+      "playwright": "Provides the required browser automation for rendering public pages and reading computed styles.",
       "tsx": "Runs the TypeScript development entry point with ESM support.",
       "typescript": "Compiles and type-checks the TypeScript source as ESM.",
       "vitest": "Executes the automated TypeScript test suite with ESM support."
@@ -34,5 +36,9 @@
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "fastify": "^5.12.5",
+    "playwright": "^1.64.0"
   }
 }

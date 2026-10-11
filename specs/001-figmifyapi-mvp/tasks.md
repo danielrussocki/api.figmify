@@ -8,11 +8,11 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** el proyecto compila TypeScript con ESM y `pnpm test` ejecuta una suite de pruebas vacía correctamente.
 
-- [ ] **T2. Añadir Fastify y Playwright, y documentar en el manifiesto la justificación de cada dependencia añadida.**
+- [x] **T2. Añadir Fastify y Playwright, y documentar en el manifiesto la justificación de cada dependencia añadida.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** las dependencias necesarias están instaladas y cada dependencia no transitiva añadida tiene una justificación documentada.
 
-- [ ] **T3. Crear los contratos TypeScript de viewport, entorno de renderizado y documento de extracción v1.**
+- [x] **T3. Crear los contratos TypeScript de viewport, entorno de renderizado y documento de extracción v1.**
   - **RF:** RF-1, RF-2.
   - **Hecho cuando:** los tipos representan `schemaVersion`, fuente, viewport, entorno, nodo, pseudoelementos y recursos descritos en `plan.md`.
 
