@@ -82,7 +82,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Serialización del documento
 
-- [ ] **T19. Implementar la serialización básica de un elemento y sus hijos en orden DOM.**
+- [x] **T19. Implementar la serialización básica de un elemento y sus hijos en orden DOM.**
   - **RF:** RF-2.
   - **Hecho cuando:** cada nodo incluye ID interno único, etiqueta, hijos ordenados, `attributes`, `resources`, `text`, `styles` y `pseudoElements`.
 
