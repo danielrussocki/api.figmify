@@ -2,7 +2,7 @@
 
 API HTTP en TypeScript que renderiza una página web pública con Playwright y devuelve su estructura y estilos computados. Ofrece una salida sin transformar y otra adaptada para que un plugin de Figma pueda reconstruirla y reutilizar estilos de color y tipografía.
 
-> **Estado del repositorio:** la lógica de extracción, transformación y rutas está implementada, pero la API **no se puede levantar ni desplegar todavía** desde esta revisión. `src/main.ts` solo contiene `export {}` y no hay módulo de *bootstrap* que cree Fastify, lance Chromium, registre las rutas ni ejecute `listen()`. Los comandos de esta guía para ejecutar el servidor y el despliegue deben aplicarse después de implementar ese ensamblaje.
+> **Estado del repositorio:** la API es ejecutable. El punto de entrada crea Fastify y Chromium, registra las dos rutas y cierra ambos recursos de forma ordenada ante `SIGINT` o `SIGTERM`.
 
 ## Capacidades previstas
 
@@ -31,6 +31,7 @@ src/
   http/          rutas, validación de consulta y manejo de errores
   application/   casos de uso que orquestan la extracción
   browser/       adaptador Playwright y serialización del DOM
+  bootstrap/     ensamblaje de Fastify, casos de uso y Chromium
   security/      política de URLs públicas
   contracts/     contratos versionados de extracción, Figma y errores
   figma/         transformación y catálogo de estilos reutilizables
@@ -62,34 +63,48 @@ pnpm exec playwright install --with-deps chromium
 
 El último comando requiere privilegios administrativos en la mayoría de distribuciones. En CI y contenedores es preferible usar una imagen que ya incluya las dependencias de Playwright o instalarlas durante la construcción de la imagen.
 
-## Arranque local (pendiente de bootstrap)
+## Arranque local
 
-Cuando exista el punto de entrada HTTP, el flujo esperado será:
+Inicie el servidor de desarrollo con:
 
 ```bash
 pnpm dev
 ```
 
-para desarrollo, y:
+Por defecto escucha únicamente en `http://127.0.0.1:3000`. El proceso lanza Chromium al arrancar y lo cierra al terminar.
+
+Para probar URLs locales o privadas durante el desarrollo, establezca `NODE_ENV=development`; en ese modo se permite la navegación a esos destinos. En PowerShell:
+
+```powershell
+$env:NODE_ENV = 'development'
+pnpm dev
+```
+
+En macOS o Linux:
+
+```bash
+NODE_ENV=development pnpm dev
+```
+
+Para ejecutar la versión compilada:
 
 ```bash
 pnpm build
 node dist/main.js
 ```
 
-para ejecutar el artefacto compilado. El *bootstrap* pendiente debe, como mínimo:
+### Configuración del listener
 
-1. Determinar el entorno de ejecución (`development` o `production`).
-2. Lanzar Chromium mediante `playwright.chromium.launch()`.
-3. Crear la instancia Fastify.
-4. Construir `PlaywrightExtractor`, `ExtractDocumentUseCase` y `CreateFigmaDocumentUseCase`.
-5. Registrar `registerExtractRoute`, `registerFigmaRoute` y `registerApplicationErrorHandler`.
-6. Escuchar en `HOST` y `PORT`, usando `0.0.0.0` para un entorno contenerizado.
-7. Cerrar ordenadamente Fastify y el navegador al recibir `SIGTERM` o `SIGINT`.
+`HOST` y `PORT` son las únicas variables que configuran el listener HTTP:
 
-Hasta que se implemente lo anterior, `pnpm dev` termina sin abrir un puerto y `node dist/main.js` no sirve rutas.
+| Variable | Predeterminado | Restricción |
+| --- | --- | --- |
+| `HOST` | `127.0.0.1` | Nombre de host o IP sin espacios exteriores. |
+| `PORT` | `3000` | Entero decimal entre `1` y `65535`. |
 
-Una vez implementado, una solicitud de ejemplo será:
+Una configuración inválida termina el proceso sin abrir un puerto. `NODE_ENV` no configura el listener: solo selecciona la política de URLs. Cualquier valor distinto de `development` aplica la política de producción.
+
+Una solicitud de ejemplo es:
 
 ```bash
 curl --get 'http://localhost:3000/v1/extract' \
@@ -109,19 +124,24 @@ Las respuestas de error usan el formato:
 
 Los códigos previstos son `INVALID_REQUEST` (400), `URL_NOT_PUBLIC` (422), `REDIRECT_NOT_ALLOWED` (502), `UPSTREAM_FAILURE` (502) e `INTERNAL_ERROR` (500).
 
-## Despliegue en producción (pendiente de bootstrap)
+## Despliegue en producción
 
-No hay `Dockerfile`, manifiestos de plataforma ni configuración CI/CD en el repositorio; por tanto, no existe un despliegue reproducible para ejecutar ahora. Cuando se implemente el punto de entrada, se recomienda desplegarlo como **servicio de contenedor persistente**, no como función *serverless*: cada solicitud abre un contexto de navegador y puede tardar al menos 30 segundos tras la carga de la página.
+No hay `Dockerfile`, manifiestos de plataforma ni configuración CI/CD en el repositorio. Aun así, puede desplegarse en cualquier plataforma que ejecute servicios Node.js o contenedores y permita Chromium. Se recomienda un **servicio de contenedor persistente**, no una función *serverless*: cada solicitud abre un contexto de navegador y puede tardar al menos 30 segundos después de la carga de la página.
 
-El servicio de destino debe cumplir estas condiciones:
+Configure en la plataforma:
 
-1. Ejecutar `pnpm install --frozen-lockfile`, `pnpm build` y `pnpm exec playwright install --with-deps chromium` durante la construcción, o partir de una imagen compatible con Playwright.
-2. Ejecutar `node dist/main.js` como comando de inicio.
-3. Exponer el puerto configurado por `PORT` y enlazar el proceso a `0.0.0.0`.
-4. Definir el entorno como `production` para activar el rechazo de destinos no públicos.
-5. Conceder CPU y memoria suficientes para Chromium y permitir procesos secundarios. No usar un sistema de archivos persistente para resultados.
-6. Configurar un periodo de apagado mayor que una extracción en curso y enviar `SIGTERM` para cerrar el navegador de forma ordenada.
-7. Establecer límites de concurrencia, de duración de solicitud y de tamaño de respuesta acorde con la capacidad del navegador.
+| Ajuste | Valor |
+| --- | --- |
+| Comando de construcción | `pnpm install --frozen-lockfile && pnpm build` |
+| Instalación de navegador | `pnpm exec playwright install --with-deps chromium` durante la imagen, o imagen base compatible con Playwright |
+| Comando de inicio | `node dist/main.js` |
+| `HOST` | `0.0.0.0` |
+| `PORT` | Puerto asignado por la plataforma, por ejemplo `8080` |
+| `NODE_ENV` | `production` |
+
+El entorno debe permitir procesos secundarios y disponer de CPU y memoria suficientes para Chromium. Establezca un periodo de apagado superior a una extracción en curso; el proceso atiende `SIGTERM` y cierra Fastify y el navegador. Configure también límites de concurrencia, duración de solicitud y tamaño de respuesta apropiados para la capacidad disponible.
+
+No se expone una ruta de salud dedicada. Mientras no exista, configure una comprobación TCP sobre el puerto o una comprobación HTTP a `/v1/extract` sin `url`, que debe responder `400` cuando la aplicación está disponible.
 
 ### Seguridad de red obligatoria
 
