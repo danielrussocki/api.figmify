@@ -72,7 +72,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3.
   - **Hecho cuando:** el extractor no inicia la serialización antes de recibir `load` y esperar los 30 segundos adicionales.
 
-- [ ] **T17. Clasificar fallos de red, certificado, origen o procesamiento como error de origen.**
+- [x] **T17. Clasificar fallos de red, certificado, origen o procesamiento como error de origen.**
   - **RF:** RF-4.
   - **Hecho cuando:** cada fallo citado se expone al caso de uso como `UPSTREAM_FAILURE` y no contiene detalles internos.
 

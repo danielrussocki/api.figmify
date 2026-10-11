@@ -1,6 +1,9 @@
 import type { Browser, BrowserContext, Frame, Page, Response } from 'playwright';
 
-import { MainDocumentRedirectError } from '../contracts/errors/application-error.js';
+import {
+  MainDocumentRedirectError,
+  UpstreamFailureError,
+} from '../contracts/errors/application-error.js';
 import type { ExtractionRequest } from '../contracts/extraction/extraction-port.js';
 import { FIXED_RENDERING_ENVIRONMENT } from '../contracts/extraction/defaults.js';
 
@@ -57,9 +60,17 @@ export class PlaywrightExtractor {
     page.on('response', detectMainDocumentRedirect);
     page.on('framenavigated', detectSubsequentMainDocumentNavigation);
     try {
-      await page.goto(url);
+      const response = await page.goto(url);
       if (redirected) {
         throw new MainDocumentRedirectError();
+      }
+
+      if (response !== null && response.status() >= 300 && response.status() < 400) {
+        throw new MainDocumentRedirectError();
+      }
+
+      if (response === null || response.status() < 200 || response.status() >= 300) {
+        throw new UpstreamFailureError();
       }
 
       await page.waitForLoadState('load');
@@ -68,6 +79,12 @@ export class PlaywrightExtractor {
       if (redirected) {
         throw new MainDocumentRedirectError();
       }
+    } catch (error) {
+      if (error instanceof MainDocumentRedirectError) {
+        throw error;
+      }
+
+      throw new UpstreamFailureError();
     } finally {
       page.off('response', detectMainDocumentRedirect);
       page.off('framenavigated', detectSubsequentMainDocumentNavigation);

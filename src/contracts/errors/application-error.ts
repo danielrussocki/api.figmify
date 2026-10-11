@@ -34,6 +34,15 @@ export interface UpstreamFailureError extends BaseApplicationError {
   code: 'UPSTREAM_FAILURE';
 }
 
+export class UpstreamFailureError extends Error {
+  readonly code = 'UPSTREAM_FAILURE' as const;
+
+  constructor() {
+    super('The upstream site could not be processed.');
+    this.name = 'UpstreamFailureError';
+  }
+}
+
 export interface InternalError extends BaseApplicationError {
   code: 'INTERNAL_ERROR';
 }

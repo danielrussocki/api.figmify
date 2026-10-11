@@ -24,6 +24,7 @@ function createPage(
   response: Response,
   mainFrame = {},
   additionalMainNavigations = 0,
+  navigationResponse: Response = response,
 ) {
   let responseListener: ((response: Response) => void) | undefined;
   let frameNavigationListener: ((frame: Frame) => void) | undefined;
@@ -47,6 +48,7 @@ function createPage(
       for (let index = 0; index < additionalMainNavigations; index += 1) {
         frameNavigationListener?.(mainFrame as Frame);
       }
+      return navigationResponse;
     }),
   } as unknown as Page;
 
@@ -133,7 +135,8 @@ describe('PlaywrightExtractor', () => {
         frame: vi.fn(),
       }),
     } as unknown as Response;
-    const { page } = createPage(response);
+    const mainDocumentResponse = { status: vi.fn().mockReturnValue(200) } as unknown as Response;
+    const { page } = createPage(response, {}, 0, mainDocumentResponse);
     const extractor = new PlaywrightExtractor(browser);
 
     await expect(extractor.navigateMainDocument(page, request.url)).resolves.toBeUndefined();
@@ -202,5 +205,69 @@ describe('PlaywrightExtractor', () => {
     resolveLoad?.();
     await vi.waitFor(() => expect(waitForTimeout).toHaveBeenCalledWith(30_000));
     await expect(navigation).resolves.toBeUndefined();
+  });
+
+  test.each([
+    ['network', 'net::ERR_NAME_NOT_RESOLVED'],
+    ['certificate', 'net::ERR_CERT_AUTHORITY_INVALID'],
+  ])('classifies a %s navigation failure as an upstream failure without internal details', async (_, detail) => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page } = createPage(response);
+    vi.mocked(page.goto).mockRejectedValue(new Error(detail));
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'UPSTREAM_FAILURE',
+      message: 'The upstream site could not be processed.',
+    });
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.not.toThrow(detail);
+  });
+
+  test('classifies an unsuccessful main document response as an upstream failure', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(503),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page, waitForLoadState, waitForTimeout } = createPage(response);
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'UPSTREAM_FAILURE',
+      message: 'The upstream site could not be processed.',
+    });
+
+    expect(waitForLoadState).not.toHaveBeenCalled();
+    expect(waitForTimeout).not.toHaveBeenCalled();
+  });
+
+  test('classifies document processing failures as an upstream failure without internal details', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page, waitForLoadState } = createPage(response);
+    vi.mocked(waitForLoadState).mockRejectedValue(new Error('Execution context was destroyed at C:\\private\\path'));
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'UPSTREAM_FAILURE',
+      message: 'The upstream site could not be processed.',
+    });
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.not.toThrow('C:\\private\\path');
   });
 });
