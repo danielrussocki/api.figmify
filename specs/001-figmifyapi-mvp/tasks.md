@@ -162,7 +162,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** las fixtures verifican espera tras `load`, redirecciones principales, errores de origen, recursos secundarios no bloqueantes e iframe no atravesado.
 
-- [ ] **T38. Añadir pruebas de extremo a extremo de respuestas satisfactorias.**
+- [x] **T38. Añadir pruebas de extremo a extremo de respuestas satisfactorias.**
   - **RF:** RF-1, RF-2, RF-3.
   - **Hecho cuando:** solicitudes HTTP reales a ambas rutas devuelven los contratos JSON v1 con los valores predeterminados y configurados de viewport.
 
