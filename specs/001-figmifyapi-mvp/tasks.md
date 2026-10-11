@@ -68,7 +68,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-4.
   - **Hecho cuando:** una navegación principal posterior causada por meta refresh o JavaScript termina con `REDIRECT_NOT_ALLOWED`.
 
-- [ ] **T16. Implementar la espera de `load` seguida de 30 segundos antes de serializar.**
+- [x] **T16. Implementar la espera de `load` seguida de 30 segundos antes de serializar.**
   - **RF:** RF-2, RF-3.
   - **Hecho cuando:** el extractor no inicia la serialización antes de recibir `load` y esperar los 30 segundos adicionales.
 

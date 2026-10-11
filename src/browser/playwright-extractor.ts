@@ -4,6 +4,8 @@ import { MainDocumentRedirectError } from '../contracts/errors/application-error
 import type { ExtractionRequest } from '../contracts/extraction/extraction-port.js';
 import { FIXED_RENDERING_ENVIRONMENT } from '../contracts/extraction/defaults.js';
 
+const POST_LOAD_SERIALIZATION_DELAY_MS = 30_000;
+
 /**
  * Creates isolated Playwright contexts configured for reproducible extraction.
  * Navigation and document serialization are added by subsequent extraction tasks.
@@ -56,6 +58,13 @@ export class PlaywrightExtractor {
     page.on('framenavigated', detectSubsequentMainDocumentNavigation);
     try {
       await page.goto(url);
+      if (redirected) {
+        throw new MainDocumentRedirectError();
+      }
+
+      await page.waitForLoadState('load');
+      await page.waitForTimeout(POST_LOAD_SERIALIZATION_DELAY_MS);
+
       if (redirected) {
         throw new MainDocumentRedirectError();
       }

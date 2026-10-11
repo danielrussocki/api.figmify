@@ -27,6 +27,8 @@ function createPage(
 ) {
   let responseListener: ((response: Response) => void) | undefined;
   let frameNavigationListener: ((frame: Frame) => void) | undefined;
+  const waitForLoadState = vi.fn().mockResolvedValue(undefined);
+  const waitForTimeout = vi.fn().mockResolvedValue(undefined);
   const page = {
     mainFrame: vi.fn().mockReturnValue(mainFrame),
     on: vi.fn((event: string, listener: (eventResponse: Response | Frame) => void) => {
@@ -37,6 +39,8 @@ function createPage(
       }
     }),
     off: vi.fn(),
+    waitForLoadState,
+    waitForTimeout,
     goto: vi.fn().mockImplementation(async () => {
       responseListener?.(response);
       frameNavigationListener?.(mainFrame as Frame);
@@ -48,6 +52,8 @@ function createPage(
 
   return {
     page,
+    waitForLoadState,
+    waitForTimeout,
     emitMainFrameNavigation: () => frameNavigationListener?.(mainFrame as Frame),
   };
 }
@@ -168,5 +174,33 @@ describe('PlaywrightExtractor', () => {
     await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
       code: 'REDIRECT_NOT_ALLOWED',
     });
+  });
+
+  test('waits for load and an additional 30 seconds before completing navigation', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page, waitForLoadState, waitForTimeout } = createPage(response);
+    let resolveLoad: (() => void) | undefined;
+    waitForLoadState.mockImplementation(
+      () => new Promise<void>((resolve) => {
+        resolveLoad = resolve;
+      }),
+    );
+    const extractor = new PlaywrightExtractor(browser);
+
+    const navigation = extractor.navigateMainDocument(page, request.url);
+    await vi.waitFor(() => expect(waitForLoadState).toHaveBeenCalledWith('load'));
+
+    expect(waitForTimeout).not.toHaveBeenCalled();
+
+    resolveLoad?.();
+    await vi.waitFor(() => expect(waitForTimeout).toHaveBeenCalledWith(30_000));
+    await expect(navigation).resolves.toBeUndefined();
   });
 });
