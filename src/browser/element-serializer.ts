@@ -43,19 +43,27 @@ const ALLOWED_ATTRIBUTES = new Map<string, string>(
 export function serializeElement(element: Element): ExtractionNode {
   let nextId = 1;
 
-  const serialize = (currentElement: Element): ExtractionNode => ({
-    id: `node-${nextId++}`,
-    tagName: currentElement.tagName.toLowerCase(),
-    attributes: selectAllowedAttributes(currentElement),
-    resources: resolveResourceReferences(currentElement),
-    text: readRenderedText(currentElement),
-    styles: readVisualStyles(currentElement),
-    pseudoElements: {
-      before: readPseudoElement(currentElement, '::before'),
-      after: readPseudoElement(currentElement, '::after'),
-    },
-    children: Array.from(currentElement.children, serialize),
-  });
+  const serialize = (currentElement: Element): ExtractionNode => {
+    const node: ExtractionNode = {
+      id: `node-${nextId++}`,
+      tagName: currentElement.tagName.toLowerCase(),
+      attributes: selectAllowedAttributes(currentElement),
+      resources: resolveResourceReferences(currentElement),
+      text: readRenderedText(currentElement),
+      styles: readVisualStyles(currentElement),
+      pseudoElements: {
+        before: readPseudoElement(currentElement, '::before'),
+        after: readPseudoElement(currentElement, '::after'),
+      },
+      children: Array.from(currentElement.children, serialize),
+    };
+
+    if (currentElement.shadowRoot !== null) {
+      node.shadowChildren = Array.from(currentElement.shadowRoot.children, serialize);
+    }
+
+    return node;
+  };
 
   return serialize(element);
 }

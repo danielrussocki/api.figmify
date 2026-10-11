@@ -5,6 +5,7 @@ import { serializeElement } from '../../../src/browser/element-serializer.js';
 interface ElementFixture {
   tagName: string;
   children: ElementFixture[];
+  shadowRoot?: { children: ElementFixture[] } | null;
   innerText?: string;
   hasAttribute(name: string): boolean;
   ownerDocument?: {
@@ -27,6 +28,7 @@ function element(
   return {
     tagName,
     children,
+    shadowRoot: null,
     innerText,
     hasAttribute: (name) => hidden && name === 'hidden',
   };
@@ -58,6 +60,42 @@ describe('serializeElement', () => {
         { id: 'node-6', tagName: 'footer', children: [] },
       ],
     });
+  });
+
+  test('serializes open Shadow DOM children in their Shadow DOM order', () => {
+    const root = element('MAIN', [element('P')]);
+    const host = element('CUSTOM-CARD');
+    host.shadowRoot = {
+      children: [element('HEADER'), element('SECTION', [element('H2')]), element('FOOTER')],
+    };
+    root.children.unshift(host);
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.children[0]).toMatchObject({
+      id: 'node-2',
+      tagName: 'custom-card',
+      children: [],
+      shadowChildren: [
+        { id: 'node-3', tagName: 'header', children: [] },
+        {
+          id: 'node-4',
+          tagName: 'section',
+          children: [{ id: 'node-5', tagName: 'h2', children: [] }],
+        },
+        { id: 'node-6', tagName: 'footer', children: [] },
+      ],
+    });
+    expect(serialized.children[1]).toMatchObject({ id: 'node-7', tagName: 'p' });
+  });
+
+  test('does not add shadow children when a Shadow DOM root is closed', () => {
+    const host = element('CUSTOM-CARD');
+    host.shadowRoot = null;
+
+    const serialized = serializeElement(host as unknown as Element);
+
+    expect(serialized).not.toHaveProperty('shadowChildren');
   });
 
   test('includes the complete extraction-node shape with basic placeholder values', () => {

@@ -102,7 +102,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** cada nodo incluye ambos campos como `null` o como un objeto con `content` y propiedades visuales permitidas.
 
-- [ ] **T24. Implementar la serialización de Shadow DOM abierto y la exclusión del cerrado.**
+- [x] **T24. Implementar la serialización de Shadow DOM abierto y la exclusión del cerrado.**
   - **RF:** RF-2.
   - **Hecho cuando:** las raíces abiertas se devuelven en `shadowChildren` respetando el orden y las cerradas no aportan contenido.
 
