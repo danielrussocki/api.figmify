@@ -124,7 +124,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3.
   - **Hecho cuando:** la transformación conserva `sourceId`, estructura, texto, atributos y recursos, y asigna un tipo permitido de Figma.
 
-- [ ] **T29. Implementar la transformación recursiva a `FigmaDocument` v1.**
+- [x] **T29. Implementar la transformación recursiva a `FigmaDocument` v1.**
   - **RF:** RF-3.
   - **Hecho cuando:** el resultado contiene `schemaVersion: "1.0"`, catálogos de estilos, árbol Figma y referencias correctas a estilos reutilizables.
 

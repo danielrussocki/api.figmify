@@ -1,5 +1,11 @@
-import type { ExtractionNode } from '../contracts/extraction/extraction-document.js';
-import type { FigmaNode, FigmaNodeType } from '../contracts/figma/figma-document.js';
+import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
+import type { FigmaDocument, FigmaNode, FigmaNodeType } from '../contracts/figma/figma-document.js';
+import {
+  createColorStyleCatalog,
+  createTypographyStyleCatalog,
+  findColorStyleForNode,
+  findTypographyStyleForNode,
+} from './style-catalog.js';
 
 const VECTOR_TAG_NAMES = new Set([
   'svg',
@@ -29,6 +35,44 @@ export function transformExtractionNode(node: ExtractionNode): FigmaNode {
     resources: node.resources.map((resource) => ({ ...resource })),
     styles: transformStyles(node.styles),
     children,
+  };
+}
+
+/** Converts a complete extraction document into the versioned Figma contract. */
+export function transformExtractionDocument(extraction: ExtractionDocument): FigmaDocument {
+  const colors = createColorStyleCatalog(extraction.document);
+  const typographies = createTypographyStyleCatalog(extraction.document);
+  const colorIds = new Set(colors.map((style) => style.id));
+  const typographyIds = new Set(typographies.map((style) => style.id));
+
+  return {
+    schemaVersion: '1.0',
+    source: {
+      url: extraction.source.url,
+      viewport: { ...extraction.source.viewport },
+    },
+    styles: { colors, typographies },
+    document: transformNodeWithStyleReferences(extraction.document, colorIds, typographyIds),
+  };
+}
+
+function transformNodeWithStyleReferences(
+  node: ExtractionNode,
+  colorIds: ReadonlySet<string>,
+  typographyIds: ReadonlySet<string>,
+): FigmaNode {
+  const colorStyle = findColorStyleForNode(node.styles);
+  const typographyStyle = findTypographyStyleForNode(node.styles);
+
+  return {
+    ...transformExtractionNode({ ...node, children: [], shadowChildren: [] }),
+    ...(colorStyle !== null && colorIds.has(colorStyle.id) ? { fillStyleId: colorStyle.id } : {}),
+    ...(typographyStyle !== null && typographyIds.has(typographyStyle.id)
+      ? { textStyleId: typographyStyle.id }
+      : {}),
+    children: [...node.children, ...(node.shadowChildren ?? [])].map((child) =>
+      transformNodeWithStyleReferences(child, colorIds, typographyIds),
+    ),
   };
 }
 

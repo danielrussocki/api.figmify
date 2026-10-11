@@ -65,6 +65,16 @@ export function createColorStyleCatalog(root: ExtractionNode): ColorStyle[] {
   return [...colors.values()].sort((left, right) => left.id.localeCompare(right.id));
 }
 
+/** Returns the reusable fill style represented by a node's text color, if any. */
+export function findColorStyleForNode(styles: Record<string, string>): ColorStyle | null {
+  if (hasColorStyleExclusion(styles)) {
+    return null;
+  }
+
+  const rgba = parseSolidColor(styles.color);
+  return rgba === null ? null : createColorStyle(rgba);
+}
+
 /**
  * Collects reusable typography styles from complete computed typography tuples.
  * IDs derive from normalized values and therefore do not depend on tree order.
@@ -93,6 +103,12 @@ export function createTypographyStyleCatalog(root: ExtractionNode): TypographySt
   visit(root);
 
   return [...typographies.values()].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+/** Returns the reusable typography style represented by a complete node tuple. */
+export function findTypographyStyleForNode(styles: Record<string, string>): TypographyStyle | null {
+  const typography = readTypographyStyle(styles);
+  return typography === null ? null : createTypographyStyle(typography);
 }
 
 function readTypographyStyle(styles: Record<string, string>): Omit<TypographyStyle, 'id'> | null {
