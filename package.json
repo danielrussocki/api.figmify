@@ -1,10 +1,13 @@
 {
   "name": "figmify-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "MVP API for extracting public web styles for Figma.",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +20,19 @@
     }
   },
   "packageManager": "pnpm@12.11.2",
-  "type": "module"
+  "type": "module",
+  "figmify": {
+    "dependencyJustifications": {
+      "@types/node": "Provides Node.js type declarations for TypeScript compilation.",
+      "tsx": "Runs the TypeScript development entry point with ESM support.",
+      "typescript": "Compiles and type-checks the TypeScript source as ESM.",
+      "vitest": "Executes the automated TypeScript test suite with ESM support."
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
 }
