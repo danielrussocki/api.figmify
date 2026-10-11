@@ -42,7 +42,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las pruebas verifican ausencia de `url`, URL no absoluta, esquemas no HTTP(S), dimensiones no enteras o fuera de rango y escalas no permitidas, todos con `INVALID_REQUEST`.
 
-- [ ] **T10. Implementar la política de URL pública para el entorno de producción.**
+- [x] **T10. Implementar la política de URL pública para el entorno de producción.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** la política rechaza localhost y direcciones IPv4 e IPv6 loopback, privadas, link-local, multicast, no especificadas, reservadas y de documentación.
 
