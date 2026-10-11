@@ -106,7 +106,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** las raíces abiertas se devuelven en `shadowChildren` respetando el orden y las cerradas no aportan contenido.
 
-- [ ] **T25. Integrar navegación y serialización en el adaptador Playwright.**
+- [x] **T25. Integrar navegación y serialización en el adaptador Playwright.**
   - **RF:** RF-1, RF-2, RF-4.
   - **Hecho cuando:** el adaptador devuelve un `ExtractionDocument` v1 completo ante una página válida o uno de los errores tipados ante un fallo.
 
@@ -177,3 +177,4 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [ ] **T41. Ejecutar la suite completa y verificar que no se persisten datos.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `pnpm test` pasa y la revisión de la implementación confirma que no incorpora base de datos, caché, archivos de resultados ni colas persistentes.
+  - **Nota:** `pnpm typecheck` tiene errores preexistentes en el contrato `UpstreamFailureError`; deben resolverse durante esta validación final.

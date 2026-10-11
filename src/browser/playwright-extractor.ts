@@ -4,21 +4,22 @@ import {
   MainDocumentRedirectError,
   UpstreamFailureError,
 } from '../contracts/errors/application-error.js';
-import type { ExtractionRequest } from '../contracts/extraction/extraction-port.js';
+import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
+import type { ExtractionPort, ExtractionRequest } from '../contracts/extraction/extraction-port.js';
 import { FIXED_RENDERING_ENVIRONMENT } from '../contracts/extraction/defaults.js';
 import {
   enforcePublicUrlPolicy,
   PublicUrlPolicyError,
   type RuntimeEnvironment,
 } from '../security/url-policy/public-url-policy.js';
+import { VISUAL_PROPERTIES } from './visual-properties.js';
 
 const POST_LOAD_SERIALIZATION_DELAY_MS = 30_000;
 
 /**
  * Creates isolated Playwright contexts configured for reproducible extraction.
- * Navigation and document serialization are added by subsequent extraction tasks.
  */
-export class PlaywrightExtractor {
+export class PlaywrightExtractor implements ExtractionPort {
   constructor(
     private readonly browser: Browser,
     private readonly environment: RuntimeEnvironment = 'production',
@@ -38,6 +39,45 @@ export class PlaywrightExtractor {
       contrast: FIXED_RENDERING_ENVIRONMENT.contrast,
       userAgent: FIXED_RENDERING_ENVIRONMENT.userAgent,
     });
+  }
+
+  async extract(request: ExtractionRequest): Promise<ExtractionDocument> {
+    const context = await this.createContext(request);
+    let page: Page | undefined;
+
+    try {
+      page = await context.newPage();
+      await this.navigateMainDocument(page, request.url);
+      const document = await page.evaluate(serializeDocumentElement, [...VISUAL_PROPERTIES]);
+
+      return {
+        schemaVersion: '1.0',
+        source: {
+          url: request.url,
+          viewport: request.viewport,
+          environment: {
+            locale: FIXED_RENDERING_ENVIRONMENT.locale,
+            timezone: FIXED_RENDERING_ENVIRONMENT.timezone,
+            colorScheme: FIXED_RENDERING_ENVIRONMENT.colorScheme,
+            reducedMotion: FIXED_RENDERING_ENVIRONMENT.reducedMotion,
+          },
+        },
+        document,
+      };
+    } catch (error) {
+      if (
+        error instanceof PublicUrlPolicyError ||
+        error instanceof MainDocumentRedirectError ||
+        error instanceof UpstreamFailureError
+      ) {
+        throw error;
+      }
+
+      throw new UpstreamFailureError();
+    } finally {
+      await page?.close().catch(() => undefined);
+      await context.close().catch(() => undefined);
+    }
   }
 
   async navigateMainDocument(page: Page, url: string): Promise<void> {
@@ -137,4 +177,105 @@ export class PlaywrightExtractor {
       await page.unroute('**/*', enforceMainDocumentDestinationPolicy);
     }
   }
+}
+
+function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
+  const allowedAttributes = new Map([
+    'id', 'class', 'role', 'title', 'lang', 'dir', 'hidden', 'tabindex', 'alt', 'aria-label',
+    'aria-labelledby', 'aria-describedby', 'aria-hidden', 'href', 'target', 'src', 'srcset',
+    'poster', 'width', 'height', 'type', 'value', 'placeholder', 'checked', 'selected',
+    'disabled', 'name', 'viewBox',
+  ].map((name) => [name.toLowerCase(), name]));
+  let nextId = 1;
+
+  const readStyles = (element: Element, pseudoElement?: '::before' | '::after'): Record<string, string> => {
+    const styles: Record<string, string> = {};
+    let computed: CSSStyleDeclaration;
+    try {
+      computed = window.getComputedStyle(element, pseudoElement);
+    } catch {
+      return styles;
+    }
+    for (const property of visualProperties) {
+      try {
+        const value = computed.getPropertyValue(property);
+        if (typeof value === 'string' && value.trim().length > 0) {
+          styles[property] = value;
+        }
+      } catch {
+        // Omit values that cannot be determined or serialized.
+      }
+    }
+    return styles;
+  };
+
+  const isRendered = (element: Element): boolean => {
+    let current: Element | null = element;
+    while (current !== null) {
+      if (current.hasAttribute('hidden')) return false;
+      const styles = window.getComputedStyle(current);
+      if (styles.display === 'none') return false;
+      if (current === element && (styles.visibility === 'hidden' || styles.visibility === 'collapse')) return false;
+      current = current.parentElement;
+    }
+    return true;
+  };
+
+  const pseudoElement = (element: Element, selector: '::before' | '::after') => {
+    let content: string;
+    try {
+      content = window.getComputedStyle(element, selector).getPropertyValue('content').trim();
+    } catch {
+      return null;
+    }
+    if (content.length === 0 || content === 'none' || content === 'normal') return null;
+    if ((content.startsWith('"') && content.endsWith('"')) || (content.startsWith("'") && content.endsWith("'"))) {
+      content = content.slice(1, -1).replace(/\\([\\"'])/g, '$1');
+    }
+    return { content, styles: readStyles(element, selector) };
+  };
+
+  const resources = (element: Element): ExtractionNode['resources'] => {
+    const result: ExtractionNode['resources'] = [];
+    const attribute = (name: string) => element.getAttribute(name);
+    const add = (kind: ExtractionNode['resources'][number]['kind'], reference: string | null) => {
+      if (reference === null || reference.trim().length === 0) return;
+      try { result.push({ kind, url: new URL(reference, element.baseURI).href }); } catch { /* Ignore invalid URLs. */ }
+    };
+    const tagName = element.tagName.toLowerCase();
+    if (tagName === 'img' || (tagName === 'input' && attribute('type')?.toLowerCase() === 'image')) add('image', attribute('src'));
+    if (tagName === 'img' || tagName === 'source') {
+      for (const candidate of attribute('srcset')?.split(',') ?? []) add('image', candidate.trim().split(/\s+/, 1)[0] ?? null);
+    }
+    if (tagName === 'video') { add('media', attribute('poster')); add('media', attribute('src')); }
+    if (tagName === 'audio' || tagName === 'source') add('media', attribute('src'));
+    if (tagName === 'link' && attribute('rel')?.split(/\s+/).some((value) => value.toLowerCase() === 'stylesheet')) add('stylesheet', attribute('href'));
+    return result;
+  };
+
+  const serialize = (element: Element): ExtractionNode => {
+    const attributes: Record<string, string> = {};
+    for (const name of element.getAttributeNames()) {
+      const outputName = allowedAttributes.get(name.toLowerCase());
+      const value = element.getAttribute(name);
+      if (outputName !== undefined && value !== null) attributes[outputName] = value;
+    }
+    const text = isRendered(element) && typeof (element as HTMLElement).innerText === 'string'
+      ? (element as HTMLElement).innerText.trim() || null
+      : null;
+    const node: ExtractionNode = {
+      id: `node-${nextId++}`,
+      tagName: element.tagName.toLowerCase(),
+      attributes,
+      resources: resources(element),
+      text,
+      styles: readStyles(element),
+      pseudoElements: { before: pseudoElement(element, '::before'), after: pseudoElement(element, '::after') },
+      children: Array.from(element.children, serialize),
+    };
+    if (element.shadowRoot !== null) node.shadowChildren = Array.from(element.shadowRoot.children, serialize);
+    return node;
+  };
+
+  return serialize(document.documentElement);
 }

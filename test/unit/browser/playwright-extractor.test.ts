@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
+import type { ExtractionNode } from '../../../src/contracts/extraction/extraction-document.js';
 import type { ExtractionRequest } from '../../../src/contracts/extraction/extraction-port.js';
 import type { Browser, BrowserContext, Frame, Page, Request, Response, Route } from 'playwright';
 
@@ -67,6 +68,94 @@ function createPage(
 }
 
 describe('PlaywrightExtractor', () => {
+  test('extracts a complete v1 document after navigation and serializes the document root', async () => {
+    const document: ExtractionNode = {
+      id: 'node-1',
+      tagName: 'html',
+      attributes: {},
+      resources: [],
+      text: 'Welcome',
+      styles: { display: 'block' },
+      pseudoElements: { before: null, after: null },
+      children: [],
+    };
+    const successfulResponse = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(false),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const closePage = vi.fn().mockResolvedValue(undefined);
+    const page = {
+      ...createPage(successfulResponse).page,
+      evaluate: vi.fn().mockResolvedValue(document),
+      close: closePage,
+    } as unknown as Page;
+    const closeContext = vi.fn().mockResolvedValue(undefined);
+    const context = {
+      newPage: vi.fn().mockResolvedValue(page),
+      close: closeContext,
+    } as unknown as BrowserContext;
+    const browser = {
+      newContext: vi.fn().mockResolvedValue(context),
+    } as unknown as Browser;
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.extract(request)).resolves.toEqual({
+      schemaVersion: '1.0',
+      source: {
+        url: request.url,
+        viewport: request.viewport,
+        environment: {
+          locale: 'en-US',
+          timezone: 'UTC',
+          colorScheme: 'light',
+          reducedMotion: 'no-preference',
+        },
+      },
+      document,
+    });
+
+    expect(context.newPage).toHaveBeenCalledTimes(1);
+    expect(page.evaluate).toHaveBeenCalledTimes(1);
+    expect(closePage).toHaveBeenCalledTimes(1);
+    expect(closeContext).toHaveBeenCalledTimes(1);
+  });
+
+  test('classifies serialization failures as upstream failures and closes browser resources', async () => {
+    const successfulResponse = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(false),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const closePage = vi.fn().mockResolvedValue(undefined);
+    const page = {
+      ...createPage(successfulResponse).page,
+      evaluate: vi.fn().mockRejectedValue(new Error('Execution context was destroyed')),
+      close: closePage,
+    } as unknown as Page;
+    const closeContext = vi.fn().mockResolvedValue(undefined);
+    const context = {
+      newPage: vi.fn().mockResolvedValue(page),
+      close: closeContext,
+    } as unknown as BrowserContext;
+    const browser = {
+      newContext: vi.fn().mockResolvedValue(context),
+    } as unknown as Browser;
+    const extractor = new PlaywrightExtractor(browser);
+
+    await expect(extractor.extract(request)).rejects.toMatchObject({
+      code: 'UPSTREAM_FAILURE',
+      message: 'The upstream site could not be processed.',
+    });
+
+    expect(closePage).toHaveBeenCalledTimes(1);
+    expect(closeContext).toHaveBeenCalledTimes(1);
+  });
+
   test('creates a context with the request viewport and fixed rendering environment', async () => {
     const { browser, context, newContext } = createBrowser();
     const extractor = new PlaywrightExtractor(browser);
