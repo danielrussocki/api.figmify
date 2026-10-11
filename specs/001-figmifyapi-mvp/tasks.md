@@ -170,7 +170,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las rutas devuelven 400, 422, 502 y 500 con el `code` esperado, mensajes en inglés y ninguna respuesta parcial.
 
-- [ ] **T40. Añadir pruebas de regresión de contratos JSON.**
+- [x] **T40. Añadir pruebas de regresión de contratos JSON.**
   - **RF:** RF-2, RF-3.
   - **Hecho cuando:** ejemplos representativos de extracción y Figma se validan contra los contratos versionados 1.0.
 

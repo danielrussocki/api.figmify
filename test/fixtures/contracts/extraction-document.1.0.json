@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "url": "https://example.com/",
+    "viewport": { "width": 1920, "height": 1080, "deviceScaleFactor": 1 },
+    "environment": {
+      "locale": "en-US",
+      "timezone": "UTC",
+      "colorScheme": "light",
+      "reducedMotion": "no-preference"
+    }
+  },
+  "document": {
+    "id": "node-1",
+    "tagName": "body",
+    "attributes": { "class": "page" },
+    "resources": [],
+    "text": null,
+    "styles": { "display": "block", "background-color": "rgb(255, 255, 255)" },
+    "pseudoElements": {
+      "before": { "content": "New", "styles": { "color": "rgb(17, 24, 39)" } },
+      "after": null
+    },
+    "children": [
+      {
+        "id": "node-2",
+        "tagName": "img",
+        "attributes": { "alt": "Logo", "src": "/logo.png" },
+        "resources": [{ "kind": "image", "url": "https://example.com/logo.png" }],
+        "text": null,
+        "styles": { "display": "block" },
+        "pseudoElements": { "before": null, "after": null },
+        "children": [],
+        "shadowChildren": [
+          {
+            "id": "node-3",
+            "tagName": "span",
+            "attributes": {},
+            "resources": [],
+            "text": "Inside shadow DOM",
+            "styles": { "color": "rgb(17, 24, 39)" },
+            "pseudoElements": { "before": null, "after": null },
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+}

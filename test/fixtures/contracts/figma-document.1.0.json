@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "url": "https://example.com/",
+    "viewport": { "width": 1920, "height": 1080, "deviceScaleFactor": 1 }
+  },
+  "styles": {
+    "colors": [
+      { "id": "color-111827", "name": "#111827", "rgba": { "r": 0.067, "g": 0.094, "b": 0.153, "a": 1 } }
+    ],
+    "typographies": [
+      {
+        "id": "type-inter-32-700-normal-38.4-0-none",
+        "fontFamily": "Inter, sans-serif",
+        "fontSize": "32px",
+        "fontWeight": "700",
+        "fontStyle": "normal",
+        "lineHeight": "38.4px",
+        "letterSpacing": "normal",
+        "textTransform": "none"
+      }
+    ]
+  },
+  "document": {
+    "sourceId": "node-1",
+    "type": "DOCUMENT",
+    "name": "html",
+    "attributes": { "class": "page" },
+    "resources": [],
+    "styles": { "backgroundColor": { "r": 1, "g": 1, "b": 1, "a": 1 } },
+    "children": [
+      {
+        "sourceId": "node-2",
+        "type": "TEXT",
+        "name": "h1",
+        "characters": "Welcome",
+        "attributes": { "id": "welcome" },
+        "resources": [],
+        "fillStyleId": "color-111827",
+        "textStyleId": "type-inter-32-700-normal-38.4-0-none",
+        "styles": { "color": "rgb(17, 24, 39)", "fontSize": 32, "fontWeight": 700 },
+        "children": []
+      }
+    ]
+  }
+}
