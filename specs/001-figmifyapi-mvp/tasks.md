@@ -470,3 +470,41 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T112. Ejecutar la regresión final de los ajustes de Auto Layout y pinturas.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las rutas mantienen sus errores normalizados y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
+
+## Corrección de rellenos transparentes e imágenes
+
+- [ ] **T113. Ajustar el contrato tipado de pinturas Figma para distinguir rellenos sólidos y de imagen.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** `fills` representa una colección que puede estar vacía y una pintura de imagen exige `type: "IMAGE"`, `src` y `scaleMode: "FILL"`, sin permitir que se modele como pintura sólida.
+
+- [ ] **T114. Emitir `fills: []` para nodos sin relleno perceptible.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** el transformador devuelve siempre un arreglo vacío de `fills` para un nodo sin fondo sólido, gradiente ni imagen perceptible y no genera un color de respaldo.
+
+- [ ] **T115. Emitir pinturas Figma `IMAGE` para fuentes de imagen determinables.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** los nodos `IMAGE` procedentes de `img` o de fondos resolubles incluyen en `fills` una pintura con `type: "IMAGE"`, URL absoluta en `src` y `scaleMode: "FILL"`, sin una pintura `SOLID` sustitutiva.
+
+- [ ] **T116. Añadir fixtures para un nodo sin fondo y para imágenes de `img` y de fondo.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** las fixtures contienen un nodo visible sin relleno perceptible, un `img` con URL resoluble y un nodo con `background-image` resoluble, con resultados esperados distinguibles.
+
+- [ ] **T117. Añadir pruebas unitarias de relleno vacío.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** las pruebas verifican que un nodo sin relleno devuelve exactamente `fills: []`, no devuelve `fills: null` ni omite la propiedad, y no crea un color reutilizable de respaldo.
+
+- [ ] **T118. Añadir pruebas unitarias de pinturas de imagen.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas cubren `img` y fondo resoluble y verifican que cada nodo `IMAGE` usa una pintura `IMAGE` con `src` y `scaleMode: "FILL"`, nunca `SOLID`.
+
+- [ ] **T119. Añadir pruebas de integración Playwright para rellenos transparentes e imágenes.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la extracción de las nuevas fixtures y su transformación preservan el nodo sin relleno como `fills: []` y emiten las dos fuentes de imagen como pinturas `IMAGE` con URL resuelta.
+
+- [ ] **T120. Añadir una prueba de extremo a extremo de `/v1/figma` para los nuevos rellenos.**
+  - **RF:** RF-1, RF-3, RF-5.
+  - **Hecho cuando:** una solicitud HTTP real valida en el contrato JSON que no hay fallback gris para el nodo transparente y que los nodos `IMAGE` contienen `fills` de tipo `IMAGE` con `src` y `scaleMode: "FILL"`.
+
+- [ ] **T121. Ejecutar la regresión final de rellenos transparentes e imágenes.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las pruebas nuevas quedan incluidas en la suite y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
