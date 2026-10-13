@@ -382,7 +382,7 @@ describe('transformExtractionNode', () => {
     expect(relative.zIndex).toBeUndefined();
   });
 
-  test('omits the root relative rect and positions descendants from their represented parent content area', () => {
+  test('omits the root relative rect and positions descendants by directly subtracting represented rect origins', () => {
     const extraction = node({
       id: 'node-root',
       layout: {
@@ -412,7 +412,7 @@ describe('transformExtractionNode', () => {
 
     expect(result.relativeRect).toBeUndefined();
     expect(result.children[0]?.relativeRect).toEqual({
-      x: 17, y: 24, width: 100, height: 50, top: 24, left: 17,
+      x: 30, y: 40, width: 100, height: 50, top: 40, left: 30,
     });
     expect(result.children[0]?.children[0]?.relativeRect).toEqual({
       x: 10, y: 10, width: 20, height: 10, top: 10, left: 10,

@@ -415,7 +415,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture incluye borde uniforme, bordes distintos por lado, sombras externa e interna múltiples, un margen negativo y un nodo `sticky` bajo un padre con caja conocida.
 
-- [ ] **T99. Corregir el cálculo de `relativeRect` mediante resta directa de rectángulos.**
+- [x] **T99. Corregir el cálculo de `relativeRect` mediante resta directa de rectángulos.**
   - **RF:** RF-5.
   - **Hecho cuando:** para cada nodo no raíz con padre representado, `x` e `y` se calculan únicamente como la diferencia de los orígenes de `rect`, y `width` y `height` se conservan sin reajustes.
 

@@ -47,7 +47,7 @@ export function transformExtractionNode(
 
 function mapExtractionNode(
   node: ExtractionNode,
-  parentContentOrigin: ContentOrigin | undefined,
+  parentRect: FigmaRect | undefined,
   parentIsVisible: boolean,
   isRoot: boolean,
   includeHidden: boolean,
@@ -60,7 +60,6 @@ function mapExtractionNode(
   const positioning = determinePositioning(node.styles);
   const paints = parseFigmaPaints(node.styles);
   const image = imageData(node, type);
-  const contentOrigin = getContentOrigin(rect, node.styles);
   const mapChild = (child: ExtractionNode): FigmaNode | undefined => {
     if (isExcludedFigmaTag(child.tagName)) {
       return undefined;
@@ -78,22 +77,22 @@ function mapExtractionNode(
 
     return mapExtractionNode(
       child,
-      contentOrigin,
+      rect,
       isVisible,
       false,
       includeHidden,
     );
   };
-  const children = mapChildrenAndDirectTextRuns(node, mapChild, rect, contentOrigin, isVisible, includeHidden);
+  const children = mapChildrenAndDirectTextRuns(node, mapChild, rect, isVisible, includeHidden);
 
   return {
     id: node.id,
     tag: node.tagName,
     type,
     rect,
-    ...(parentContentOrigin === undefined
+    ...(parentRect === undefined
       ? {}
-      : { relativeRect: toRelativeRect(rect, parentContentOrigin) }),
+      : { relativeRect: toRelativeRect(rect, parentRect) }),
     isVisible,
     ...(autoLayout.layoutMode === undefined ? {} : { layoutMode: autoLayout.layoutMode }),
     ...(autoLayout.gap === undefined ? {} : { gap: autoLayout.gap }),
@@ -120,7 +119,6 @@ function mapChildrenAndDirectTextRuns(
   node: ExtractionNode,
   mapChild: (child: ExtractionNode) => FigmaNode | undefined,
   parentRect: FigmaRect,
-  parentContentOrigin: ContentOrigin,
   isVisible: boolean,
   includeHidden: boolean,
 ): FigmaNode[] {
@@ -142,7 +140,7 @@ function mapChildrenAndDirectTextRuns(
     }
 
     if (includeHidden || isVisible) {
-      children.push(mapDirectTextRun(node, textRun, parentRect, parentContentOrigin, isVisible));
+      children.push(mapDirectTextRun(node, textRun, parentRect, isVisible));
     }
   }
 
@@ -165,7 +163,6 @@ function mapDirectTextRun(
   parent: ExtractionNode,
   textRun: DirectTextRun,
   parentRect: FigmaRect,
-  parentContentOrigin: ContentOrigin,
   isVisible: boolean,
 ): FigmaNode {
   const paints = parseFigmaPaints(textRun.styles);
@@ -176,7 +173,7 @@ function mapDirectTextRun(
     tag: '#text',
     type: 'TEXT',
     rect: parentRect,
-    relativeRect: toRelativeRect(parentRect, parentContentOrigin),
+    relativeRect: toRelativeRect(parentRect, parentRect),
     isVisible,
     ...(paints.fills === null ? {} : { fills: paints.fills }),
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
@@ -413,11 +410,6 @@ function normalizedStyle(node: ExtractionNode, property: string): string | undef
   return value?.trim().toLowerCase();
 }
 
-interface ContentOrigin {
-  x: number;
-  y: number;
-}
-
 function toFigmaRect(rect: FigmaRect | undefined): FigmaRect {
   const source = rect ?? EMPTY_RECT;
   return {
@@ -430,29 +422,18 @@ function toFigmaRect(rect: FigmaRect | undefined): FigmaRect {
   };
 }
 
-function toRelativeRect(rect: FigmaRect, parentContentOrigin: ContentOrigin): FigmaRect {
+function toRelativeRect(rect: FigmaRect, parentRect: FigmaRect): FigmaRect {
+  const x = finiteNumber(rect.x - parentRect.x);
+  const y = finiteNumber(rect.y - parentRect.y);
+
   return {
-    x: finiteNumber(rect.x - parentContentOrigin.x),
-    y: finiteNumber(rect.y - parentContentOrigin.y),
+    x,
+    y,
     width: rect.width,
     height: rect.height,
-    top: finiteNumber(rect.top - parentContentOrigin.y),
-    left: finiteNumber(rect.left - parentContentOrigin.x),
+    top: y,
+    left: x,
   };
-}
-
-function getContentOrigin(rect: FigmaRect, styles: Record<string, string>): ContentOrigin {
-  return {
-    x: finiteNumber(rect.x + cssPixelValue(styles['border-left-width']) + cssPixelValue(styles['padding-left'])),
-    y: finiteNumber(rect.y + cssPixelValue(styles['border-top-width']) + cssPixelValue(styles['padding-top'])),
-  };
-}
-
-function cssPixelValue(value: string | undefined): number {
-  if (value === undefined) return 0;
-
-  const match = /^(-?(?:\d+\.?\d*|\.\d+))px$/i.exec(value.trim());
-  return match === null ? 0 : finiteNumber(Number(match[1]));
 }
 
 function finiteNumber(value: number): number {
