@@ -365,11 +365,11 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** la extracción conserva el marcado serializado del SVG inline, incluidos atributos y descendientes gráficos necesarios para recrearlo, sin convertirlo en una imagen basada en URL ni relajar la lista de atributos ordinarios de HTML.
 
-- [ ] **T87. Emitir y probar SVG inline e imágenes de fondo en el contrato Figma.**
+- [x] **T87. Emitir y probar SVG inline e imágenes de fondo en el contrato Figma.**
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas verifican SVG con atributos gráficos como `d`, `fill`, `cx`, `cy` y `r`, fondos con URL y ajuste conocidos, y la omisión segura de datos no determinables.
 
-- [ ] **T88. Añadir fuentes `@font-face` determinables al documento de extracción.**
+- [x] **T88. Añadir fuentes `@font-face` determinables al documento de extracción.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** el contrato y el serializador recogen, cuando sean accesibles, las familias, pesos y URL HTTP(S) resueltas de reglas `@font-face`, sin fallar ante hojas de estilo entre orígenes o reglas inaccesibles.
 

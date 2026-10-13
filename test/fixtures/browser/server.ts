@@ -36,6 +36,12 @@ export async function startBrowserFixtureServer(): Promise<BrowserFixtureServer>
       return;
     }
 
+    if (pathname === '/resources/cross-origin-font.css') {
+      response.writeHead(200, { 'content-type': 'text/css; charset=utf-8' });
+      response.end('@font-face { font-family: "Cross Origin Font"; font-weight: 400; src: url("/resources/cross-origin.woff2"); }');
+      return;
+    }
+
     if (pathname === '/redirect/http') {
       response.writeHead(302, { location: '/browser-fixtures.html' });
       response.end();
@@ -67,7 +73,10 @@ export async function startBrowserFixtureServer(): Promise<BrowserFixtureServer>
       return;
     }
 
-    const document = await readFile(new URL(`./${fixtureFile}`, import.meta.url), 'utf8');
+    const document = (await readFile(new URL(`./${fixtureFile}`, import.meta.url), 'utf8')).replace(
+      '{{crossOriginUrl}}',
+      `http://localhost:${(server.address() as { port: number }).port}`,
+    );
     const contentType = fixtureFile.endsWith('.svg')
       ? 'image/svg+xml'
       : 'text/html; charset=utf-8';

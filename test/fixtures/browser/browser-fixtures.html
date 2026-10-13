@@ -5,7 +5,13 @@
     <meta name="fixture-metadata" content="Metadata fixture">
     <title>Browser extraction fixtures</title>
     <link rel="stylesheet" href="/resources/secondary-redirect.css">
+    <link rel="stylesheet" href="{{crossOriginUrl}}/resources/cross-origin-font.css">
     <style>
+      @font-face {
+        font-family: "Fixture Sans";
+        font-weight: 700;
+        src: local("Fixture Sans"), url("/resources/fixture-font.woff2") format("woff2"), url("data:font/woff2;base64,AA==");
+      }
       #hidden-display { display: none; }
       #hidden-opacity { opacity: 0; }
       #zero-size { width: 0; height: 0; overflow: hidden; }

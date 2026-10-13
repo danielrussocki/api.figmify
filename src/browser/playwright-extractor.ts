@@ -4,7 +4,7 @@ import {
   MainDocumentRedirectError,
   UpstreamFailureException,
 } from '../contracts/errors/application-error.js';
-import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
+import type { ExtractionDocument, ExtractionNode, FontFaceSource } from '../contracts/extraction/extraction-document.js';
 import type { ExtractionPort, ExtractionRequest } from '../contracts/extraction/extraction-port.js';
 import { FIXED_RENDERING_ENVIRONMENT } from '../contracts/extraction/defaults.js';
 import {
@@ -49,7 +49,7 @@ export class PlaywrightExtractor implements ExtractionPort {
     try {
       page = await context.newPage();
       await this.navigateMainDocument(page, request.url);
-      const document = await page.evaluate(serializeDocumentElement, [...VISUAL_PROPERTIES]);
+      const serialized = await page.evaluate(serializeDocumentElement, [...VISUAL_PROPERTIES]);
 
       return {
         schemaVersion: '1.0',
@@ -63,7 +63,8 @@ export class PlaywrightExtractor implements ExtractionPort {
             reducedMotion: FIXED_RENDERING_ENVIRONMENT.reducedMotion,
           },
         },
-        document,
+        ...(serialized.fontFaceSources.length === 0 ? {} : { fontFaceSources: serialized.fontFaceSources }),
+        document: serialized.document,
       };
     } catch (error) {
       if (
@@ -183,7 +184,10 @@ export class PlaywrightExtractor implements ExtractionPort {
   }
 }
 
-function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
+function serializeDocumentElement(visualProperties: string[]): {
+  document: ExtractionNode;
+  fontFaceSources: FontFaceSource[];
+} {
   const allowedAttributes = new Map([
     'id', 'class', 'role', 'title', 'lang', 'dir', 'hidden', 'tabindex', 'alt', 'aria-label',
     'aria-labelledby', 'aria-describedby', 'aria-hidden', 'href', 'target', 'src', 'srcset',
@@ -351,5 +355,84 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
     return node;
   };
 
-  return serialize(document.documentElement);
+  return {
+    document: serialize(document.documentElement),
+    fontFaceSources: readFontFaceSources(),
+  };
+
+  function readFontFaceSources(): FontFaceSource[] {
+    const sources: FontFaceSource[] = [];
+
+    for (const stylesheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList;
+      try {
+        rules = stylesheet.cssRules;
+      } catch {
+        // Cross-origin stylesheets and inaccessible rules are intentionally ignored.
+        continue;
+      }
+
+      for (const rule of Array.from(rules)) {
+        if (rule.type !== CSSRule.FONT_FACE_RULE) {
+          continue;
+        }
+
+        const style = (rule as CSSFontFaceRule).style;
+        const family = readFontFamily(style.getPropertyValue('font-family'));
+        const weight = readFontWeight(style.getPropertyValue('font-weight'));
+
+        if (family === undefined || weight === undefined) {
+          continue;
+        }
+
+        for (const reference of readFontUrls(style.getPropertyValue('src'))) {
+          try {
+            const url = new URL(reference, stylesheet.href ?? document.baseURI);
+            if (url.protocol === 'http:' || url.protocol === 'https:') {
+              sources.push({ family, weight, url: url.href });
+            }
+          } catch {
+            // Ignore font source URLs that cannot be resolved safely.
+          }
+        }
+      }
+    }
+
+    return sources;
+  }
+
+  function readFontFamily(value: string): string | undefined {
+    const family = value.trim();
+    if (family.length === 0) return undefined;
+    if ((family.startsWith('"') && family.endsWith('"')) || (family.startsWith("'") && family.endsWith("'"))) {
+      const unquoted = family.slice(1, -1).trim();
+      return unquoted.length > 0 ? unquoted : undefined;
+    }
+    return family;
+  }
+
+  function readFontWeight(value: string): number | undefined {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'normal') return 400;
+    if (normalized === 'bold') return 700;
+    if (!/^\d{1,4}$/.test(normalized)) return undefined;
+
+    const weight = Number(normalized);
+    return weight >= 1 && weight <= 1000 ? weight : undefined;
+  }
+
+  function readFontUrls(value: string): string[] {
+    const urls: string[] = [];
+    const matcher = /url\(\s*(['"]?)(.*?)\1\s*\)/gi;
+    let match: RegExpExecArray | null;
+
+    while ((match = matcher.exec(value)) !== null) {
+      const reference = match[2]?.trim();
+      if (reference !== undefined && reference.length > 0) {
+        urls.push(reference);
+      }
+    }
+
+    return urls;
+  }
 }

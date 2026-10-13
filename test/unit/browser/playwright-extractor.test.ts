@@ -90,7 +90,7 @@ describe('PlaywrightExtractor', () => {
     const closePage = vi.fn().mockResolvedValue(undefined);
     const page = {
       ...createPage(successfulResponse).page,
-      evaluate: vi.fn().mockResolvedValue(document),
+      evaluate: vi.fn().mockResolvedValue({ document, fontFaceSources: [] }),
       close: closePage,
     } as unknown as Page;
     const closeContext = vi.fn().mockResolvedValue(undefined);

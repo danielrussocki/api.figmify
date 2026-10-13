@@ -316,16 +316,17 @@ describe('transformExtractionNode', () => {
     expect(result.image).toBeUndefined();
   });
 
-  test('serializes an inline SVG into the Figma node', () => {
+  test('preserves complete inline SVG markup with graphical attributes in the Figma node', () => {
     const result = transformExtractionNode(node({
       tagName: 'svg',
       attributes: { viewBox: '0 0 24 24', role: 'img' },
       children: [node({ id: 'node-path', tagName: 'path' })],
+      svg: '<svg viewBox="0 0 24 24" role="img"><path d="M2 3L18 21" fill="#123456"></path><circle cx="12" cy="12" r="8" fill="none"></circle></svg>',
     }));
 
     expect(result).toMatchObject({
       type: 'FRAME',
-      svg: '<svg viewBox="0 0 24 24" role="img"><path></path></svg>',
+      svg: '<svg viewBox="0 0 24 24" role="img"><path d="M2 3L18 21" fill="#123456"></path><circle cx="12" cy="12" r="8" fill="none"></circle></svg>',
     });
   });
 

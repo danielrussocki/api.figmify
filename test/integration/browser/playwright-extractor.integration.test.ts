@@ -150,6 +150,25 @@ describe('PlaywrightExtractor integration', () => {
     expect(svg?.resources).toEqual([]);
   });
 
+  test('collects accessible @font-face families, weights, and resolved HTTP(S) URLs without failing on cross-origin stylesheets', async () => {
+    await shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+
+    const document = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: requestViewport,
+    });
+
+    expect(document.fontFaceSources).toEqual([
+      {
+        family: 'Fixture Sans',
+        weight: 700,
+        url: `${fixtureServer.url}/resources/fixture-font.woff2`,
+      },
+    ]);
+    expect(document.fontFaceSources).not.toContainEqual(expect.objectContaining({ family: 'Cross Origin Font' }));
+  });
+
   test('preserves ordered direct text runs without duplicating mixed text and omits hidden text runs', async () => {
     await shortenPostLoadWait();
     const extractor = new PlaywrightExtractor(browser, 'development');

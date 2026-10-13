@@ -6,6 +6,7 @@ import type {
   ExtractionDocument,
   ExtractionLayout,
   ExtractionNode,
+  FontFaceSource,
   ObjectFit,
   RenderingEnvironment,
   ResourceReference,
@@ -38,6 +39,12 @@ test('models the versioned extraction document contract', () => {
     height: 39,
     top: 32,
     left: 24,
+  };
+
+  const fontFaceSource: FontFaceSource = {
+    family: 'Inter',
+    weight: 700,
+    url: 'https://example.com/fonts/inter-bold.woff2',
   };
 
   const layout: ExtractionLayout = {
@@ -77,12 +84,17 @@ test('models the versioned extraction document contract', () => {
       viewport,
       environment,
     },
+    fontFaceSources: [fontFaceSource],
     document: node,
   };
 
   expectTypeOf(document.schemaVersion).toEqualTypeOf<'1.0'>();
   expectTypeOf(document.source.viewport).toEqualTypeOf<Viewport>();
   expectTypeOf(document.source.environment).toEqualTypeOf<RenderingEnvironment>();
+  expectTypeOf(document.fontFaceSources).toEqualTypeOf<FontFaceSource[] | undefined>();
+  expectTypeOf(fontFaceSource.family).toEqualTypeOf<string>();
+  expectTypeOf(fontFaceSource.weight).toEqualTypeOf<number>();
+  expectTypeOf(fontFaceSource.url).toEqualTypeOf<string>();
   expectTypeOf(document.document.pseudoElements.before).toEqualTypeOf<
     { content: string | null; styles: Record<string, string> } | null
   >();

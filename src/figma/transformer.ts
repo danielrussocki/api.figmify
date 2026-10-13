@@ -105,7 +105,7 @@ function mapExtractionNode(
     ...(paints.cornerRadius === undefined ? {} : { cornerRadius: paints.cornerRadius }),
     ...(paints.cornerRadii === undefined ? {} : { cornerRadii: paints.cornerRadii }),
     ...(image === undefined ? {} : { image }),
-    ...(node.tagName.toLowerCase() === 'svg' ? { svg: serializeInlineSvg(node) } : {}),
+    ...(node.tagName.toLowerCase() === 'svg' ? { svg: node.svg ?? serializeInlineSvg(node) } : {}),
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     ...(textStyle === undefined ? {} : { styles: textStyle }),
     children,

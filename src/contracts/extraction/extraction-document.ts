@@ -65,6 +65,13 @@ export interface DirectTextRun {
   styles: Record<string, string>;
 }
 
+/** A usable HTTP(S) source declared by an accessible CSS @font-face rule. */
+export interface FontFaceSource {
+  family: string;
+  weight: number;
+  url: string;
+}
+
 export interface ExtractionNode {
   id: string;
   tagName: string;
@@ -90,5 +97,7 @@ export interface ExtractionSource {
 export interface ExtractionDocument {
   schemaVersion: SchemaVersion;
   source: ExtractionSource;
+  /** Omitted only when no accessible @font-face rule has a determinate source. */
+  fontFaceSources?: FontFaceSource[];
   document: ExtractionNode;
 }
