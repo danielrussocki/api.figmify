@@ -239,7 +239,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el serializador convierte `getBoundingClientRect()` a coordenadas de documento y entrega seis números, incluidos ceros para nodos sin caja.
 
-- [ ] **T56. Extraer los datos de layout necesarios para imágenes y visibilidad.**
+- [x] **T56. Extraer los datos de layout necesarios para imágenes y visibilidad.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el documento raw conserva la aplicabilidad de `offsetParent`, dimensiones naturales de `img` y `objectFit` calculado sin alterar el contrato de estilos raw.
 

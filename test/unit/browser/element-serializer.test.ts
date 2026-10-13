@@ -7,6 +7,9 @@ interface ElementFixture {
   children: ElementFixture[];
   shadowRoot?: { children: ElementFixture[] } | null;
   innerText?: string;
+  offsetParent?: ElementFixture | null;
+  naturalWidth?: number;
+  naturalHeight?: number;
   getBoundingClientRect?: () => {
     x: number;
     y: number;
@@ -167,6 +170,33 @@ describe('serializeElement', () => {
     expect(serialized.layout).toEqual({
       rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
     });
+  });
+
+  test('retains image dimensions, computed object fit, and applicable offset parent metadata', () => {
+    const image = element('IMG');
+    const root = element('DIV', [image]);
+    image.offsetParent = root;
+    image.naturalWidth = 640;
+    image.naturalHeight = 480;
+    image.ownerDocument = {
+      defaultView: {
+        getComputedStyle: () => ({
+          getPropertyValue: (property) => property === 'object-fit' ? 'cover' : '',
+        }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.children[0]?.layout).toEqual({
+      rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+      hasOffsetParent: true,
+      offsetParentId: 'node-1',
+      naturalWidth: 640,
+      naturalHeight: 480,
+      objectFit: 'cover',
+    });
+    expect(serialized.children[0]?.styles).toEqual({ 'object-fit': 'cover' });
   });
 
   test('extracts rendered text and returns null when an element has no rendered text', () => {

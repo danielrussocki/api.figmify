@@ -187,6 +187,7 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
     'disabled', 'name', 'viewBox',
   ].map((name) => [name.toLowerCase(), name]));
   let nextId = 1;
+  const nodeIds = new Map<Element, string>();
 
   const readStyles = (element: Element, pseudoElement?: '::before' | '::after'): Record<string, string> => {
     const styles: Record<string, string> = {};
@@ -255,9 +256,31 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
 
   const layout = (element: Element): ExtractionNode['layout'] => {
     const zeroRect = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
+    const metadata: Omit<NonNullable<ExtractionNode['layout']>, 'rect'> = {};
+    if ('offsetParent' in element) {
+      const offsetParent = (element as HTMLElement).offsetParent;
+      metadata.hasOffsetParent = offsetParent !== null;
+      if (offsetParent !== null) {
+        const offsetParentId = nodeIds.get(offsetParent);
+        if (offsetParentId !== undefined) metadata.offsetParentId = offsetParentId;
+      }
+    }
+    if (element.tagName.toLowerCase() === 'img') {
+      const image = element as HTMLImageElement;
+      if (Number.isFinite(image.naturalWidth) && image.naturalWidth >= 0) metadata.naturalWidth = image.naturalWidth;
+      if (Number.isFinite(image.naturalHeight) && image.naturalHeight >= 0) metadata.naturalHeight = image.naturalHeight;
+      try {
+        const objectFit = window.getComputedStyle(element).getPropertyValue('object-fit').trim();
+        if (objectFit === 'fill' || objectFit === 'contain' || objectFit === 'cover' || objectFit === 'none' || objectFit === 'scale-down') {
+          metadata.objectFit = objectFit;
+        }
+      } catch {
+        // Omit an indeterminable computed object-fit value.
+      }
+    }
     try {
       const box = element.getBoundingClientRect();
-      if (box.width === 0 && box.height === 0) return { rect: zeroRect };
+      if (box.width === 0 && box.height === 0) return { rect: zeroRect, ...metadata };
 
       const rect = {
         x: box.x + window.scrollX,
@@ -267,13 +290,15 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
         top: box.top + window.scrollY,
         left: box.left + window.scrollX,
       };
-      return Object.values(rect).every(Number.isFinite) ? { rect } : { rect: zeroRect };
+      return Object.values(rect).every(Number.isFinite) ? { rect, ...metadata } : { rect: zeroRect, ...metadata };
     } catch {
-      return { rect: zeroRect };
+      return { rect: zeroRect, ...metadata };
     }
   };
 
   const serialize = (element: Element): ExtractionNode => {
+    const id = `node-${nextId++}`;
+    nodeIds.set(element, id);
     const attributes: Record<string, string> = {};
     for (const name of element.getAttributeNames()) {
       const outputName = allowedAttributes.get(name.toLowerCase());
@@ -284,7 +309,7 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
       ? (element as HTMLElement).innerText.trim() || null
       : null;
     const node: ExtractionNode = {
-      id: `node-${nextId++}`,
+      id,
       tagName: element.tagName.toLowerCase(),
       attributes,
       resources: resources(element),

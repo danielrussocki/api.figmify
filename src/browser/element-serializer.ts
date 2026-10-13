@@ -43,15 +43,18 @@ const ALLOWED_ATTRIBUTES = new Map<string, string>(
  */
 export function serializeElement(element: Element): ExtractionNode {
   let nextId = 1;
+  const nodeIds = new Map<Element, string>();
 
   const serialize = (currentElement: Element): ExtractionNode => {
+    const id = `node-${nextId++}`;
+    nodeIds.set(currentElement, id);
     const node: ExtractionNode = {
-      id: `node-${nextId++}`,
+      id,
       tagName: currentElement.tagName.toLowerCase(),
       attributes: selectAllowedAttributes(currentElement),
       resources: resolveResourceReferences(currentElement),
       text: readRenderedText(currentElement),
-      layout: inspectLayout(currentElement),
+      layout: inspectLayout(currentElement, (candidate) => nodeIds.get(candidate)),
       styles: readVisualStyles(currentElement),
       pseudoElements: {
         before: readPseudoElement(currentElement, '::before'),
