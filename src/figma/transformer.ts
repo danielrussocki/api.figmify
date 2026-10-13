@@ -36,6 +36,7 @@ export function transformExtractionDocument(extraction: ExtractionDocument): Fig
       viewport: { ...extraction.source.viewport },
     },
     styles: { colors, typographies },
+    assets: [],
     document: transformExtractionNode(extraction.document),
   };
 }

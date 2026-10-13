@@ -42,6 +42,7 @@ describe('CreateFigmaDocumentUseCase', () => {
       schemaVersion: '1.0',
       source: { url: request.url, viewport: request.viewport },
       styles: { colors: [], typographies: [] },
+      assets: [],
       document: {
         id: 'node-1',
         tag: 'html',

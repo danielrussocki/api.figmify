@@ -8,6 +8,8 @@ import type {
   FigmaDropShadowEffect,
   FigmaEffect,
   FigmaFills,
+  FigmaFontAsset,
+  FigmaImageData,
   FigmaIsVisible,
   FigmaNode,
   FigmaNodeType,
@@ -17,6 +19,9 @@ import type {
   FigmaRgbaColor,
   FigmaStyleCatalog,
   FigmaStrokes,
+  FigmaTextAutoResize,
+  FigmaTextStyle,
+  FigmaTextAlign,
   TypographyStyle,
   TypographyStyleId,
 } from '../../../src/contracts/figma/figma-document.js';
@@ -129,6 +134,66 @@ test('models structured paints, strokes, drop shadows, and corner radii', () => 
   >();
 });
 
+test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () => {
+  const textAlign: FigmaTextAlign = 'CENTER';
+  const textAutoResize: FigmaTextAutoResize = 'HEIGHT';
+  const textStyles: FigmaTextStyle = {
+    fontFamily: 'Inter',
+    fontSize: 32,
+    fontWeight: 700,
+    lineHeight: 38.4,
+    letterSpacing: 0,
+    textAlign,
+    textAutoResize,
+  };
+  const image: FigmaImageData = {
+    src: 'https://example.com/hero.png',
+    naturalWidth: 1600,
+    naturalHeight: 900,
+    objectFit: 'cover',
+  };
+  const asset: FigmaFontAsset = {
+    family: 'Inter',
+    weights: [400, 700],
+    url: 'https://example.com/inter.woff2',
+  };
+  const textNode: FigmaNode = {
+    id: 'node-4',
+    tag: 'span',
+    type: 'TEXT',
+    rect: { x: 0, y: 0, width: 100, height: 40, top: 0, left: 0 },
+    isVisible: true,
+    characters: 'Welcome',
+    styles: textStyles,
+    children: [],
+  };
+  const imageNode: FigmaNode = {
+    id: 'node-5',
+    tag: 'img',
+    type: 'IMAGE',
+    rect: { x: 0, y: 0, width: 100, height: 40, top: 0, left: 0 },
+    isVisible: true,
+    image,
+    svg: '<svg viewBox="0 0 1 1"></svg>',
+    children: [],
+  };
+
+  expectTypeOf(textNode.characters).toEqualTypeOf<string | undefined>();
+  expectTypeOf(textNode.styles).toEqualTypeOf<FigmaTextStyle | undefined>();
+  expectTypeOf(textStyles.fontSize).toEqualTypeOf<number>();
+  expectTypeOf(textStyles.fontWeight).toEqualTypeOf<number>();
+  expectTypeOf(textStyles.lineHeight).toEqualTypeOf<number>();
+  expectTypeOf(textStyles.letterSpacing).toEqualTypeOf<number>();
+  expectTypeOf(textStyles.textAlign).toEqualTypeOf<FigmaTextAlign>();
+  expectTypeOf(textStyles.textAutoResize).toEqualTypeOf<FigmaTextAutoResize>();
+  expectTypeOf(imageNode.image).toEqualTypeOf<FigmaImageData | undefined>();
+  expectTypeOf(image.naturalWidth).toEqualTypeOf<number>();
+  expectTypeOf(image.naturalHeight).toEqualTypeOf<number>();
+  expectTypeOf(imageNode.svg).toEqualTypeOf<string | undefined>();
+  expectTypeOf(asset.weights).toEqualTypeOf<number[]>();
+  expectTypeOf(asset.url).toEqualTypeOf<string | undefined>();
+});
+
 test('models the versioned Figma document contract and reusable style catalogs', () => {
   const viewport: Viewport = {
     width: 1920,
@@ -178,6 +243,7 @@ test('models the versioned Figma document contract and reusable style catalogs',
       viewport,
     },
     styles,
+    assets: [],
     document: node,
   };
 
@@ -185,6 +251,7 @@ test('models the versioned Figma document contract and reusable style catalogs',
   expectTypeOf(document.source.viewport).toEqualTypeOf<Viewport>();
   expectTypeOf(document.styles.colors).toEqualTypeOf<ColorStyle[]>();
   expectTypeOf(document.styles.typographies).toEqualTypeOf<TypographyStyle[]>();
+  expectTypeOf(document.assets).toEqualTypeOf<FigmaFontAsset[]>();
   expectTypeOf(document.document.type).toEqualTypeOf<FigmaNodeType>();
   expectTypeOf(document.document.id).toEqualTypeOf<string>();
   expectTypeOf(document.document.tag).toEqualTypeOf<string>();

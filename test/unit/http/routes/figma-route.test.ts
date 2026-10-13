@@ -14,6 +14,7 @@ const figmaDocument: FigmaDocument = {
     viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
   },
   styles: { colors: [], typographies: [] },
+  assets: [],
   document: {
     id: 'node-1',
     tag: 'html',

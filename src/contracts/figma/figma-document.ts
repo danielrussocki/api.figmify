@@ -90,6 +90,36 @@ export interface FigmaStyleCatalog {
 
 export type FigmaStyleValue = string | number | boolean | FigmaRgbaColor;
 
+export type FigmaTextAlign = 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFIED';
+
+export type FigmaTextAutoResize = 'NONE' | 'WIDTH_AND_HEIGHT' | 'HEIGHT' | 'TRUNCATE';
+
+/** Normalized typography values emitted for an individual TEXT run. */
+export interface FigmaTextStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: number;
+  lineHeight: number;
+  letterSpacing: number;
+  textAlign: FigmaTextAlign;
+  textAutoResize: FigmaTextAutoResize;
+}
+
+/** Rendered source data preserved for an IMAGE node. */
+export interface FigmaImageData {
+  src: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  objectFit: string;
+}
+
+/** A font family used by included text runs, optionally linked to its source. */
+export interface FigmaFontAsset {
+  family: string;
+  weights: number[];
+  url?: string;
+}
+
 export interface FigmaNode {
   id: string;
   tag: string;
@@ -102,6 +132,10 @@ export interface FigmaNode {
   effects?: FigmaEffect[] | null;
   cornerRadius?: number;
   cornerRadii?: FigmaCornerRadii;
+  characters?: string;
+  styles?: FigmaTextStyle;
+  image?: FigmaImageData;
+  svg?: string;
   children: FigmaNode[];
 }
 
@@ -114,5 +148,6 @@ export interface FigmaDocument {
   schemaVersion: FigmaSchemaVersion;
   source: FigmaSource;
   styles: FigmaStyleCatalog;
+  assets: FigmaFontAsset[];
   document: FigmaNode;
 }

@@ -223,7 +223,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** existen tipos estructurados para RGBA normalizado, `fills`, `strokes`, `effects` con `DROP_SHADOW`, `cornerRadius` y radios por esquina.
 
-- [ ] **T52. Definir los contratos de texto, imágenes, SVG y assets Figma.**
+- [x] **T52. Definir los contratos de texto, imágenes, SVG y assets Figma.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** los tipos representan runs `TEXT` con valores tipográficos normalizados, datos de `IMAGE`, cadena `svg` y la colección global `assets` por familia, pesos y URL opcional.
 
