@@ -459,7 +459,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** cada sombra perceptible convertible conserva su orden y emite `DROP_SHADOW` o `INNER_SHADOW` con RGBA, `offset`, `radius` y `spread` numéricos.
 
-- [ ] **T110. Añadir pruebas unitarias del parseador de bordes y efectos.**
+- [x] **T110. Añadir pruebas unitarias del parseador de bordes y efectos.**
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas cubren bordes uniformes y por lado, bordes transparentes, sombras múltiples internas y externas, y valores de desplazamiento, desenfoque o extensión cero.
 

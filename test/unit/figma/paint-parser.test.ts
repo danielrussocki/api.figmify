@@ -74,6 +74,23 @@ describe('parseFigmaPaints', () => {
     });
   });
 
+  test('omits transparent borders even when every physical side is otherwise valid', () => {
+    expect(parseFigmaPaints({
+      'border-top-width': '1px',
+      'border-right-width': '2px',
+      'border-bottom-width': '3px',
+      'border-left-width': '4px',
+      'border-top-style': 'solid',
+      'border-right-style': 'solid',
+      'border-bottom-style': 'solid',
+      'border-left-style': 'solid',
+      'border-top-color': 'transparent',
+      'border-right-color': 'rgba(0, 0, 0, 0)',
+      'border-bottom-color': '#00000000',
+      'border-left-color': '#0000',
+    })).toMatchObject({ strokes: null });
+  });
+
   test('converts perceptible CSS box shadows to DROP_SHADOW effects', () => {
     expect(parseFigmaPaints({
       'box-shadow': 'rgba(0, 0, 0, 0.25) 2px -3px 4px 1px, 0 1px 2px rgb(10, 20, 30)',
@@ -118,6 +135,27 @@ describe('parseFigmaPaints', () => {
         color: { r: 0.157, g: 0.196, b: 0.235, a: 1 },
         offset: { x: 0, y: 0 },
         radius: 6,
+        spread: 0,
+      },
+    ]);
+  });
+
+  test('preserves zero offsets, blur, and spread for external and internal shadows', () => {
+    expect(parseFigmaPaints({
+      'box-shadow': '0 0 0 0 rgb(1, 2, 3), inset 0px 0px 0px 0px #040506',
+    }).effects).toEqual([
+      {
+        type: 'DROP_SHADOW',
+        color: { r: 0.004, g: 0.008, b: 0.012, a: 1 },
+        offset: { x: 0, y: 0 },
+        radius: 0,
+        spread: 0,
+      },
+      {
+        type: 'INNER_SHADOW',
+        color: { r: 0.016, g: 0.02, b: 0.024, a: 1 },
+        offset: { x: 0, y: 0 },
+        radius: 0,
         spread: 0,
       },
     ]);
