@@ -279,6 +279,14 @@ describe('transformExtractionNode', () => {
     expect(result.children.map((child) => child.layoutGrow)).toEqual([1.5, undefined, undefined, undefined]);
   });
 
+  test('omits layoutGrow for a positive flex-grow node outside an Auto Layout parent', () => {
+    const result = transformExtractionNode(node({
+      styles: { 'flex-grow': '2' },
+    }));
+
+    expect(result.layoutGrow).toBeUndefined();
+  });
+
   test.each([
     ['flex-start', 'flex-start', 'MIN', 'MIN'],
     ['start', 'start', 'MIN', 'MIN'],

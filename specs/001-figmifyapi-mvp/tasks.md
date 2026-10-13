@@ -443,7 +443,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** el mapeador determina el eje principal conforme a `grid-auto-flow` o las pistas, usa `column-gap` u `row-gap` según ese eje y normaliza `normal` a `0`.
 
-- [ ] **T106. Añadir pruebas unitarias del mapeo de Auto Layout.**
+- [x] **T106. Añadir pruebas unitarias del mapeo de Auto Layout.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas cubren flex, grid, ejes invertidos, separaciones distintas, padding parcial, alineaciones directas e inexactas, y `layoutGrow` dentro y fuera de flujo.
 
