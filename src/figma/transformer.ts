@@ -270,7 +270,7 @@ function hasRenderableBackgroundImage(node: ExtractionNode): boolean {
   if (backgroundImage === undefined) return false;
 
   return [...backgroundImage.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)]
-    .some((match) => match[2].trim().length > 0);
+    .some((match) => match[2]?.trim().length !== 0);
 }
 
 function isPureTextLeaf(node: ExtractionNode): boolean {

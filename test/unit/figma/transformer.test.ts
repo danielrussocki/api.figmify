@@ -199,14 +199,23 @@ describe('transformExtractionNode', () => {
     expect(result.children[0]?.relativeRect).toEqual({ x: 0, y: 5, width: 6, height: 0, top: 5, left: 0 });
   });
 
-  test.each([
+  const visibilityCases: Array<[
+    description: string,
+    styles: Record<string, string>,
+    attributes: Record<string, string>,
+    dimensions: { width: number; height: number },
+    isVisible: boolean,
+    hasOffsetParent?: boolean,
+  ]> = [
     ['display none', { display: 'none' }, {}, { width: 100, height: 50 }, false],
     ['hidden visibility', { visibility: 'hidden' }, {}, { width: 100, height: 50 }, false],
     ['hidden attribute', {}, { hidden: '' }, { width: 100, height: 50 }, false],
     ['zero opacity', { opacity: '0' }, {}, { width: 100, height: 50 }, false],
     ['zero-sized box', {}, {}, { width: 0, height: 50 }, false],
     ['visible measured element', { display: 'block', visibility: 'visible', opacity: '1' }, {}, { width: 100, height: 50 }, true, true],
-  ] as const)('determines real visibility for %s', (
+  ];
+
+  test.each(visibilityCases)('determines real visibility for %s', (
     _description,
     styles,
     attributes,
