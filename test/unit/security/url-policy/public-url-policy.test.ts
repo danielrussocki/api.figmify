@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  PublicUrlPolicy,
   PublicUrlPolicyError,
   enforcePublicUrlPolicy,
 } from '../../../../src/security/url-policy/public-url-policy.js';
@@ -42,6 +43,31 @@ const nonPublicUrls = [
 ] as const;
 
 describe('enforcePublicUrlPolicy', () => {
+  test('resolves hostnames through an injected resolver', async () => {
+    const resolver = async (hostname: string): Promise<readonly string[]> => {
+      expect(hostname).toBe('public.example');
+      return ['203.0.114.10', '2001:4860:4860::8888'];
+    };
+    const policy = new PublicUrlPolicy(resolver);
+
+    await expect(policy.resolveHostname('public.example')).resolves.toEqual([
+      '203.0.114.10',
+      '2001:4860:4860::8888',
+    ]);
+  });
+
+  test('keeps literal address validation without resolving it', async () => {
+    const resolver = async (): Promise<readonly string[]> => {
+      throw new Error('The resolver must not receive IP address literals.');
+    };
+    const policy = new PublicUrlPolicy(resolver);
+
+    expect(() => policy.enforce(new URL('http://127.0.0.1'), 'production')).toThrow(
+      PublicUrlPolicyError,
+    );
+    await expect(policy.resolveHostname('203.0.114.10')).resolves.toEqual(['203.0.114.10']);
+  });
+
   test('allows a public hostname in production', () => {
     expect(() =>
       enforcePublicUrlPolicy(new URL('https://example.com/path'), 'production'),

@@ -1,6 +1,10 @@
+import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
 export type RuntimeEnvironment = 'development' | 'production';
+
+/** Resolves a hostname to every address returned by the operating system DNS APIs. */
+export type HostnameResolver = (hostname: string) => Promise<readonly string[]>;
 
 export class PublicUrlPolicyError extends Error {
   readonly code = 'URL_NOT_PUBLIC' as const;
@@ -11,22 +15,47 @@ export class PublicUrlPolicyError extends Error {
   }
 }
 
-export function enforcePublicUrlPolicy(
-  url: URL,
-  environment: RuntimeEnvironment,
-): void {
-  if (environment !== 'production') {
-    return;
+export class PublicUrlPolicy {
+  constructor(private readonly hostnameResolver: HostnameResolver = resolveHostnameWithNode) {}
+
+  enforce(url: URL, environment: RuntimeEnvironment): void {
+    if (environment !== 'production') {
+      return;
+    }
+
+    const hostname = normalizeHostname(url.hostname);
+    if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+      throw new PublicUrlPolicyError();
+    }
+
+    if (isNonPublicIpAddress(hostname)) {
+      throw new PublicUrlPolicyError();
+    }
   }
 
-  const hostname = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-  if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
-    throw new PublicUrlPolicyError();
-  }
+  async resolveHostname(hostname: string): Promise<readonly string[]> {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (isIP(normalizedHostname) !== 0) {
+      return [normalizedHostname];
+    }
 
-  if (isNonPublicIpAddress(hostname)) {
-    throw new PublicUrlPolicyError();
+    return this.hostnameResolver(normalizedHostname);
   }
+}
+
+const defaultPublicUrlPolicy = new PublicUrlPolicy();
+
+export function enforcePublicUrlPolicy(url: URL, environment: RuntimeEnvironment): void {
+  defaultPublicUrlPolicy.enforce(url, environment);
+}
+
+async function resolveHostnameWithNode(hostname: string): Promise<readonly string[]> {
+  const addresses = await lookup(hostname, { all: true, verbatim: true });
+  return addresses.map(({ address }) => address);
+}
+
+function normalizeHostname(hostname: string): string {
+  return hostname.replace(/^\[|\]$/g, '').toLowerCase();
 }
 
 function isNonPublicIpAddress(hostname: string): boolean {

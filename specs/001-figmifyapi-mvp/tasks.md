@@ -322,3 +322,69 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T76. Ejecutar la regresión final del contrato y de no persistencia.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` pasa, los ejemplos de ambos contratos v1 validan sus esquemas y la revisión confirma que no se añadieron almacenamiento ni dependencias no justificadas.
+
+## Cierre de brechas de cumplimiento
+
+- [x] **T77. Hacer inyectable la resolución de nombres en la política de URL pública.**
+  - **RF:** RF-1, RF-4.
+  - **Hecho cuando:** la política puede resolver un hostname mediante una abstracción basada en las APIs estándar de Node.js, conserva la comprobación de literales IPv4 e IPv6 y permite sustituir el resolvedor de DNS en pruebas sin añadir dependencias.
+
+- [ ] **T78. Rechazar en producción los hostnames que resuelven a direcciones no públicas.**
+  - **RF:** RF-1, RF-4.
+  - **Hecho cuando:** antes de cargar la URL inicial y cada destino de navegación principal se comprueban todas las direcciones resueltas; si cualquiera es loopback, privada, reservada o interna se devuelve `URL_NOT_PUBLIC` y no se carga el destino.
+
+- [ ] **T79. Probar la política DNS para URL inicial y destinos de navegación principal.**
+  - **RF:** RF-1, RF-4.
+  - **Hecho cuando:** las pruebas unitarias cubren hostnames que resuelven a IPv4 e IPv6 no públicas y a direcciones públicas, las de integración cubren un destino principal no público resuelto por DNS, y desarrollo continúa permitiendo esos destinos.
+
+- [ ] **T80. Versionar el contrato de extracción necesario para conservar ejecuciones de texto directo.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** antes de modificar la respuesta se actualizan la especificación versionada y el plan para definir una representación ordenada de nodos de texto directos y sus estilos calculados, sin romper el árbol de elementos ni inventar contenido.
+
+- [ ] **T81. Serializar las ejecuciones de texto directo en el orden del DOM.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** el extractor conserva cada nodo de texto renderizado que sea hijo directo de un elemento, con sus caracteres y estilos efectivos, e ignora texto no renderizado sin duplicarlo en el texto de sus contenedores.
+
+- [ ] **T82. Transformar texto directo y texto de elementos en nodos `TEXT` hoja.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** `/v1/figma` emite todas las ejecuciones de texto en orden DOM, incluidos casos como `Hello <em>world</em>`, no asigna `characters` a contenedores y normaliza el estilo de cada ejecución de forma independiente.
+
+- [ ] **T83. Añadir pruebas de texto directo, mixto y oculto.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** las pruebas unitarias, de integración con Playwright y de extremo a extremo verifican que no se pierde ni se duplica texto directo, que los cambios de estilo producen ejecuciones ordenadas y que `includeHidden` aplica al subárbol correspondiente.
+
+- [ ] **T84. Versionar el contrato de imagen para fondos resolubles.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** antes de cambiar la respuesta se actualizan la especificación versionada y el plan para permitir que un nodo `IMAGE` de fondo incluya fuente y ajuste resueltos sin exigir dimensiones naturales que no puedan determinarse.
+
+- [ ] **T85. Extraer y transformar las fuentes y ajustes de imágenes de fondo determinables.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** una imagen de fondo con URL absoluta o resoluble y `background-size` conocido produce un nodo `IMAGE` con su fuente y ajuste; los valores ambiguos, múltiples o no resolubles se omiten sin inventar datos.
+
+- [ ] **T86. Conservar el marcado completo de los SVG inline en la extracción.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** la extracción conserva el marcado serializado del SVG inline, incluidos atributos y descendientes gráficos necesarios para recrearlo, sin convertirlo en una imagen basada en URL ni relajar la lista de atributos ordinarios de HTML.
+
+- [ ] **T87. Emitir y probar SVG inline e imágenes de fondo en el contrato Figma.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** las pruebas verifican SVG con atributos gráficos como `d`, `fill`, `cx`, `cy` y `r`, fondos con URL y ajuste conocidos, y la omisión segura de datos no determinables.
+
+- [ ] **T88. Añadir fuentes `@font-face` determinables al documento de extracción.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** el contrato y el serializador recogen, cuando sean accesibles, las familias, pesos y URL HTTP(S) resueltas de reglas `@font-face`, sin fallar ante hojas de estilo entre orígenes o reglas inaccesibles.
+
+- [ ] **T89. Asociar URLs de fuente detectadas a los assets Figma usados.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** `assets` agrupa solo familias y pesos de nodos `TEXT` visibles e incluidos, añade la URL de carga cuando corresponde a una fuente detectada y omite fuentes declaradas pero no usadas.
+
+- [ ] **T90. Probar la detección de URLs de fuentes y la poda de assets.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** fixtures y pruebas de transformación cubren una fuente accesible con URL, una fuente sin URL determinable y una fuente usada exclusivamente por nodos ocultos o excluidos.
+
+- [ ] **T91. Corregir los errores de tipos de la suite de pruebas.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** las solicitudes de prueba de `CreateFigmaDocumentUseCase` incluyen `includeHidden` y `pnpm typecheck` termina sin errores.
+
+- [ ] **T92. Ejecutar la validación final de cumplimiento de la especificación.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan; las pruebas de extremo a extremo cubren las brechas corregidas; y una revisión requisito por requisito confirma que no quedan URL internas resolubles, texto perdido, fondos de imagen resolubles, SVG incompleto ni assets tipográficos determinables ausentes.
