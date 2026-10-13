@@ -545,7 +545,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2.
   - **Hecho cuando:** las pruebas verifican que `opacity: 0.8` y `opacity: 0.5` se conservan textualmente en `styles` de elementos y ejecuciones de texto, y que no se inventan valores para opacidades no serializables.
 
-- [ ] **T130. Mapear la opacidad positiva fraccionaria al nodo compacto de Figma.**
+- [x] **T130. Mapear la opacidad positiva fraccionaria al nodo compacto de Figma.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** el mapeador convierte `styles.opacity` a `opacity` numérico en nodos `FRAME`, `IMAGE` y `TEXT` cuando el valor está entre `0` y `1`, sin alterar `isVisible` ni la poda de `includeHidden`.
 

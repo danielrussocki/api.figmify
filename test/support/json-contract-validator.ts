@@ -131,7 +131,7 @@ function validateFigmaNode(value: unknown, path: string, errors: string[], isRoo
   const node = object(value, path, errors);
   if (node === undefined) return;
   keys(node, path, ['id', 'tag', 'type', 'rect', 'isVisible', 'children'], [
-    'relativeRect', 'layoutMode', 'itemSpacing', 'gap', 'padding', 'primaryAxisAlign', 'counterAxisAlign', 'layoutGrow',
+    'relativeRect', 'opacity', 'layoutMode', 'itemSpacing', 'gap', 'padding', 'primaryAxisAlign', 'counterAxisAlign', 'layoutGrow',
     'position', 'zIndex', 'fills', 'strokes', 'strokeWeight', 'strokeWeights', 'effects', 'cornerRadius', 'cornerRadii',
     'characters', 'styles', 'image', 'svg',
   ], errors);
@@ -140,6 +140,7 @@ function validateFigmaNode(value: unknown, path: string, errors: string[], isRoo
   enumValue(node.type, FIGMA_NODE_TYPES, `${path}.type`, errors);
   rect(node.rect, `${path}.rect`, errors);
   boolean(node.isVisible, `${path}.isVisible`, errors);
+  optionalNumber(node, 'opacity', path, errors);
   if (!isRoot && !('relativeRect' in node)) errors.push(`${path}.relativeRect is required.`);
   if ('relativeRect' in node) rect(node.relativeRect, `${path}.relativeRect`, errors);
   if ('layoutMode' in node) enumValue(node.layoutMode, new Set(['HORIZONTAL', 'VERTICAL']), `${path}.layoutMode`, errors);

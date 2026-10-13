@@ -99,6 +99,9 @@ function mapExtractionNode(
       ? {}
       : { relativeRect: toRelativeRect(rect, parentRect) }),
     isVisible,
+    ...(positiveFractionalOpacity(node.styles.opacity) === undefined
+      ? {}
+      : { opacity: positiveFractionalOpacity(node.styles.opacity) }),
     ...(autoLayout.layoutMode === undefined ? {} : { layoutMode: autoLayout.layoutMode }),
     ...(autoLayout.itemSpacing === undefined ? {} : { itemSpacing: autoLayout.itemSpacing }),
     ...(autoLayout.gap === undefined ? {} : { gap: autoLayout.gap }),
@@ -189,6 +192,9 @@ function mapDirectTextRun(
     rect: parentRect,
     relativeRect: toRelativeRect(parentRect, parentRect),
     isVisible,
+    ...(positiveFractionalOpacity(textRun.styles.opacity) === undefined
+      ? {}
+      : { opacity: positiveFractionalOpacity(textRun.styles.opacity) }),
     fills: paints.fills ?? [],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
     ...(paints.effects === null ? {} : { effects: paints.effects }),
@@ -566,6 +572,14 @@ function determineVisibility(node: ExtractionNode, rect: FigmaRect, isRoot: bool
 function normalizedStyle(node: ExtractionNode, property: string): string | undefined {
   const value = node.styles[property];
   return value?.trim().toLowerCase();
+}
+
+/** Maps a serialized CSS opacity only when it remains visibly fractional. */
+function positiveFractionalOpacity(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+
+  const opacity = Number(value.trim());
+  return Number.isFinite(opacity) && opacity > 0 && opacity < 1 ? opacity : undefined;
 }
 
 function toFigmaRect(rect: FigmaRect | undefined): FigmaRect {

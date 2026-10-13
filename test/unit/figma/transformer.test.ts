@@ -119,6 +119,36 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test('maps positive fractional opacity to visible FRAME, IMAGE, and TEXT nodes', () => {
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
+    const result = transformExtractionNode(node({
+      id: 'node-frame',
+      layout: visibleBox,
+      styles: { opacity: '0.8' },
+      children: [
+        node({
+          id: 'node-image',
+          tagName: 'img',
+          layout: visibleBox,
+          styles: { opacity: '0.5' },
+        }),
+        node({
+          id: 'node-text',
+          tagName: 'span',
+          text: 'Visible text',
+          layout: visibleBox,
+          styles: { opacity: '0.25' },
+        }),
+      ],
+    }), { includeHidden: false });
+
+    expect(result).toMatchObject({ type: 'FRAME', opacity: 0.8, isVisible: true });
+    expect(result.children).toMatchObject([
+      { id: 'node-image', type: 'IMAGE', opacity: 0.5, isVisible: true },
+      { id: 'node-text', type: 'TEXT', opacity: 0.25, isVisible: true },
+    ]);
+  });
+
   test('emits ordered leaf TEXT runs without assigning descendant text to containers', () => {
     const extraction = node({
       id: 'node-root',
