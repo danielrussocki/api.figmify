@@ -207,7 +207,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Evolución del contrato compacto de Figma
 
-- [ ] **T48. Ampliar los contratos de extracción con los metadatos `layout`.**
+- [x] **T48. Ampliar los contratos de extracción con los metadatos `layout`.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** los tipos de extracción representan el rectángulo de documento, los datos de `offsetParent`, las dimensiones naturales y `objectFit` sin usar valores CSS textuales para la geometría.
 

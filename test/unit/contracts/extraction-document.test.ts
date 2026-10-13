@@ -1,8 +1,11 @@
 import { expectTypeOf, test } from 'vitest';
 
 import type {
+  DocumentRect,
   ExtractionDocument,
+  ExtractionLayout,
   ExtractionNode,
+  ObjectFit,
   RenderingEnvironment,
   ResourceReference,
   Viewport,
@@ -27,12 +30,31 @@ test('models the versioned extraction document contract', () => {
     url: 'https://example.com/logo.svg',
   };
 
+  const rect: DocumentRect = {
+    x: 24,
+    y: 32,
+    width: 180,
+    height: 39,
+    top: 32,
+    left: 24,
+  };
+
+  const layout: ExtractionLayout = {
+    rect,
+    hasOffsetParent: true,
+    offsetParentId: 'node-1',
+    naturalWidth: 360,
+    naturalHeight: 78,
+    objectFit: 'cover',
+  };
+
   const node: ExtractionNode = {
     id: 'node-1',
     tagName: 'body',
     attributes: { class: 'page' },
     resources: [resource],
     text: null,
+    layout,
     styles: { display: 'block' },
     pseudoElements: {
       before: { content: '""', styles: { display: 'inline' } },
@@ -59,4 +81,17 @@ test('models the versioned extraction document contract', () => {
     { content: string | null; styles: Record<string, string> } | null
   >();
   expectTypeOf(document.document.resources).toEqualTypeOf<ResourceReference[]>();
+  expectTypeOf(document.document.layout).toEqualTypeOf<ExtractionLayout | undefined>();
+  expectTypeOf(layout.rect).toEqualTypeOf<DocumentRect>();
+  expectTypeOf(layout.rect.x).toEqualTypeOf<number>();
+  expectTypeOf(layout.rect.y).toEqualTypeOf<number>();
+  expectTypeOf(layout.rect.width).toEqualTypeOf<number>();
+  expectTypeOf(layout.rect.height).toEqualTypeOf<number>();
+  expectTypeOf(layout.rect.top).toEqualTypeOf<number>();
+  expectTypeOf(layout.rect.left).toEqualTypeOf<number>();
+  expectTypeOf(layout.offsetParentId).toEqualTypeOf<string | undefined>();
+  expectTypeOf(layout.hasOffsetParent).toEqualTypeOf<boolean | undefined>();
+  expectTypeOf(layout.naturalWidth).toEqualTypeOf<number | undefined>();
+  expectTypeOf(layout.naturalHeight).toEqualTypeOf<number | undefined>();
+  expectTypeOf(layout.objectFit).toEqualTypeOf<ObjectFit | undefined>();
 });
