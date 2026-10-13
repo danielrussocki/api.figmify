@@ -587,7 +587,12 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test.each([
+  const relativeRectCases: Array<{
+    description: string;
+    childStyles: Record<string, string>;
+    childRect: { x: number; y: number; width: number; height: number; top: number; left: number };
+    expected: { x: number; y: number; width: number; height: number; top: number; left: number };
+  }> = [
     {
       description: 'a child with a negative margin',
       childStyles: { 'margin-left': '-48px', 'margin-top': '-24px' },
@@ -606,7 +611,9 @@ describe('transformExtractionNode', () => {
       childRect: { x: 100, y: 200, width: 0, height: 0, top: 200, left: 100 },
       expected: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
     },
-  ])('calculates relativeRect by direct subtraction for $description', ({ childStyles, childRect, expected }) => {
+  ];
+
+  test.each(relativeRectCases)('calculates relativeRect by direct subtraction for $description', ({ childStyles, childRect, expected }) => {
     const result = transformExtractionNode(node({
       id: 'node-parent',
       layout: { rect: { x: 100, y: 200, width: 400, height: 300, top: 200, left: 100 } },

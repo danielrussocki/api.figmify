@@ -467,6 +467,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** una extracción Playwright de las nuevas fixtures y una solicitud a `/v1/figma` validan geometría relativa, Auto Layout, bordes y efectos contra el contrato versionado.
 
-- [ ] **T112. Ejecutar la regresión final de los ajustes de Auto Layout y pinturas.**
+- [x] **T112. Ejecutar la regresión final de los ajustes de Auto Layout y pinturas.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las rutas mantienen sus errores normalizados y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
