@@ -549,7 +549,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** el mapeador convierte `styles.opacity` a `opacity` numérico en nodos `FRAME`, `IMAGE` y `TEXT` cuando el valor está entre `0` y `1`, sin alterar `isVisible` ni la poda de `includeHidden`.
 
-- [ ] **T131. Añadir pruebas unitarias del mapeo Figma de opacidad.**
+- [x] **T131. Añadir pruebas unitarias del mapeo Figma de opacidad.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas verifican que nodos visibles con opacidad `0.8` y `0.5` emiten el mismo valor numérico, conservan `isVisible: true` y no incluyen `opacity` dentro de `styles`.
 

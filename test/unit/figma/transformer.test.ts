@@ -119,7 +119,7 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test('maps positive fractional opacity to visible FRAME, IMAGE, and TEXT nodes', () => {
+  test('maps positive fractional opacity to visible nodes without retaining it in text styles', () => {
     const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
     const result = transformExtractionNode(node({
       id: 'node-frame',
@@ -137,16 +137,32 @@ describe('transformExtractionNode', () => {
           tagName: 'span',
           text: 'Visible text',
           layout: visibleBox,
-          styles: { opacity: '0.25' },
+          styles: {
+            opacity: '0.5',
+            'font-family': 'Inter, sans-serif',
+            'font-size': '16px',
+            'font-weight': '400',
+            'line-height': '19.2px',
+            'letter-spacing': '0px',
+          },
         }),
       ],
     }), { includeHidden: false });
 
     expect(result).toMatchObject({ type: 'FRAME', opacity: 0.8, isVisible: true });
+    expect(result).not.toHaveProperty('styles.opacity');
     expect(result.children).toMatchObject([
       { id: 'node-image', type: 'IMAGE', opacity: 0.5, isVisible: true },
-      { id: 'node-text', type: 'TEXT', opacity: 0.25, isVisible: true },
+      {
+        id: 'node-text',
+        type: 'TEXT',
+        opacity: 0.5,
+        isVisible: true,
+        styles: { fontFamily: 'Inter', fontSize: 16 },
+      },
     ]);
+    expect(result.children[0]).not.toHaveProperty('styles.opacity');
+    expect(result.children[1]).not.toHaveProperty('styles.opacity');
   });
 
   test('emits ordered leaf TEXT runs without assigning descendant text to containers', () => {
