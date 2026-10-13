@@ -431,7 +431,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** un contenedor flex emite `itemSpacing` y `gap` iguales según su eje principal, normaliza la separación no efectiva a `0` e incluye siempre los cuatro valores numéricos de `padding`.
 
-- [ ] **T103. Implementar el mapeo de alineación de Auto Layout.**
+- [x] **T103. Implementar el mapeo de alineación de Auto Layout.**
   - **RF:** RF-5.
   - **Hecho cuando:** las equivalencias directas de `justify-content` y `align-items` producen los valores de eje definidos, mientras que `stretch`, `baseline`, `space-around`, `space-evenly` y otros valores inexactos omiten el campo correspondiente.
 

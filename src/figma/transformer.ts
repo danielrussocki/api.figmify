@@ -1,9 +1,11 @@
 import type { DirectTextRun, ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
 import type {
   FigmaDocument,
+  FigmaCounterAxisAlign,
   FigmaLayoutMode,
   FigmaNode,
   FigmaNodeType,
+  FigmaPrimaryAxisAlign,
   FigmaPosition,
   FigmaRect,
   FigmaTextAlign,
@@ -98,6 +100,8 @@ function mapExtractionNode(
     ...(autoLayout.itemSpacing === undefined ? {} : { itemSpacing: autoLayout.itemSpacing }),
     ...(autoLayout.gap === undefined ? {} : { gap: autoLayout.gap }),
     ...(autoLayout.padding === undefined ? {} : { padding: autoLayout.padding }),
+    ...(autoLayout.primaryAxisAlign === undefined ? {} : { primaryAxisAlign: autoLayout.primaryAxisAlign }),
+    ...(autoLayout.counterAxisAlign === undefined ? {} : { counterAxisAlign: autoLayout.counterAxisAlign }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     ...(paints.fills === null ? {} : { fills: paints.fills }),
@@ -278,6 +282,8 @@ function determineAutoLayout(styles: Record<string, string>): {
   itemSpacing?: number;
   gap?: number;
   padding?: FigmaNode['padding'];
+  primaryAxisAlign?: FigmaPrimaryAxisAlign;
+  counterAxisAlign?: FigmaCounterAxisAlign;
 } {
   const display = styles.display?.trim().toLowerCase();
   if (display !== 'flex' && display !== 'inline-flex' && display !== 'grid' && display !== 'inline-grid') {
@@ -300,7 +306,47 @@ function determineAutoLayout(styles: Record<string, string>): {
     itemSpacing: spacing,
     gap: spacing,
     padding: flexPadding(styles),
+    ...(primaryAxisAlign(styles['justify-content']) === undefined
+      ? {}
+      : { primaryAxisAlign: primaryAxisAlign(styles['justify-content']) }),
+    ...(counterAxisAlign(styles['align-items']) === undefined
+      ? {}
+      : { counterAxisAlign: counterAxisAlign(styles['align-items']) }),
   };
+}
+
+/** Maps only CSS alignment values with an exact Figma Auto Layout equivalent. */
+function primaryAxisAlign(value: string | undefined): FigmaPrimaryAxisAlign | undefined {
+  switch (value?.trim().toLowerCase()) {
+    case 'flex-start':
+    case 'start':
+      return 'MIN';
+    case 'center':
+      return 'CENTER';
+    case 'flex-end':
+    case 'end':
+      return 'MAX';
+    case 'space-between':
+      return 'SPACE_BETWEEN';
+    default:
+      return undefined;
+  }
+}
+
+/** Maps only CSS cross-axis alignment values with an exact Figma equivalent. */
+function counterAxisAlign(value: string | undefined): FigmaCounterAxisAlign | undefined {
+  switch (value?.trim().toLowerCase()) {
+    case 'flex-start':
+    case 'start':
+      return 'MIN';
+    case 'center':
+      return 'CENTER';
+    case 'flex-end':
+    case 'end':
+      return 'MAX';
+    default:
+      return undefined;
+  }
 }
 
 /** Returns the effective flex main-axis gap, treating CSS `normal` as zero. */

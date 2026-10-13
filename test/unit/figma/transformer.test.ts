@@ -258,6 +258,53 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test.each([
+    ['flex-start', 'flex-start', 'MIN', 'MIN'],
+    ['start', 'start', 'MIN', 'MIN'],
+    ['center', 'center', 'CENTER', 'CENTER'],
+    ['flex-end', 'flex-end', 'MAX', 'MAX'],
+    ['end', 'end', 'MAX', 'MAX'],
+    ['space-between', 'center', 'SPACE_BETWEEN', 'CENTER'],
+  ] as const)('maps direct flex alignment equivalents for justify-content=%s and align-items=%s', (
+    justifyContent,
+    alignItems,
+    primaryAxisAlign,
+    counterAxisAlign,
+  ) => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'flex',
+        'justify-content': justifyContent,
+        'align-items': alignItems,
+      },
+    }));
+
+    expect(result.primaryAxisAlign).toBe(primaryAxisAlign);
+    expect(result.counterAxisAlign).toBe(counterAxisAlign);
+  });
+
+  test.each([
+    ['stretch', 'stretch'],
+    ['baseline', 'baseline'],
+    ['space-around', 'space-around'],
+    ['space-evenly', 'space-evenly'],
+    ['left', 'right'],
+  ])('omits inexact flex alignment values for justify-content=%s and align-items=%s', (
+    justifyContent,
+    alignItems,
+  ) => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'inline-flex',
+        'justify-content': justifyContent,
+        'align-items': alignItems,
+      },
+    }));
+
+    expect(result.primaryAxisAlign).toBeUndefined();
+    expect(result.counterAxisAlign).toBeUndefined();
+  });
+
   test('omits Auto Layout properties for a node that is neither flex nor grid', () => {
     const result = transformExtractionNode(node({
       styles: { display: 'block', 'flex-direction': 'column', gap: '16px' },
