@@ -519,7 +519,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas unitarias cubren grid con padding parcial y con padding cero, verifican los cuatro lados numéricos y confirman que flex conserva su comportamiento actual.
 
-- [ ] **T124. Completar la matriz E2E de errores de carga para ambas rutas.**
+- [x] **T124. Completar la matriz E2E de errores de carga para ambas rutas.**
   - **RF:** RF-4.
   - **Hecho cuando:** las pruebas HTTP reales verifican que `/v1/extract` y `/v1/figma` devuelven `REDIRECT_NOT_ALLOWED` ante una redirección principal y `UPSTREAM_FAILURE` ante un fallo de origen, siempre con estado 502, mensaje en inglés y sin documento parcial.
 

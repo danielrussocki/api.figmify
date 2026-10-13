@@ -64,8 +64,10 @@ describe('error HTTP responses', () => {
 
   test.each([
     ['/v1/extract', '/redirect/http', 'REDIRECT_NOT_ALLOWED', 'The main document navigation must not redirect.'],
+    ['/v1/figma', '/redirect/http', 'REDIRECT_NOT_ALLOWED', 'The main document navigation must not redirect.'],
+    ['/v1/extract', '/errors/upstream', 'UPSTREAM_FAILURE', 'The upstream site could not be processed.'],
     ['/v1/figma', '/errors/upstream', 'UPSTREAM_FAILURE', 'The upstream site could not be processed.'],
-  ] as const)('%s returns a normalized 502 without a partial document', async (route, path, code, message) => {
+  ] as const)('%s returns %s as a normalized 502 without a partial document', async (route, path, code, message) => {
     const applicationUrl = await startApplication('development');
 
     await expectError(applicationUrl, route, `${fixtureServer.url}${path}`, 502, code, message);
