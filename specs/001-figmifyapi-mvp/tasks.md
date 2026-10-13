@@ -227,7 +227,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** los tipos representan runs `TEXT` con valores tipográficos normalizados, datos de `IMAGE`, cadena `svg` y la colección global `assets` por familia, pesos y URL opcional.
 
-- [ ] **T53. Añadir `includeHidden` al esquema de consulta de `/v1/figma`.**
+- [x] **T53. Añadir `includeHidden` al esquema de consulta de `/v1/figma`.**
   - **RF:** RF-1, RF-4, RF-5.
   - **Hecho cuando:** solo `true` y `false` son válidos, la omisión normaliza a `false` y un valor distinto produce `INVALID_REQUEST`.
 
