@@ -424,6 +424,25 @@ describe('transformExtractionNode', () => {
       layoutMode: 'HORIZONTAL',
       padding: { top: 6, right: 0, bottom: 12, left: 0 },
     });
+    Object.values(result.padding ?? {}).forEach((value) => expect(value).toBeTypeOf('number'));
+  });
+
+  test('emits four numeric zero padding values for a grid Auto Layout container', () => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'grid',
+        'padding-top': '0px',
+        'padding-right': '0px',
+        'padding-bottom': '0px',
+        'padding-left': '0px',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      layoutMode: 'HORIZONTAL',
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+    });
+    Object.values(result.padding ?? {}).forEach((value) => expect(value).toBeTypeOf('number'));
   });
 
   test('maps perceptible paints, borders, shadows, and corner radii to structured Figma values', () => {

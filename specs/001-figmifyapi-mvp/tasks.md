@@ -515,7 +515,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** todo nodo `grid` o `inline-grid` que emita `layoutMode` incluye `padding` con `top`, `right`, `bottom` y `left` numéricos en píxeles CSS, normalizando los valores ausentes, no numéricos o no efectivos a `0`.
 
-- [ ] **T123. Probar el `padding` de Auto Layout para grid.**
+- [x] **T123. Probar el `padding` de Auto Layout para grid.**
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas unitarias cubren grid con padding parcial y con padding cero, verifican los cuatro lados numéricos y confirman que flex conserva su comportamiento actual.
 
