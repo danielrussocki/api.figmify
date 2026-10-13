@@ -243,7 +243,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el documento raw conserva la aplicabilidad de `offsetParent`, dimensiones naturales de `img` y `objectFit` calculado sin alterar el contrato de estilos raw.
 
-- [ ] **T57. Probar la serialización de metadatos de layout.**
+- [x] **T57. Probar la serialización de metadatos de layout.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** las pruebas verifican coordenadas con desplazamiento de documento, caja cero y los datos de una imagen.
 
