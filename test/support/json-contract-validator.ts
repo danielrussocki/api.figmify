@@ -151,8 +151,8 @@ function validateFigmaNode(value: unknown, path: string, errors: string[], isRoo
   optionalNumber(node, 'layoutGrow', path, errors);
   if ('position' in node) enumValue(node.position, new Set(['absolute', 'sticky']), `${path}.position`, errors);
   optionalNumber(node, 'zIndex', path, errors);
-  if ('fills' in node) paints(node.fills, `${path}.fills`, errors, false);
-  if ('strokes' in node) paints(node.strokes, `${path}.strokes`, errors, true);
+  if ('fills' in node) paints(node.fills, `${path}.fills`, errors, false, true);
+  if ('strokes' in node) paints(node.strokes, `${path}.strokes`, errors, true, false);
   optionalNumber(node, 'strokeWeight', path, errors);
   if ('strokeWeights' in node) strokeWeights(node.strokeWeights, `${path}.strokeWeights`, errors);
   if ('effects' in node) effects(node.effects, `${path}.effects`, errors);
@@ -172,11 +172,18 @@ function rect(value: unknown, path: string, errors: string[]): void {
   for (const key of ['x', 'y', 'width', 'height', 'top', 'left']) number(candidate[key], `${path}.${key}`, errors);
 }
 
-function paints(value: unknown, path: string, errors: string[], includesWeight: boolean): void {
+function paints(value: unknown, path: string, errors: string[], includesWeight: boolean, allowsImage: boolean): void {
   if (value === null) return;
   array(value, path, errors, (paint, paintPath) => {
     const entry = object(paint, paintPath, errors);
     if (entry === undefined) return;
+    if (allowsImage && entry.type === 'IMAGE') {
+      keys(entry, paintPath, ['type', 'src', 'scaleMode'], [], errors);
+      url(entry.src, `${paintPath}.src`, errors);
+      literal(entry.scaleMode, 'FILL', `${paintPath}.scaleMode`, errors);
+      return;
+    }
+
     keys(entry, paintPath, includesWeight ? ['type', 'color', 'weight'] : ['type', 'color'], includesWeight ? ['side'] : [], errors);
     literal(entry.type, 'SOLID', `${paintPath}.type`, errors);
     rgba(entry.color, `${paintPath}.color`, errors);

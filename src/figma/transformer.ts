@@ -108,7 +108,9 @@ function mapExtractionNode(
     ...(layoutGrow === undefined ? {} : { layoutGrow }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
-    fills: paints.fills ?? [],
+    fills: image === undefined
+      ? paints.fills ?? []
+      : [{ type: 'IMAGE', src: image.src, scaleMode: 'FILL' }],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
     ...(paints.strokeWeight === undefined ? {} : { strokeWeight: paints.strokeWeight }),
     ...(paints.strokeWeights === undefined ? {} : { strokeWeights: paints.strokeWeights }),

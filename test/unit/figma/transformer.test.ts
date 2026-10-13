@@ -444,6 +444,7 @@ describe('transformExtractionNode', () => {
 
     expect(result).toMatchObject({
       type: 'IMAGE',
+      fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FILL' }],
       image: {
         src: 'https://example.com/images/logo.png',
         naturalWidth: 240,
@@ -464,6 +465,7 @@ describe('transformExtractionNode', () => {
 
     expect(result).toMatchObject({
       type: 'IMAGE',
+      fills: [{ type: 'IMAGE', src: 'https://example.com/background.png', scaleMode: 'FILL' }],
       image: {
         src: 'https://example.com/background.png',
         backgroundSize: 'cover',

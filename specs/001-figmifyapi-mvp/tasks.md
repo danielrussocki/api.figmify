@@ -481,7 +481,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** el transformador devuelve siempre un arreglo vacío de `fills` para un nodo sin fondo sólido, gradiente ni imagen perceptible y no genera un color de respaldo.
 
-- [ ] **T115. Emitir pinturas Figma `IMAGE` para fuentes de imagen determinables.**
+- [x] **T115. Emitir pinturas Figma `IMAGE` para fuentes de imagen determinables.**
   - **RF:** RF-5.
   - **Hecho cuando:** los nodos `IMAGE` procedentes de `img` o de fondos resolubles incluyen en `fills` una pintura con `type: "IMAGE"`, URL absoluta en `src` y `scaleMode: "FILL"`, sin una pintura `SOLID` sustitutiva.
 
