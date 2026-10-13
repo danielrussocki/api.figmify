@@ -196,6 +196,12 @@ function serializeDocumentElement(visualProperties: string[]): {
   ].map((name) => [name.toLowerCase(), name]));
   let nextId = 1;
   const nodeIds = new Map<Element, string>();
+  const isPositiveFractionalOpacity = (value: unknown): value is string => {
+    if (typeof value !== 'string') return false;
+
+    const opacity = Number(value.trim());
+    return Number.isFinite(opacity) && opacity > 0 && opacity < 1;
+  };
 
   const readStyles = (element: Element, pseudoElement?: '::before' | '::after'): Record<string, string> => {
     const styles: Record<string, string> = {};
@@ -208,6 +214,10 @@ function serializeDocumentElement(visualProperties: string[]): {
     for (const property of visualProperties) {
       try {
         const value = computed.getPropertyValue(property);
+        if (property === 'opacity' && isPositiveFractionalOpacity(value)) {
+          styles[property] = value;
+          continue;
+        }
         if (typeof value === 'string' && value.trim().length > 0) {
           styles[property] = value;
         }

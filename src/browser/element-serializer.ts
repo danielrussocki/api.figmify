@@ -256,6 +256,11 @@ function selectVisualStyles(computedStyles: CSSStyleDeclaration): Record<string,
     try {
       const value: unknown = computedStyles.getPropertyValue(property);
 
+      if (property === 'opacity' && isPositiveFractionalOpacity(value)) {
+        styles[property] = value;
+        continue;
+      }
+
       if (typeof value === 'string' && value.trim().length > 0) {
         styles[property] = value;
       }
@@ -265,6 +270,15 @@ function selectVisualStyles(computedStyles: CSSStyleDeclaration): Record<string,
   }
 
   return styles;
+}
+
+function isPositiveFractionalOpacity(value: unknown): value is string {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const opacity = Number(value.trim());
+  return Number.isFinite(opacity) && opacity > 0 && opacity < 1;
 }
 
 function readRenderedText(element: Element): string | null {

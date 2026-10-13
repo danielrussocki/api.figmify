@@ -344,7 +344,44 @@ describe('serializeElement', () => {
        'font-size': '16px',
        color: 'rgb(1, 2, 3)',
        'grid-auto-flow': 'column dense',
-     });
+    });
+  });
+
+  test('preserves positive fractional opacity for elements and direct text runs', () => {
+    const textElement = element('P', [], 'Visible text');
+    textElement.childNodes = [{ nodeType: 3, textContent: 'Visible text' }];
+    const root = element('DIV', [textElement]);
+    root.ownerDocument = {
+      defaultView: {
+        getComputedStyle: () => ({
+          getPropertyValue: (property) => ({
+            display: 'block',
+            opacity: '0.8',
+          })[property] ?? '',
+        }),
+      },
+    };
+    textElement.ownerDocument = {
+      defaultView: {
+        getComputedStyle: () => ({
+          getPropertyValue: (property) => ({
+            display: 'block',
+            opacity: '0.5',
+          })[property] ?? '',
+        }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.styles).toEqual({ display: 'block', opacity: '0.8' });
+    expect(serialized.children[0]?.directTextRuns).toEqual([
+      {
+        characters: 'Visible text',
+        childNodeIndex: 0,
+        styles: { display: 'block', opacity: '0.5' },
+      },
+    ]);
   });
 
   test('omits indeterminable and non-serializable computed values', () => {
@@ -365,6 +402,7 @@ describe('serializeElement', () => {
     const serialized = serializeElement(root as unknown as Element);
 
     expect(serialized.styles).toEqual({ display: 'block' });
+    expect(serialized.styles).not.toHaveProperty('opacity');
   });
 
   test('serializes computed ::before and ::after content with only permitted visual styles', () => {

@@ -537,11 +537,11 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture contiene un elemento visible con `opacity: 0.8` y un nodo de texto directo visible con `opacity: 0.5`, con identificadores y contenido verificables.
 
-- [ ] **T128. Conservar la opacidad positiva fraccionaria al serializar el documento raw.**
+- [x] **T128. Conservar la opacidad positiva fraccionaria al serializar el documento raw.**
   - **RF:** RF-2.
   - **Hecho cuando:** el serializador incluye el valor textual computado de `opacity` en `styles` para elementos y `directTextRuns` cuando sea mayor que `0` y menor que `1`, sin omitirlo como valor no significativo.
 
-- [ ] **T129. Añadir pruebas unitarias de serialización de opacidad positiva fraccionaria.**
+- [x] **T129. Añadir pruebas unitarias de serialización de opacidad positiva fraccionaria.**
   - **RF:** RF-2.
   - **Hecho cuando:** las pruebas verifican que `opacity: 0.8` y `opacity: 0.5` se conservan textualmente en `styles` de elementos y ejecuciones de texto, y que no se inventan valores para opacidades no serializables.
 
