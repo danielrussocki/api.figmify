@@ -177,7 +177,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T41. Ejecutar la suite completa y verificar que no se persisten datos.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `pnpm test` pasa y la revisión de la implementación confirma que no incorpora base de datos, caché, archivos de resultados ni colas persistentes.
-  - **Nota:** `pnpm typecheck` tiene errores preexistentes en el contrato `UpstreamFailureError`; deben resolverse durante esta validación final.
+  - **NOTA:** `pnpm typecheck` tiene dos errores preexistentes que deben resolverse durante esta validación final: `TS2532` en `src/figma/transformer.ts` (el acceso a `match[2]` puede ser `undefined`) y `TS2345` en `test/unit/figma/transformer.test.ts` (la tupla de casos de `test.each` no coincide con la firma de la función).
 
 ## Ensamblaje y ejecución de la API
 
@@ -279,7 +279,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** un contenedor no tiene `characters` por texto descendiente y cada tramo de texto en orden DOM se emite como un nodo `TEXT` hoja.
 
-- [ ] **T66. Normalizar el estilo de cada run de texto.**
+- [x] **T66. Normalizar el estilo de cada run de texto.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** cada run incluye familia sin fallbacks, tamaño, peso, `lineHeight`, `letterSpacing`, `textAlign` y `textAutoResize` con los tipos establecidos por el plan.
 

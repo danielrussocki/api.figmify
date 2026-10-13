@@ -119,6 +119,31 @@ describe('transformExtractionNode', () => {
     expect(transformExtractionNode(extraction).characters).toBeUndefined();
   });
 
+  test('normalizes the style of every TEXT run into Figma typography values', () => {
+    const result = transformExtractionNode(node({
+      tagName: 'span',
+      text: 'Styled text',
+      styles: {
+        'font-family': '"Inter", Arial, sans-serif',
+        'font-size': '16px',
+        'font-weight': '600',
+        'line-height': '24px',
+        'letter-spacing': '0.5px',
+        'text-align': 'center',
+      },
+    }));
+
+    expect(result.styles).toEqual({
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: 600,
+      lineHeight: 24,
+      letterSpacing: 0.5,
+      textAlign: 'CENTER',
+      textAutoResize: 'HEIGHT',
+    });
+  });
+
   test('omits the root relative rect and positions descendants from their represented parent content area', () => {
     const extraction = node({
       id: 'node-root',

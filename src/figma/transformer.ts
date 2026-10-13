@@ -1,5 +1,12 @@
 import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
-import type { FigmaDocument, FigmaNode, FigmaNodeType, FigmaRect } from '../contracts/figma/figma-document.js';
+import type {
+  FigmaDocument,
+  FigmaNode,
+  FigmaNodeType,
+  FigmaRect,
+  FigmaTextAlign,
+  FigmaTextStyle,
+} from '../contracts/figma/figma-document.js';
 import {
   createColorStyleCatalog,
   createTypographyStyleCatalog,
@@ -43,6 +50,8 @@ function mapExtractionNode(
 ): FigmaNode {
   const rect = toFigmaRect(node.layout?.rect);
   const isVisible = parentIsVisible && determineVisibility(node, rect, isRoot);
+  const type = determineFigmaNodeType(node);
+  const textStyle = type === 'TEXT' ? normalizeTextStyle(node.styles) : undefined;
   const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
     if (isExcludedFigmaTag(child.tagName)) {
       return [];
@@ -67,8 +76,6 @@ function mapExtractionNode(
     )];
   });
 
-  const type = determineFigmaNodeType(node);
-
   return {
     id: node.id,
     tag: node.tagName,
@@ -79,8 +86,73 @@ function mapExtractionNode(
       : { relativeRect: toRelativeRect(rect, parentContentOrigin) }),
     isVisible,
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
+    ...(textStyle === undefined ? {} : { styles: textStyle }),
     children,
   };
+}
+
+/** Converts the computed CSS typography of a text run to the Figma contract. */
+function normalizeTextStyle(styles: Record<string, string>): FigmaTextStyle | undefined {
+  const fontFamily = primaryFontFamily(styles['font-family']);
+  const fontSize = cssNumber(styles['font-size']);
+  const fontWeight = fontWeightNumber(styles['font-weight']);
+
+  if (fontFamily === undefined || fontSize === undefined || fontWeight === undefined) {
+    return undefined;
+  }
+
+  const lineHeight = styles['line-height']?.trim().toLowerCase() === 'normal'
+    ? fontSize * 1.2
+    : cssNumber(styles['line-height']);
+  const letterSpacing = styles['letter-spacing']?.trim().toLowerCase() === 'normal'
+    ? 0
+    : cssNumber(styles['letter-spacing']);
+
+  if (lineHeight === undefined || letterSpacing === undefined) {
+    return undefined;
+  }
+
+  return {
+    fontFamily,
+    fontSize,
+    fontWeight,
+    lineHeight,
+    letterSpacing,
+    textAlign: normalizeTextAlign(styles['text-align']),
+    textAutoResize: styles['white-space']?.trim().toLowerCase() === 'nowrap'
+      ? 'WIDTH_AND_HEIGHT'
+      : 'HEIGHT',
+  };
+}
+
+function primaryFontFamily(value: string | undefined): string | undefined {
+  const family = value?.split(',', 1)[0]?.trim().replace(/^(?:"([^"]*)"|'([^']*)')$/u, '$1$2');
+  return family === undefined || family.length === 0 ? undefined : family;
+}
+
+function cssNumber(value: string | undefined): number | undefined {
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))(?:px)?$/iu.exec(value?.trim() ?? '');
+  if (match?.[1] === undefined) return undefined;
+
+  const number = Number(match[1]);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+function fontWeightNumber(value: string | undefined): number | undefined {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === 'normal') return 400;
+  if (normalized === 'bold') return 700;
+  return cssNumber(normalized);
+}
+
+function normalizeTextAlign(value: string | undefined): FigmaTextAlign {
+  switch (value?.trim().toLowerCase()) {
+    case 'center': return 'CENTER';
+    case 'right':
+    case 'end': return 'RIGHT';
+    case 'justify': return 'JUSTIFIED';
+    default: return 'LEFT';
+  }
 }
 
 /**
