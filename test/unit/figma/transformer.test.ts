@@ -166,6 +166,53 @@ describe('transformExtractionNode', () => {
     expect(result.gap).toBeUndefined();
   });
 
+  test('maps an img with its resolved source and measured image data', () => {
+    const result = transformExtractionNode(node({
+      tagName: 'img',
+      attributes: { src: 'images/logo.png' },
+      resources: [{ kind: 'image', url: 'https://example.com/images/logo.png' }],
+      layout: {
+        rect: { x: 0, y: 0, width: 120, height: 80, top: 0, left: 0 },
+        naturalWidth: 240,
+        naturalHeight: 160,
+        objectFit: 'contain',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      type: 'IMAGE',
+      image: {
+        src: 'https://example.com/images/logo.png',
+        naturalWidth: 240,
+        naturalHeight: 160,
+        objectFit: 'contain',
+      },
+    });
+  });
+
+  test('does not invent image data for an element classified from its background', () => {
+    const result = transformExtractionNode(node({
+      tagName: 'div',
+      styles: { 'background-image': 'url("https://example.com/background.png")' },
+    }));
+
+    expect(result.type).toBe('IMAGE');
+    expect(result.image).toBeUndefined();
+  });
+
+  test('serializes an inline SVG into the Figma node', () => {
+    const result = transformExtractionNode(node({
+      tagName: 'svg',
+      attributes: { viewBox: '0 0 24 24', role: 'img' },
+      children: [node({ id: 'node-path', tagName: 'path' })],
+    }));
+
+    expect(result).toMatchObject({
+      type: 'FRAME',
+      svg: '<svg viewBox="0 0 24 24" role="img"><path></path></svg>',
+    });
+  });
+
   test('prunes a zero CSS gap while retaining the structural Auto Layout mode', () => {
     const result = transformExtractionNode(node({
       styles: { display: 'flex', 'flex-direction': 'row', gap: '0px' },

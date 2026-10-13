@@ -295,7 +295,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** colores perceptibles se normalizan a RGBA, sombras se convierten a `DROP_SHADOW`, radios se expresan numéricamente y ausencias no se representan como cadenas CSS.
 
-- [ ] **T70. Implementar el mapeo de `IMAGE` y SVG inline.**
+- [x] **T70. Implementar el mapeo de `IMAGE` y SVG inline.**
   - **RF:** RF-5.
   - **Hecho cuando:** un `img` incluye `src`, dimensiones naturales y `objectFit`; fondos resueltos no inventan datos; y SVG inline incluye `svg` como cadena.
 

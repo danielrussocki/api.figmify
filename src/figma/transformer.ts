@@ -58,6 +58,7 @@ function mapExtractionNode(
   const autoLayout = determineAutoLayout(node.styles);
   const positioning = determinePositioning(node.styles);
   const paints = parseFigmaPaints(node.styles);
+  const image = imageData(node, type);
   const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
     if (isExcludedFigmaTag(child.tagName)) {
       return [];
@@ -100,10 +101,50 @@ function mapExtractionNode(
     ...(paints.effects === null ? {} : { effects: paints.effects }),
     ...(paints.cornerRadius === undefined ? {} : { cornerRadius: paints.cornerRadius }),
     ...(paints.cornerRadii === undefined ? {} : { cornerRadii: paints.cornerRadii }),
+    ...(image === undefined ? {} : { image }),
+    ...(node.tagName.toLowerCase() === 'svg' ? { svg: serializeInlineSvg(node) } : {}),
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     ...(textStyle === undefined ? {} : { styles: textStyle }),
     children,
   };
+}
+
+function imageData(node: ExtractionNode, type: FigmaNodeType): FigmaNode['image'] | undefined {
+  if (type !== 'IMAGE' || node.tagName.toLowerCase() !== 'img') return undefined;
+
+  const src = node.resources.find((resource) => resource.kind === 'image')?.url;
+  const { naturalWidth, naturalHeight, objectFit } = node.layout ?? {};
+  if (src === undefined
+    || !isNaturalDimension(naturalWidth)
+    || !isNaturalDimension(naturalHeight)
+    || objectFit === undefined) {
+    return undefined;
+  }
+
+  return { src, naturalWidth, naturalHeight, objectFit };
+}
+
+function isNaturalDimension(value: number | undefined): value is number {
+  return value !== undefined && Number.isFinite(value) && value >= 0;
+}
+
+/** Reconstructs the retained inline SVG tree without treating it as an asset. */
+function serializeInlineSvg(node: ExtractionNode): string {
+  const attributes = Object.entries(node.attributes)
+    .map(([name, value]) => ` ${name}="${escapeSvgValue(value)}"`)
+    .join('');
+  const children = node.children.map(serializeInlineSvg).join('');
+  const text = node.children.length === 0 && node.text !== null ? escapeSvgText(node.text) : '';
+
+  return `<${node.tagName}${attributes}>${text}${children}</${node.tagName}>`;
+}
+
+function escapeSvgValue(value: string): string {
+  return value.replace(/&/gu, '&amp;').replace(/"/gu, '&quot;').replace(/</gu, '&lt;');
+}
+
+function escapeSvgText(value: string): string {
+  return value.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;');
 }
 
 function determineAutoLayout(styles: Record<string, string>): {
