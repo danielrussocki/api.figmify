@@ -32,15 +32,18 @@ const TYPOGRAPHY_PROPERTIES = [
  * Collects reusable solid colors from an extraction tree. Style IDs derive from
  * normalized RGBA values, rather than traversal position, so they are stable.
  */
-export function createColorStyleCatalog(root: ExtractionNode): ColorStyle[] {
+export function createColorStyleCatalog(
+  root: ExtractionNode,
+  includedNodeIds?: ReadonlySet<string>,
+): ColorStyle[] {
   const colors = new Map<string, ColorStyle>();
 
   const visit = (node: ExtractionNode): void => {
-    if (!hasColorStyleExclusion(node.styles)) {
+    if ((includedNodeIds === undefined || includedNodeIds.has(node.id)) && !hasColorStyleExclusion(node.styles)) {
       for (const property of COLOR_PROPERTIES) {
         const rgba = parseSolidColor(node.styles[property]);
 
-        if (rgba === null) {
+        if (rgba === null || rgba.a <= 0) {
           continue;
         }
 
@@ -79,11 +82,16 @@ export function findColorStyleForNode(styles: Record<string, string>): ColorStyl
  * Collects reusable typography styles from complete computed typography tuples.
  * IDs derive from normalized values and therefore do not depend on tree order.
  */
-export function createTypographyStyleCatalog(root: ExtractionNode): TypographyStyle[] {
+export function createTypographyStyleCatalog(
+  root: ExtractionNode,
+  includedNodeIds?: ReadonlySet<string>,
+): TypographyStyle[] {
   const typographies = new Map<string, TypographyStyle>();
 
   const visit = (node: ExtractionNode): void => {
-    const typography = readTypographyStyle(node.styles);
+    const typography = includedNodeIds === undefined || includedNodeIds.has(node.id)
+      ? readTypographyStyle(node.styles)
+      : null;
     if (typography !== null) {
       const key = typographyKey(typography);
       if (!typographies.has(key)) {

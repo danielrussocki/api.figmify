@@ -444,6 +444,80 @@ describe('transformExtractionNode', () => {
 });
 
 describe('transformExtractionDocument', () => {
+  test('builds catalogs only from perceptible resources used by visible included nodes', () => {
+    const typography = {
+      'font-family': 'Inter, sans-serif',
+      'font-size': '16px',
+      'font-weight': '400',
+      'font-style': 'normal',
+      'line-height': '24px',
+      'letter-spacing': 'normal',
+      'text-transform': 'none',
+    };
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
+    const extraction: ExtractionDocument = {
+      schemaVersion: '1.0',
+      source: {
+        url: 'https://example.com/',
+        viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
+        environment: { locale: 'en-US', timezone: 'UTC', colorScheme: 'light', reducedMotion: 'no-preference' },
+      },
+      document: node({
+        id: 'node-root',
+        tagName: 'html',
+        layout: visibleBox,
+        styles: { ...typography },
+        children: [
+          node({
+            id: 'node-visible-text',
+            tagName: 'span',
+            text: 'Visible',
+            layout: visibleBox,
+            styles: { color: 'rgb(17, 34, 51)', ...typography },
+          }),
+          node({
+            id: 'node-hidden-text',
+            tagName: 'span',
+            text: 'Hidden',
+            layout: visibleBox,
+            styles: { color: 'rgb(68, 85, 102)', display: 'none', ...typography },
+          }),
+          node({
+            id: 'node-transparent',
+            layout: visibleBox,
+            styles: { 'background-color': 'rgba(255, 0, 0, 0)' },
+          }),
+          node({
+            id: 'node-gradient',
+            layout: visibleBox,
+            styles: {
+              'background-color': 'rgb(0, 255, 0)',
+              'background-image': 'linear-gradient(red, blue)',
+            },
+          }),
+        ],
+      }),
+    };
+
+    const result = transformExtractionDocument(extraction);
+
+    expect(result.styles.colors).toEqual([{
+      id: 'color-112233',
+      name: '#112233',
+      rgba: { r: 0.067, g: 0.133, b: 0.2, a: 1 },
+    }]);
+    expect(result.styles.typographies).toEqual([{
+      id: 'type-inter-16-400-normal-24-0-none',
+      fontFamily: 'Inter, sans-serif',
+      fontSize: '16px',
+      fontWeight: '400',
+      fontStyle: 'normal',
+      lineHeight: '24px',
+      letterSpacing: 'normal',
+      textTransform: 'none',
+    }]);
+  });
+
   test('creates a versioned Figma document with reusable style references throughout the tree', () => {
     const typography = {
       'font-family': 'Inter, sans-serif',

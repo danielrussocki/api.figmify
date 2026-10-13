@@ -299,7 +299,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** un `img` incluye `src`, dimensiones naturales y `objectFit`; fondos resueltos no inventan datos; y SVG inline incluye `svg` como cadena.
 
-- [ ] **T71. Actualizar el catálogo de colores y tipografías tras el filtrado.**
+- [x] **T71. Actualizar el catálogo de colores y tipografías tras el filtrado.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** los catálogos solo contienen recursos perceptibles referenciados por nodos visibles incluidos, sin colores de alfa cero ni entradas de gradientes, imágenes, filtros o mezclas.
 

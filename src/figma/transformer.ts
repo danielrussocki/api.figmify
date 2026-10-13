@@ -337,8 +337,10 @@ function isExcludedFigmaTag(tagName: string): boolean {
 
 /** Converts a complete extraction document into the versioned Figma contract. */
 export function transformExtractionDocument(extraction: ExtractionDocument): FigmaDocument {
-  const colors = createColorStyleCatalog(extraction.document);
-  const typographies = createTypographyStyleCatalog(extraction.document);
+  const document = transformExtractionNode(extraction.document);
+  const referencedNodeIds = collectReferencedCatalogNodeIds(document);
+  const colors = createColorStyleCatalog(extraction.document, referencedNodeIds.colors);
+  const typographies = createTypographyStyleCatalog(extraction.document, referencedNodeIds.typographies);
   return {
     schemaVersion: '1.0',
     source: {
@@ -347,8 +349,33 @@ export function transformExtractionDocument(extraction: ExtractionDocument): Fig
     },
     styles: { colors, typographies },
     assets: [],
-    document: transformExtractionNode(extraction.document),
+    document,
   };
+}
+
+/** Collects only resources represented by visible nodes retained in the Figma tree. */
+function collectReferencedCatalogNodeIds(document: FigmaNode): {
+  colors: ReadonlySet<string>;
+  typographies: ReadonlySet<string>;
+} {
+  const colors = new Set<string>();
+  const typographies = new Set<string>();
+
+  const visit = (node: FigmaNode): void => {
+    if (node.isVisible) {
+      colors.add(node.id);
+      if (node.type === 'TEXT') {
+        typographies.add(node.id);
+      }
+    }
+
+    for (const child of node.children) {
+      visit(child);
+    }
+  };
+
+  visit(document);
+  return { colors, typographies };
 }
 
 function determineFigmaNodeType(node: ExtractionNode): FigmaNodeType {
