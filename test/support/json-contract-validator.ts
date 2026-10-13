@@ -1,7 +1,10 @@
 type JsonObject = Record<string, unknown>;
 
-const FIGMA_NODE_TYPES = new Set(['DOCUMENT', 'FRAME', 'TEXT', 'IMAGE', 'VECTOR', 'RECTANGLE']);
+const FIGMA_NODE_TYPES = new Set(['FRAME', 'TEXT', 'IMAGE']);
 const RESOURCE_KINDS = new Set(['image', 'media', 'stylesheet']);
+const OBJECT_FITS = new Set(['fill', 'contain', 'cover', 'none', 'scale-down']);
+const TEXT_ALIGNS = new Set(['LEFT', 'CENTER', 'RIGHT', 'JUSTIFIED']);
+const TEXT_AUTO_RESIZES = new Set(['NONE', 'WIDTH_AND_HEIGHT', 'HEIGHT', 'TRUNCATE']);
 
 export function validateExtractionDocumentV1(value: unknown): string[] {
   const errors: string[] = [];
@@ -20,11 +23,12 @@ export function validateFigmaDocumentV1(value: unknown): string[] {
   const document = object(value, '$', errors);
   if (document === undefined) return errors;
 
-  keys(document, '$', ['schemaVersion', 'source', 'styles', 'document'], [], errors);
+  keys(document, '$', ['schemaVersion', 'source', 'styles', 'assets', 'document'], [], errors);
   literal(document.schemaVersion, '1.0', '$.schemaVersion', errors);
   validateFigmaSource(document.source, '$.source', errors);
   validateFigmaCatalog(document.styles, '$.styles', errors);
-  validateFigmaNode(document.document, '$.document', errors);
+  fontAssets(document.assets, '$.assets', errors);
+  validateFigmaNode(document.document, '$.document', errors, true);
   return errors;
 }
 
@@ -34,7 +38,6 @@ function validateExtractionSource(value: unknown, path: string, errors: string[]
   keys(source, path, ['url', 'viewport', 'environment'], [], errors);
   url(source.url, `${path}.url`, errors);
   viewport(source.viewport, `${path}.viewport`, errors);
-
   const environment = object(source.environment, `${path}.environment`, errors);
   if (environment === undefined) return;
   keys(environment, `${path}.environment`, ['locale', 'timezone', 'colorScheme', 'reducedMotion'], [], errors);
@@ -55,16 +58,29 @@ function validateFigmaSource(value: unknown, path: string, errors: string[]): vo
 function validateExtractionNode(value: unknown, path: string, errors: string[]): void {
   const node = object(value, path, errors);
   if (node === undefined) return;
-  keys(node, path, ['id', 'tagName', 'attributes', 'resources', 'text', 'styles', 'pseudoElements', 'children'], ['shadowChildren'], errors);
+  keys(node, path, ['id', 'tagName', 'attributes', 'resources', 'text', 'styles', 'pseudoElements', 'children'], ['layout', 'shadowChildren'], errors);
   string(node.id, `${path}.id`, errors);
   string(node.tagName, `${path}.tagName`, errors);
   stringRecord(node.attributes, `${path}.attributes`, errors);
   resources(node.resources, `${path}.resources`, errors);
   nullableString(node.text, `${path}.text`, errors);
+  if ('layout' in node) extractionLayout(node.layout, `${path}.layout`, errors);
   stringRecord(node.styles, `${path}.styles`, errors);
   pseudoElements(node.pseudoElements, `${path}.pseudoElements`, errors);
   nested(node.children, `${path}.children`, errors, validateExtractionNode);
   if ('shadowChildren' in node) nested(node.shadowChildren, `${path}.shadowChildren`, errors, validateExtractionNode);
+}
+
+function extractionLayout(value: unknown, path: string, errors: string[]): void {
+  const layout = object(value, path, errors);
+  if (layout === undefined) return;
+  keys(layout, path, ['rect'], ['offsetParentId', 'hasOffsetParent', 'naturalWidth', 'naturalHeight', 'objectFit'], errors);
+  rect(layout.rect, `${path}.rect`, errors);
+  optionalString(layout, 'offsetParentId', path, errors);
+  optionalBoolean(layout, 'hasOffsetParent', path, errors);
+  optionalNumber(layout, 'naturalWidth', path, errors);
+  optionalNumber(layout, 'naturalHeight', path, errors);
+  if ('objectFit' in layout) enumValue(layout.objectFit, OBJECT_FITS, `${path}.objectFit`, errors);
 }
 
 function validateFigmaCatalog(value: unknown, path: string, errors: string[]): void {
@@ -84,37 +100,113 @@ function validateFigmaCatalog(value: unknown, path: string, errors: string[]): v
     if (entry === undefined) return;
     keys(entry, typographyPath, ['id', 'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'textTransform'], [], errors);
     prefixedString(entry.id, 'type-', `${typographyPath}.id`, errors);
-    for (const key of ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'textTransform']) {
-      string(entry[key], `${typographyPath}.${key}`, errors);
-    }
+    for (const key of ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'textTransform']) string(entry[key], `${typographyPath}.${key}`, errors);
   });
 }
 
-function validateFigmaNode(value: unknown, path: string, errors: string[]): void {
-  const node = object(value, path, errors);
-  if (node === undefined) return;
-  keys(node, path, ['sourceId', 'type', 'name', 'attributes', 'resources', 'styles', 'children'], ['characters', 'fillStyleId', 'textStyleId'], errors);
-  string(node.sourceId, `${path}.sourceId`, errors);
-  enumValue(node.type, FIGMA_NODE_TYPES, `${path}.type`, errors);
-  string(node.name, `${path}.name`, errors);
-  if ('characters' in node) string(node.characters, `${path}.characters`, errors);
-  stringRecord(node.attributes, `${path}.attributes`, errors);
-  resources(node.resources, `${path}.resources`, errors);
-  figmaStyleRecord(node.styles, `${path}.styles`, errors);
-  if ('fillStyleId' in node) prefixedString(node.fillStyleId, 'color-', `${path}.fillStyleId`, errors);
-  if ('textStyleId' in node) prefixedString(node.textStyleId, 'type-', `${path}.textStyleId`, errors);
-  nested(node.children, `${path}.children`, errors, validateFigmaNode);
+function fontAssets(value: unknown, path: string, errors: string[]): void {
+  array(value, path, errors, (asset, assetPath) => {
+    const entry = object(asset, assetPath, errors);
+    if (entry === undefined) return;
+    keys(entry, assetPath, ['family', 'weights'], ['url'], errors);
+    string(entry.family, `${assetPath}.family`, errors);
+    array(entry.weights, `${assetPath}.weights`, errors, (weight, weightPath) => number(weight, weightPath, errors));
+    if ('url' in entry) url(entry.url, `${assetPath}.url`, errors);
+  });
 }
 
-function viewport(value: unknown, path: string, errors: string[]): void {
+function validateFigmaNode(value: unknown, path: string, errors: string[], isRoot: boolean): void {
+  const node = object(value, path, errors);
+  if (node === undefined) return;
+  keys(node, path, ['id', 'tag', 'type', 'rect', 'isVisible', 'children'], [
+    'relativeRect', 'layoutMode', 'gap', 'position', 'zIndex', 'fills', 'strokes', 'effects', 'cornerRadius', 'cornerRadii', 'characters', 'styles', 'image', 'svg',
+  ], errors);
+  string(node.id, `${path}.id`, errors);
+  string(node.tag, `${path}.tag`, errors);
+  enumValue(node.type, FIGMA_NODE_TYPES, `${path}.type`, errors);
+  rect(node.rect, `${path}.rect`, errors);
+  boolean(node.isVisible, `${path}.isVisible`, errors);
+  if (!isRoot && !('relativeRect' in node)) errors.push(`${path}.relativeRect is required.`);
+  if ('relativeRect' in node) rect(node.relativeRect, `${path}.relativeRect`, errors);
+  if ('layoutMode' in node) enumValue(node.layoutMode, new Set(['HORIZONTAL', 'VERTICAL']), `${path}.layoutMode`, errors);
+  optionalNumber(node, 'gap', path, errors);
+  if ('position' in node) enumValue(node.position, new Set(['absolute', 'sticky']), `${path}.position`, errors);
+  optionalNumber(node, 'zIndex', path, errors);
+  if ('fills' in node) paints(node.fills, `${path}.fills`, errors, false);
+  if ('strokes' in node) paints(node.strokes, `${path}.strokes`, errors, true);
+  if ('effects' in node) effects(node.effects, `${path}.effects`, errors);
+  optionalNumber(node, 'cornerRadius', path, errors);
+  if ('cornerRadii' in node) cornerRadii(node.cornerRadii, `${path}.cornerRadii`, errors);
+  if ('characters' in node) string(node.characters, `${path}.characters`, errors);
+  if ('styles' in node) textStyle(node.styles, `${path}.styles`, errors);
+  if ('image' in node) image(node.image, `${path}.image`, errors);
+  if ('svg' in node) string(node.svg, `${path}.svg`, errors);
+  nested(node.children, `${path}.children`, errors, (child, childPath, childErrors) => validateFigmaNode(child, childPath, childErrors, false));
+}
+
+function rect(value: unknown, path: string, errors: string[]): void {
   const candidate = object(value, path, errors);
   if (candidate === undefined) return;
-  keys(candidate, path, ['width', 'height', 'deviceScaleFactor'], [], errors);
-  positiveInteger(candidate.width, `${path}.width`, errors);
-  positiveInteger(candidate.height, `${path}.height`, errors);
-  if (candidate.deviceScaleFactor !== 1 && candidate.deviceScaleFactor !== 2 && candidate.deviceScaleFactor !== 3) {
-    errors.push(`${path}.deviceScaleFactor must be 1, 2, or 3.`);
-  }
+  keys(candidate, path, ['x', 'y', 'width', 'height', 'top', 'left'], [], errors);
+  for (const key of ['x', 'y', 'width', 'height', 'top', 'left']) number(candidate[key], `${path}.${key}`, errors);
+}
+
+function paints(value: unknown, path: string, errors: string[], includesWeight: boolean): void {
+  if (value === null) return;
+  array(value, path, errors, (paint, paintPath) => {
+    const entry = object(paint, paintPath, errors);
+    if (entry === undefined) return;
+    keys(entry, paintPath, includesWeight ? ['type', 'color', 'weight'] : ['type', 'color'], [], errors);
+    literal(entry.type, 'SOLID', `${paintPath}.type`, errors);
+    rgba(entry.color, `${paintPath}.color`, errors);
+    if (includesWeight) number(entry.weight, `${paintPath}.weight`, errors);
+  });
+}
+
+function effects(value: unknown, path: string, errors: string[]): void {
+  if (value === null) return;
+  array(value, path, errors, (effect, effectPath) => {
+    const entry = object(effect, effectPath, errors);
+    if (entry === undefined) return;
+    keys(entry, effectPath, ['type', 'color', 'offset', 'radius', 'spread'], [], errors);
+    literal(entry.type, 'DROP_SHADOW', `${effectPath}.type`, errors);
+    rgba(entry.color, `${effectPath}.color`, errors);
+    const offset = object(entry.offset, `${effectPath}.offset`, errors);
+    if (offset !== undefined) {
+      keys(offset, `${effectPath}.offset`, ['x', 'y'], [], errors);
+      number(offset.x, `${effectPath}.offset.x`, errors);
+      number(offset.y, `${effectPath}.offset.y`, errors);
+    }
+    number(entry.radius, `${effectPath}.radius`, errors);
+    number(entry.spread, `${effectPath}.spread`, errors);
+  });
+}
+
+function cornerRadii(value: unknown, path: string, errors: string[]): void {
+  const candidate = object(value, path, errors);
+  if (candidate === undefined) return;
+  keys(candidate, path, ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'], [], errors);
+  for (const key of ['topLeft', 'topRight', 'bottomRight', 'bottomLeft']) number(candidate[key], `${path}.${key}`, errors);
+}
+
+function textStyle(value: unknown, path: string, errors: string[]): void {
+  const style = object(value, path, errors);
+  if (style === undefined) return;
+  keys(style, path, ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'textAlign', 'textAutoResize'], [], errors);
+  string(style.fontFamily, `${path}.fontFamily`, errors);
+  for (const key of ['fontSize', 'fontWeight', 'lineHeight', 'letterSpacing']) number(style[key], `${path}.${key}`, errors);
+  enumValue(style.textAlign, TEXT_ALIGNS, `${path}.textAlign`, errors);
+  enumValue(style.textAutoResize, TEXT_AUTO_RESIZES, `${path}.textAutoResize`, errors);
+}
+
+function image(value: unknown, path: string, errors: string[]): void {
+  const data = object(value, path, errors);
+  if (data === undefined) return;
+  keys(data, path, ['src', 'naturalWidth', 'naturalHeight', 'objectFit'], [], errors);
+  url(data.src, `${path}.src`, errors);
+  number(data.naturalWidth, `${path}.naturalWidth`, errors);
+  number(data.naturalHeight, `${path}.naturalHeight`, errors);
+  string(data.objectFit, `${path}.objectFit`, errors);
 }
 
 function pseudoElements(value: unknown, path: string, errors: string[]): void {
@@ -142,23 +234,10 @@ function resources(value: unknown, path: string, errors: string[]): void {
   });
 }
 
-function figmaStyleRecord(value: unknown, path: string, errors: string[]): void {
-  const styles = object(value, path, errors);
-  if (styles === undefined) return;
-  for (const [key, style] of Object.entries(styles)) {
-    if (typeof style === 'string' || typeof style === 'number' || typeof style === 'boolean') continue;
-    rgba(style, `${path}.${key}`, errors);
-  }
-}
-
 function stringRecord(value: unknown, path: string, errors: string[]): void {
   const record = object(value, path, errors);
   if (record === undefined) return;
   for (const [key, entry] of Object.entries(record)) string(entry, `${path}.${key}`, errors);
-}
-
-function nested(value: unknown, path: string, errors: string[], validate: (entry: unknown, path: string, errors: string[]) => void): void {
-  array(value, path, errors, (entry, entryPath) => validate(entry, entryPath, errors));
 }
 
 function rgba(value: unknown, path: string, errors: string[]): void {
@@ -166,6 +245,15 @@ function rgba(value: unknown, path: string, errors: string[]): void {
   if (color === undefined) return;
   keys(color, path, ['r', 'g', 'b', 'a'], [], errors);
   for (const key of ['r', 'g', 'b', 'a']) number(color[key], `${path}.${key}`, errors);
+}
+
+function viewport(value: unknown, path: string, errors: string[]): void {
+  const candidate = object(value, path, errors);
+  if (candidate === undefined) return;
+  keys(candidate, path, ['width', 'height', 'deviceScaleFactor'], [], errors);
+  positiveInteger(candidate.width, `${path}.width`, errors);
+  positiveInteger(candidate.height, `${path}.height`, errors);
+  if (candidate.deviceScaleFactor !== 1 && candidate.deviceScaleFactor !== 2 && candidate.deviceScaleFactor !== 3) errors.push(`${path}.deviceScaleFactor must be 1, 2, or 3.`);
 }
 
 function object(value: unknown, path: string, errors: string[]): JsonObject | undefined {
@@ -182,40 +270,26 @@ function array(value: unknown, path: string, errors: string[], validate: (entry:
   value.forEach((entry, index) => validate(entry, `${path}[${index}]`));
 }
 
+function nested(value: unknown, path: string, errors: string[], validate: (entry: unknown, path: string, errors: string[]) => void): void {
+  array(value, path, errors, (entry, entryPath) => validate(entry, entryPath, errors));
+}
+
 function keys(value: JsonObject, path: string, required: string[], optional: string[], errors: string[]): void {
   for (const key of required) if (!(key in value)) errors.push(`${path}.${key} is required.`);
-  for (const key of Object.keys(value)) {
-    if (!required.includes(key) && !optional.includes(key)) errors.push(`${path}.${key} is not allowed.`);
-  }
+  for (const key of Object.keys(value)) if (!required.includes(key) && !optional.includes(key)) errors.push(`${path}.${key} is not allowed.`);
 }
 
-function string(value: unknown, path: string, errors: string[]): void {
-  if (typeof value !== 'string') errors.push(`${path} must be a string.`);
-}
-
-function nullableString(value: unknown, path: string, errors: string[]): void {
-  if (value !== null) string(value, path, errors);
-}
-
-function number(value: unknown, path: string, errors: string[]): void {
-  if (typeof value !== 'number' || !Number.isFinite(value)) errors.push(`${path} must be a finite number.`);
-}
-
-function positiveInteger(value: unknown, path: string, errors: string[]): void {
-  if (!Number.isInteger(value) || typeof value !== 'number' || value < 1) errors.push(`${path} must be a positive integer.`);
-}
-
-function literal(value: unknown, expected: string, path: string, errors: string[]): void {
-  if (value !== expected) errors.push(`${path} must be ${expected}.`);
-}
-
-function enumValue(value: unknown, allowed: ReadonlySet<string>, path: string, errors: string[]): void {
-  if (typeof value !== 'string' || !allowed.has(value)) errors.push(`${path} has an invalid value.`);
-}
-
-function prefixedString(value: unknown, prefix: string, path: string, errors: string[]): void {
-  if (typeof value !== 'string' || !value.startsWith(prefix)) errors.push(`${path} must start with ${prefix}.`);
-}
+function string(value: unknown, path: string, errors: string[]): void { if (typeof value !== 'string') errors.push(`${path} must be a string.`); }
+function boolean(value: unknown, path: string, errors: string[]): void { if (typeof value !== 'boolean') errors.push(`${path} must be a boolean.`); }
+function nullableString(value: unknown, path: string, errors: string[]): void { if (value !== null) string(value, path, errors); }
+function number(value: unknown, path: string, errors: string[]): void { if (typeof value !== 'number' || !Number.isFinite(value)) errors.push(`${path} must be a finite number.`); }
+function positiveInteger(value: unknown, path: string, errors: string[]): void { if (!Number.isInteger(value) || typeof value !== 'number' || value < 1) errors.push(`${path} must be a positive integer.`); }
+function literal(value: unknown, expected: string, path: string, errors: string[]): void { if (value !== expected) errors.push(`${path} must be ${expected}.`); }
+function enumValue(value: unknown, allowed: ReadonlySet<string>, path: string, errors: string[]): void { if (typeof value !== 'string' || !allowed.has(value)) errors.push(`${path} has an invalid value.`); }
+function prefixedString(value: unknown, prefix: string, path: string, errors: string[]): void { if (typeof value !== 'string' || !value.startsWith(prefix)) errors.push(`${path} must start with ${prefix}.`); }
+function optionalString(value: JsonObject, key: string, path: string, errors: string[]): void { if (key in value) string(value[key], `${path}.${key}`, errors); }
+function optionalBoolean(value: JsonObject, key: string, path: string, errors: string[]): void { if (key in value) boolean(value[key], `${path}.${key}`, errors); }
+function optionalNumber(value: JsonObject, key: string, path: string, errors: string[]): void { if (key in value) number(value[key], `${path}.${key}`, errors); }
 
 function url(value: unknown, path: string, errors: string[]): void {
   if (typeof value !== 'string') {

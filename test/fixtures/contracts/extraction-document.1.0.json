@@ -16,6 +16,9 @@
     "attributes": { "class": "page" },
     "resources": [],
     "text": null,
+    "layout": {
+      "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080, "top": 0, "left": 0 }
+    },
     "styles": { "display": "block", "background-color": "rgb(255, 255, 255)" },
     "pseudoElements": {
       "before": { "content": "New", "styles": { "color": "rgb(17, 24, 39)" } },
@@ -28,6 +31,12 @@
         "attributes": { "alt": "Logo", "src": "/logo.png" },
         "resources": [{ "kind": "image", "url": "https://example.com/logo.png" }],
         "text": null,
+        "layout": {
+          "rect": { "x": 24, "y": 32, "width": 180, "height": 39, "top": 32, "left": 24 },
+          "naturalWidth": 360,
+          "naturalHeight": 78,
+          "objectFit": "contain"
+        },
         "styles": { "display": "block" },
         "pseudoElements": { "before": null, "after": null },
         "children": [],
@@ -38,6 +47,11 @@
             "attributes": {},
             "resources": [],
             "text": "Inside shadow DOM",
+            "layout": {
+              "rect": { "x": 24, "y": 32, "width": 100, "height": 20, "top": 32, "left": 24 },
+              "hasOffsetParent": true,
+              "offsetParentId": "node-2"
+            },
             "styles": { "color": "rgb(17, 24, 39)" },
             "pseudoElements": { "before": null, "after": null },
             "children": []

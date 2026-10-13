@@ -21,24 +21,32 @@
       }
     ]
   },
+  "assets": [{ "family": "Inter", "weights": [700] }],
   "document": {
-    "sourceId": "node-1",
-    "type": "DOCUMENT",
-    "name": "html",
-    "attributes": { "class": "page" },
-    "resources": [],
-    "styles": { "backgroundColor": { "r": 1, "g": 1, "b": 1, "a": 1 } },
+    "id": "node-1",
+    "tag": "body",
+    "type": "FRAME",
+    "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080, "top": 0, "left": 0 },
+    "isVisible": true,
+    "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1, "a": 1 } }],
     "children": [
       {
-        "sourceId": "node-2",
+        "id": "node-2",
+        "tag": "h1",
         "type": "TEXT",
-        "name": "h1",
+        "rect": { "x": 24, "y": 32, "width": 180, "height": 39, "top": 32, "left": 24 },
+        "relativeRect": { "x": 24, "y": 32, "width": 180, "height": 39, "top": 32, "left": 24 },
+        "isVisible": true,
         "characters": "Welcome",
-        "attributes": { "id": "welcome" },
-        "resources": [],
-        "fillStyleId": "color-111827",
-        "textStyleId": "type-inter-32-700-normal-38.4-0-none",
-        "styles": { "color": "rgb(17, 24, 39)", "fontSize": 32, "fontWeight": 700 },
+        "styles": {
+          "fontFamily": "Inter",
+          "fontSize": 32,
+          "fontWeight": 700,
+          "lineHeight": 38.4,
+          "letterSpacing": 0,
+          "textAlign": "LEFT",
+          "textAutoResize": "HEIGHT"
+        },
         "children": []
       }
     ]

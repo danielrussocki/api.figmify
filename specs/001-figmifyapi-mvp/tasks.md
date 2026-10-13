@@ -319,6 +319,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** las fixtures y solicitudes reales validan `includeHidden` por omisión y habilitado, el JSON compacto versionado y los errores 400 sin respuestas parciales.
 
-- [ ] **T76. Ejecutar la regresión final del contrato y de no persistencia.**
+- [x] **T76. Ejecutar la regresión final del contrato y de no persistencia.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` pasa, los ejemplos de ambos contratos v1 validan sus esquemas y la revisión confirma que no se añadieron almacenamiento ni dependencias no justificadas.
