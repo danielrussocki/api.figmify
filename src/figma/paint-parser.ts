@@ -82,7 +82,8 @@ function parseShadows(value: string | undefined): FigmaEffect[] {
 
   return splitCssList(value).flatMap((shadow) => {
     const normalized = shadow.trim();
-    if (normalized.length === 0 || /\binset\b/iu.test(normalized)) return [];
+    if (normalized.length === 0) return [];
+    const isInset = /\binset\b/iu.test(normalized);
 
     const colorMatch = /(?:rgba?\([^)]*\)|#[\da-f]{3,8}|\btransparent\b)/iu.exec(normalized);
     if (colorMatch === null) return [];
@@ -90,7 +91,8 @@ function parseShadows(value: string | undefined): FigmaEffect[] {
     const color = perceptibleColor(colorMatch[0]);
     if (color === null) return [];
 
-    const dimensions = normalized.slice(0, colorMatch.index) + normalized.slice((colorMatch.index ?? 0) + colorMatch[0].length);
+    const dimensions = (normalized.slice(0, colorMatch.index) + normalized.slice((colorMatch.index ?? 0) + colorMatch[0].length))
+      .replace(/\binset\b/giu, ' ');
     const values = dimensions.trim().split(/\s+/u).filter(Boolean).map(cssNumber);
     if (values.length < 2 || values.length > 4 || values.some((number) => number === undefined)) return [];
 
@@ -98,7 +100,7 @@ function parseShadows(value: string | undefined): FigmaEffect[] {
     const y = values[1]!;
     const radius = values[2] ?? 0;
     const spread = values[3] ?? 0;
-    return [{ type: 'DROP_SHADOW' as const, color, offset: { x, y }, radius, spread }];
+    return [{ type: isInset ? 'INNER_SHADOW' as const : 'DROP_SHADOW' as const, color, offset: { x, y }, radius, spread }];
   });
 }
 

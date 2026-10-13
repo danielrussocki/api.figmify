@@ -455,7 +455,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** colores o grosores distintos generan entradas de `strokes` identificadas por lado y `strokeWeights` sin colapsarlos a un único borde uniforme.
 
-- [ ] **T109. Implementar el parseo de sombras CSS externas e internas.**
+- [x] **T109. Implementar el parseo de sombras CSS externas e internas.**
   - **RF:** RF-5.
   - **Hecho cuando:** cada sombra perceptible convertible conserva su orden y emite `DROP_SHADOW` o `INNER_SHADOW` con RGBA, `offset`, `radius` y `spread` numéricos.
 

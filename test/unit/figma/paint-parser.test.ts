@@ -95,6 +95,34 @@ describe('parseFigmaPaints', () => {
     ]);
   });
 
+  test('preserves the order and inset type of perceptible CSS box shadows', () => {
+    expect(parseFigmaPaints({
+      'box-shadow': 'inset rgba(10, 20, 30, 0.4) 1px -2px 0 3px, 0 4px 8px #0008, inset 0 0 6px rgb(40, 50, 60)',
+    }).effects).toEqual([
+      {
+        type: 'INNER_SHADOW',
+        color: { r: 0.039, g: 0.078, b: 0.118, a: 0.4 },
+        offset: { x: 1, y: -2 },
+        radius: 0,
+        spread: 3,
+      },
+      {
+        type: 'DROP_SHADOW',
+        color: { r: 0, g: 0, b: 0, a: 0.533 },
+        offset: { x: 0, y: 4 },
+        radius: 8,
+        spread: 0,
+      },
+      {
+        type: 'INNER_SHADOW',
+        color: { r: 0.157, g: 0.196, b: 0.235, a: 1 },
+        offset: { x: 0, y: 0 },
+        radius: 6,
+        spread: 0,
+      },
+    ]);
+  });
+
   test('expresses uniform and per-corner radii numerically', () => {
     expect(parseFigmaPaints({
       'border-top-left-radius': '8px',
