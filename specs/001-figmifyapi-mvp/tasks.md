@@ -497,7 +497,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas cubren `img` y fondo resoluble y verifican que cada nodo `IMAGE` usa una pintura `IMAGE` con `src` y `scaleMode: "FILL"`, nunca `SOLID`.
 
-- [ ] **T119. Añadir pruebas de integración Playwright para rellenos transparentes e imágenes.**
+- [x] **T119. Añadir pruebas de integración Playwright para rellenos transparentes e imágenes.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la extracción de las nuevas fixtures y su transformación preservan el nodo sin relleno como `fills: []` y emiten las dos fuentes de imagen como pinturas `IMAGE` con URL resuelta.
 

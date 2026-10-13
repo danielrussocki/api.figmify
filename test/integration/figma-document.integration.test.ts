@@ -2,6 +2,7 @@ import { chromium, type Browser } from 'playwright';
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 
 import { PlaywrightExtractor } from '../../src/browser/playwright-extractor.js';
+import type { ExtractionNode } from '../../src/contracts/extraction/extraction-document.js';
 import type { FigmaNode } from '../../src/contracts/figma/figma-document.js';
 import { transformExtractionDocument } from '../../src/figma/transformer.js';
 import { startBrowserFixtureServer, type BrowserFixtureServer } from '../fixtures/browser/server.js';
@@ -103,6 +104,40 @@ describe('Figma document browser integration', () => {
       ],
     });
   });
+
+  test('preserves transparent fills and resolved img and background sources as IMAGE paints', async () => {
+    shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+    const extraction = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
+    });
+    const source = `${fixtureServer.url}/resources/fixture-image.svg`;
+    const transparent = requireExtractionNode(extraction.document, 'no-perceptible-background');
+    const image = requireExtractionNode(extraction.document, 'resolvable-img-image');
+    const background = requireExtractionNode(extraction.document, 'resolvable-background-image');
+
+    expect(transparent.styles['background-color'])
+      .toMatch(/transparent|rgba\(0, 0, 0, 0\)/u);
+    expect(image.resources)
+      .toContainEqual({ kind: 'image', url: source });
+    expect(background.styles)
+      .toMatchObject({ 'background-image': `url("${source}")`, 'background-size': 'cover' });
+
+    const document = transformExtractionDocument(extraction);
+
+    expect(findNodeById(document.document, transparent.id)).toMatchObject({
+      fills: [],
+    });
+    expect(findNodeById(document.document, image.id)).toMatchObject({
+      type: 'IMAGE',
+      fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
+    });
+    expect(findNodeById(document.document, background.id)).toMatchObject({
+      type: 'IMAGE',
+      fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
+    });
+  });
 });
 
 async function extractAndTransform(includeHidden = false) {
@@ -136,6 +171,34 @@ function findNodeByCharacters(node: FigmaNode, characters: string): FigmaNode | 
   }
 
   return undefined;
+}
+
+function findNodeById(node: FigmaNode, id: string): FigmaNode | undefined {
+  if (node.id === id) return node;
+
+  for (const child of node.children) {
+    const match = findNodeById(child, id);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findExtractionNodeById(node: ExtractionNode, id: string): ExtractionNode | undefined {
+  if (node.attributes.id === id) return node;
+
+  for (const child of [...node.children, ...(node.shadowChildren ?? [])]) {
+    const match = findExtractionNodeById(child, id);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function requireExtractionNode(node: ExtractionNode, id: string): ExtractionNode {
+  const match = findExtractionNodeById(node, id);
+  if (match === undefined) throw new Error(`Missing extraction fixture node: ${id}`);
+  return match;
 }
 
 function findParentOfCharacters(node: FigmaNode, characters: string): FigmaNode | undefined {
