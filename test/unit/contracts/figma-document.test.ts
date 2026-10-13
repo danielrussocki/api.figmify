@@ -11,6 +11,9 @@ import type {
   FigmaFontAsset,
   FigmaImageData,
   FigmaIsVisible,
+  FigmaCounterAxisAlign,
+  FigmaPadding,
+  FigmaPrimaryAxisAlign,
   FigmaNode,
   FigmaNodeType,
   FigmaPaint,
@@ -83,6 +86,44 @@ test('models compact Figma nodes with required geometry and only permitted types
   expectTypeOf(root.isVisible).toEqualTypeOf<FigmaIsVisible>();
   expectTypeOf(root.relativeRect).toEqualTypeOf<FigmaRelativeRect | undefined>();
   expectTypeOf(child.relativeRect).toEqualTypeOf<FigmaRelativeRect | undefined>();
+});
+
+test('models optional Auto Layout values with their Figma value domains', () => {
+  const padding: FigmaPadding = {
+    top: 16,
+    right: 20,
+    bottom: 16,
+    left: 20,
+  };
+  const primaryAxisAlign: FigmaPrimaryAxisAlign = 'SPACE_BETWEEN';
+  const counterAxisAlign: FigmaCounterAxisAlign = 'CENTER';
+  const node: FigmaNode = {
+    id: 'node-auto-layout',
+    tag: 'section',
+    type: 'FRAME',
+    rect: { x: 0, y: 0, width: 100, height: 100, top: 0, left: 0 },
+    isVisible: true,
+    layoutMode: 'HORIZONTAL',
+    itemSpacing: 12,
+    gap: 12,
+    padding,
+    primaryAxisAlign,
+    counterAxisAlign,
+    layoutGrow: 1,
+    children: [],
+  };
+
+  expectTypeOf(node.layoutMode).toEqualTypeOf<'HORIZONTAL' | 'VERTICAL' | undefined>();
+  expectTypeOf(node.itemSpacing).toEqualTypeOf<number | undefined>();
+  expectTypeOf(node.gap).toEqualTypeOf<number | undefined>();
+  expectTypeOf(node.padding).toEqualTypeOf<FigmaPadding | undefined>();
+  expectTypeOf(node.primaryAxisAlign).toEqualTypeOf<FigmaPrimaryAxisAlign | undefined>();
+  expectTypeOf(node.counterAxisAlign).toEqualTypeOf<FigmaCounterAxisAlign | undefined>();
+  expectTypeOf(node.layoutGrow).toEqualTypeOf<number | undefined>();
+  expectTypeOf(padding.top).toEqualTypeOf<number>();
+  expectTypeOf(padding.right).toEqualTypeOf<number>();
+  expectTypeOf(padding.bottom).toEqualTypeOf<number>();
+  expectTypeOf(padding.left).toEqualTypeOf<number>();
 });
 
 test('models structured paints, strokes, drop shadows, and corner radii', () => {

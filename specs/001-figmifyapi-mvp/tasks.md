@@ -395,7 +395,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** la serialización raw incluye el valor computado serializable de `grid-auto-flow` y continúa omitiendo propiedades fuera de la lista cerrada.
 
-- [ ] **T94. Ampliar los tipos Figma para Auto Layout.**
+- [x] **T94. Ampliar los tipos Figma para Auto Layout.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** los contratos tipados representan `layoutMode`, `itemSpacing`, `gap`, `padding`, `primaryAxisAlign`, `counterAxisAlign` y `layoutGrow` con los tipos y opcionalidad definidos en el plan.
 

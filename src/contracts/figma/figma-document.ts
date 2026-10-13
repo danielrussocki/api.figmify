@@ -19,6 +19,17 @@ export type FigmaNodeType = 'FRAME' | 'TEXT' | 'IMAGE';
 
 export type FigmaLayoutMode = 'HORIZONTAL' | 'VERTICAL';
 
+export type FigmaPrimaryAxisAlign = 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+
+export type FigmaCounterAxisAlign = 'MIN' | 'CENTER' | 'MAX';
+
+export interface FigmaPadding {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
 export type FigmaPosition = 'absolute' | 'sticky';
 
 export type ColorStyleId = `color-${string}`;
@@ -141,7 +152,12 @@ export interface FigmaNode {
   relativeRect?: FigmaRelativeRect;
   isVisible: FigmaIsVisible;
   layoutMode?: FigmaLayoutMode;
+  itemSpacing?: number;
   gap?: number;
+  padding?: FigmaPadding;
+  primaryAxisAlign?: FigmaPrimaryAxisAlign;
+  counterAxisAlign?: FigmaCounterAxisAlign;
+  layoutGrow?: number;
   position?: FigmaPosition;
   zIndex?: number;
   fills?: FigmaFills;
