@@ -50,7 +50,7 @@ test('defines the closed list of permitted computed visual properties', () => {
     'object-position', 'cursor', 'pointer-events',
     'flex-direction', 'flex-wrap', 'flex-grow', 'flex-shrink', 'flex-basis',
     'justify-content', 'align-items', 'align-content', 'align-self', 'order', 'gap',
-    'row-gap', 'column-gap', 'grid-template-columns', 'grid-template-rows',
+    'row-gap', 'column-gap', 'grid-auto-flow', 'grid-template-columns', 'grid-template-rows',
     'grid-column-start', 'grid-column-end', 'grid-row-start', 'grid-row-end', 'place-items',
     'place-content',
   ]);

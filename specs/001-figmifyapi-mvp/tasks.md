@@ -391,7 +391,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Auto Layout, geometría y pinturas estructuradas
 
-- [ ] **T93. Añadir `grid-auto-flow` a la lista de propiedades visuales permitidas.**
+- [x] **T93. Añadir `grid-auto-flow` a la lista de propiedades visuales permitidas.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** la serialización raw incluye el valor computado serializable de `grid-auto-flow` y continúa omitiendo propiedades fuera de la lista cerrada.
 

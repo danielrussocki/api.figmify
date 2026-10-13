@@ -327,10 +327,11 @@ describe('serializeElement', () => {
       defaultView: {
         getComputedStyle: () => ({
           getPropertyValue: (property) => ({
-            display: 'flex',
-            'font-size': '16px',
-            color: 'rgb(1, 2, 3)',
-            'not-permitted': 'must not be serialized',
+             display: 'flex',
+             'font-size': '16px',
+             color: 'rgb(1, 2, 3)',
+             'grid-auto-flow': 'column dense',
+             'not-permitted': 'must not be serialized',
           })[property] ?? '',
         }),
       },
@@ -339,10 +340,11 @@ describe('serializeElement', () => {
     const serialized = serializeElement(root as unknown as Element);
 
     expect(serialized.styles).toEqual({
-      display: 'flex',
-      'font-size': '16px',
-      color: 'rgb(1, 2, 3)',
-    });
+       display: 'flex',
+       'font-size': '16px',
+       color: 'rgb(1, 2, 3)',
+       'grid-auto-flow': 'column dense',
+     });
   });
 
   test('omits indeterminable and non-serializable computed values', () => {
