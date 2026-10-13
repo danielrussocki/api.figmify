@@ -553,7 +553,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas verifican que nodos visibles con opacidad `0.8` y `0.5` emiten el mismo valor numérico, conservan `isVisible: true` y no incluyen `opacity` dentro de `styles`.
 
-- [ ] **T132. Añadir una prueba de integración Playwright para opacidad positiva fraccionaria.**
+- [x] **T132. Añadir una prueba de integración Playwright para opacidad positiva fraccionaria.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la extracción de la fixture conserva las opacidades textuales en el documento raw y su transformación emite las opacidades numéricas en los nodos Figma correspondientes.
 

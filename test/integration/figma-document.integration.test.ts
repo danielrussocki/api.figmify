@@ -138,6 +138,33 @@ describe('Figma document browser integration', () => {
       fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
     });
   });
+
+  test('preserves positive fractional opacity in raw extraction and mapped Figma nodes', async () => {
+    shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+    const extraction = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
+    });
+    const element = requireExtractionNode(extraction.document, 'fractional-opacity-element');
+    const directText = requireExtractionNode(extraction.document, 'fractional-opacity-direct-text');
+
+    expect(element.styles.opacity).toBe('0.8');
+    expect(directText.directTextRuns).toEqual([
+      expect.objectContaining({
+        characters: 'Visible direct text with fractional opacity',
+        styles: expect.objectContaining({ opacity: '0.5' }),
+      }),
+    ]);
+
+    const document = transformExtractionDocument(extraction);
+
+    expect(findNodeById(document.document, element.id)).toMatchObject({
+      type: 'FRAME', opacity: 0.8, isVisible: true,
+    });
+    expect(findNodeByCharacters(document.document, 'Visible direct text with fractional opacity'))
+      .toMatchObject({ type: 'TEXT', opacity: 0.5, isVisible: true });
+  });
 });
 
 async function extractAndTransform(includeHidden = false) {
