@@ -475,7 +475,7 @@ export function transformExtractionDocument(
       viewport: { ...extraction.source.viewport },
     },
     styles: { colors, typographies },
-    assets: collectUsedFontAssets(document),
+    assets: collectUsedFontAssets(document, extraction.fontFaceSources),
     document,
   };
 }

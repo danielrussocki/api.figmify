@@ -612,6 +612,45 @@ describe('transformExtractionDocument', () => {
     ]);
   });
 
+  test('associates detected font URLs only with their used text family and weight', () => {
+    const typography = {
+      'font-size': '16px',
+      'font-style': 'normal',
+      'line-height': '24px',
+      'letter-spacing': 'normal',
+      'text-transform': 'none',
+    };
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
+    const extraction: ExtractionDocument = {
+      schemaVersion: '1.0',
+      source: {
+        url: 'https://example.com/',
+        viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
+        environment: { locale: 'en-US', timezone: 'UTC', colorScheme: 'light', reducedMotion: 'no-preference' },
+      },
+      fontFaceSources: [
+        { family: 'Inter', weight: 700, url: 'https://example.com/fonts/inter-bold.woff2' },
+        { family: 'Unused', weight: 400, url: 'https://example.com/fonts/unused.woff2' },
+      ],
+      document: node({
+        id: 'node-root',
+        tagName: 'html',
+        layout: visibleBox,
+        children: [node({
+          id: 'node-inter-bold',
+          tagName: 'span',
+          text: 'Bold',
+          layout: visibleBox,
+          styles: { ...typography, 'font-family': 'Inter, sans-serif', 'font-weight': '700' },
+        })],
+      }),
+    };
+
+    expect(transformExtractionDocument(extraction).assets).toEqual([
+      { family: 'Inter', weights: [700], url: 'https://example.com/fonts/inter-bold.woff2' },
+    ]);
+  });
+
   test('builds catalogs only from perceptible resources used by visible included nodes', () => {
     const typography = {
       'font-family': 'Inter, sans-serif',

@@ -373,7 +373,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** el contrato y el serializador recogen, cuando sean accesibles, las familias, pesos y URL HTTP(S) resueltas de reglas `@font-face`, sin fallar ante hojas de estilo entre orígenes o reglas inaccesibles.
 
-- [ ] **T89. Asociar URLs de fuente detectadas a los assets Figma usados.**
+- [x] **T89. Asociar URLs de fuente detectadas a los assets Figma usados.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `assets` agrupa solo familias y pesos de nodos `TEXT` visibles e incluidos, añade la URL de carga cuando corresponde a una fuente detectada y omite fuentes declaradas pero no usadas.
 
