@@ -35,6 +35,36 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serve fixtures for mixed text runs, layout modes, and image representations', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="mixed-text-runs"');
+      expect(document).toContain('id="mixed-text-regular"');
+      expect(document).toContain('id="mixed-text-emphasis"');
+      expect(document).toContain('id="mixed-text-strong"');
+      expect(document).toContain('id="flex-layout"');
+      expect(document).toContain('id="grid-layout"');
+      expect(document).toContain('gap: normal');
+      expect(document).toContain('id="fixture-image"');
+      expect(document).toContain('src="/resources/fixture-image.svg"');
+      expect(document).toContain('id="background-image"');
+      expect(document).toContain('background-image: url("/resources/fixture-image.svg")');
+      expect(document).toContain('id="inline-svg"');
+      expect(document).toContain('<circle');
+
+      const image = await fetch(`${fixtureServer.url}/resources/fixture-image.svg`);
+      expect(image.status).toBe(200);
+      expect(image.headers.get('content-type')).toContain('image/svg+xml');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serve failed resources and redirect secondary resources without redirecting the document', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 

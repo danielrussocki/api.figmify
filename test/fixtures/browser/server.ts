@@ -10,6 +10,7 @@ export interface BrowserFixtureServer {
 const FIXTURE_FILES = new Map([
   ['/browser-fixtures.html', 'browser-fixtures.html'],
   ['/iframe.html', 'iframe.html'],
+  ['/resources/fixture-image.svg', 'fixture-image.svg'],
 ]);
 
 /** Starts an ephemeral local server used only by browser integration tests. */
@@ -67,7 +68,10 @@ export async function startBrowserFixtureServer(): Promise<BrowserFixtureServer>
     }
 
     const document = await readFile(new URL(`./${fixtureFile}`, import.meta.url), 'utf8');
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    const contentType = fixtureFile.endsWith('.svg')
+      ? 'image/svg+xml'
+      : 'text/html; charset=utf-8';
+    response.writeHead(200, { 'content-type': contentType });
     response.end(document);
   });
 

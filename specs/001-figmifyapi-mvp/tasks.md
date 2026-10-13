@@ -251,7 +251,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** existen fixtures con metadatos HTML, `display: none`, `hidden`, opacidad cero, tamaño cero, posición fija y SVG con caja.
 
-- [ ] **T59. Crear fixtures para texto mixto, layout e imágenes.**
+- [x] **T59. Crear fixtures para texto mixto, layout e imágenes.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** existen fixtures con runs de texto de estilos distintos, flex, grid, `gap: normal`, imágenes `img`, fondos de imagen y SVG inline.
 
