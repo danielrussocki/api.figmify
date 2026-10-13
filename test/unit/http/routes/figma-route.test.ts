@@ -52,6 +52,7 @@ describe('GET /v1/figma', () => {
     expect(execute).toHaveBeenCalledWith({
       url: 'https://example.com/page#heading',
       viewport: { width: 1280, height: 720, deviceScaleFactor: 2 },
+      includeHidden: false,
     });
   });
 
@@ -67,6 +68,23 @@ describe('GET /v1/figma', () => {
     expect(execute).toHaveBeenCalledWith({
       url: 'https://example.com/',
       viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
+      includeHidden: false,
+    });
+  });
+
+  test('passes includeHidden=true to the Figma use case', async () => {
+    const { application, execute } = createApplication();
+
+    const response = await application.inject({
+      method: 'GET',
+      url: '/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=true',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(execute).toHaveBeenCalledWith({
+      url: 'https://example.com/',
+      viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
+      includeHidden: true,
     });
   });
 

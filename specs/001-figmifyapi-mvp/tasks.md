@@ -303,11 +303,11 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** los catálogos solo contienen recursos perceptibles referenciados por nodos visibles incluidos, sin colores de alfa cero ni entradas de gradientes, imágenes, filtros o mezclas.
 
-- [ ] **T72. Implementar la colección global de assets tipográficos usados.**
+- [x] **T72. Implementar la colección global de assets tipográficos usados.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `assets` agrupa familias y pesos de nodos visibles incluidos y añade URL solo cuando puede determinarse.
 
-- [ ] **T73. Integrar `includeHidden` en el caso de uso y la ruta Figma.**
+- [x] **T73. Integrar `includeHidden` en el caso de uso y la ruta Figma.**
   - **RF:** RF-1, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `/v1/figma` entrega el árbol compacto con el filtrado solicitado y mantiene la traducción de errores sin resultados parciales.
 

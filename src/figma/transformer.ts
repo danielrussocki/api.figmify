@@ -14,6 +14,7 @@ import {
   createTypographyStyleCatalog,
 } from './style-catalog.js';
 import { parseFigmaPaints } from './paint-parser.js';
+import { collectUsedFontAssets } from './font-assets.js';
 
 const EMPTY_RECT = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
 const EXCLUDED_FIGMA_TAGS = new Set([
@@ -336,8 +337,11 @@ function isExcludedFigmaTag(tagName: string): boolean {
 }
 
 /** Converts a complete extraction document into the versioned Figma contract. */
-export function transformExtractionDocument(extraction: ExtractionDocument): FigmaDocument {
-  const document = transformExtractionNode(extraction.document);
+export function transformExtractionDocument(
+  extraction: ExtractionDocument,
+  options: TransformExtractionNodeOptions = {},
+): FigmaDocument {
+  const document = transformExtractionNode(extraction.document, options);
   const referencedNodeIds = collectReferencedCatalogNodeIds(document);
   const colors = createColorStyleCatalog(extraction.document, referencedNodeIds.colors);
   const typographies = createTypographyStyleCatalog(extraction.document, referencedNodeIds.typographies);
@@ -348,7 +352,7 @@ export function transformExtractionDocument(extraction: ExtractionDocument): Fig
       viewport: { ...extraction.source.viewport },
     },
     styles: { colors, typographies },
-    assets: [],
+    assets: collectUsedFontAssets(document),
     document,
   };
 }

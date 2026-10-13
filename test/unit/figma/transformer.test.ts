@@ -444,6 +444,57 @@ describe('transformExtractionNode', () => {
 });
 
 describe('transformExtractionDocument', () => {
+  test('collects deterministic font assets for visible included text runs', () => {
+    const typography = {
+      'font-size': '16px',
+      'font-style': 'normal',
+      'line-height': '24px',
+      'letter-spacing': 'normal',
+      'text-transform': 'none',
+    };
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
+    const extraction: ExtractionDocument = {
+      schemaVersion: '1.0',
+      source: {
+        url: 'https://example.com/',
+        viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
+        environment: { locale: 'en-US', timezone: 'UTC', colorScheme: 'light', reducedMotion: 'no-preference' },
+      },
+      document: node({
+        id: 'node-root',
+        tagName: 'html',
+        layout: visibleBox,
+        children: [
+          node({
+            id: 'node-inter-regular',
+            tagName: 'span',
+            text: 'Regular',
+            layout: visibleBox,
+            styles: { ...typography, 'font-family': 'Inter, sans-serif', 'font-weight': '400' },
+          }),
+          node({
+            id: 'node-inter-bold',
+            tagName: 'span',
+            text: 'Bold',
+            layout: visibleBox,
+            styles: { ...typography, 'font-family': '"Inter", Arial', 'font-weight': '700' },
+          }),
+          node({
+            id: 'node-hidden',
+            tagName: 'span',
+            text: 'Hidden',
+            layout: visibleBox,
+            styles: { ...typography, 'font-family': 'Roboto, sans-serif', 'font-weight': '500', display: 'none' },
+          }),
+        ],
+      }),
+    };
+
+    expect(transformExtractionDocument(extraction).assets).toEqual([
+      { family: 'Inter', weights: [400, 700] },
+    ]);
+  });
+
   test('builds catalogs only from perceptible resources used by visible included nodes', () => {
     const typography = {
       'font-family': 'Inter, sans-serif',

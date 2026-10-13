@@ -9,10 +9,6 @@ export function registerFigmaRoute(
 ): void {
   application.get<{ Querystring: FigmaQuery }>('/v1/figma', async (request) => {
     const normalizedRequest = normalizeFigmaQuery(request.query);
-    const extractionRequest = {
-      url: normalizedRequest.url,
-      viewport: normalizedRequest.viewport,
-    };
-    return createFigmaDocument.execute(extractionRequest);
+    return createFigmaDocument.execute(normalizedRequest);
   });
 }

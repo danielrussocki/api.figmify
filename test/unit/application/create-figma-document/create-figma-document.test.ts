@@ -55,6 +55,35 @@ describe('CreateFigmaDocumentUseCase', () => {
     expect(extractor.extract).toHaveBeenCalledWith(request);
   });
 
+  test('filters hidden nodes according to includeHidden without passing it to the extraction port', async () => {
+    const extractionWithHiddenNode: ExtractionDocument = {
+      ...extraction,
+      document: {
+        ...extraction.document,
+        children: [{
+          id: 'node-hidden',
+          tagName: 'div',
+          attributes: { hidden: '' },
+          resources: [],
+          text: null,
+          styles: {},
+          pseudoElements: { before: null, after: null },
+          children: [],
+        }],
+      },
+    };
+    const extractor: ExtractionPort = { extract: vi.fn().mockResolvedValue(extractionWithHiddenNode) };
+    const useCase = new CreateFigmaDocumentUseCase(extractor);
+
+    const hiddenExcluded = await useCase.execute({ ...request, includeHidden: false });
+    const hiddenIncluded = await useCase.execute({ ...request, includeHidden: true });
+
+    expect(hiddenExcluded.document.children).toEqual([]);
+    expect(hiddenIncluded.document.children).toMatchObject([{ id: 'node-hidden', isVisible: false }]);
+    expect(extractor.extract).toHaveBeenNthCalledWith(1, request);
+    expect(extractor.extract).toHaveBeenNthCalledWith(2, request);
+  });
+
   test('propagates extraction errors without attempting to return a partial Figma document', async () => {
     const error = { code: 'UPSTREAM_FAILURE', message: 'The upstream site could not be processed.' };
     const extractor: ExtractionPort = { extract: vi.fn().mockRejectedValue(error) };
