@@ -36,8 +36,29 @@
        #mixed-text-strong { font-size: 20px; font-weight: 700; }
        #direct-mixed-text { font: 16px/24px Arial, sans-serif; }
        #direct-text-emphasis { color: rgb(180, 20, 20); font-size: 20px; font-style: italic; }
-      #flex-layout { display: flex; flex-direction: row; gap: 12px; }
-      #grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+       #flex-layout { display: flex; flex-direction: row; gap: 12px; }
+       #flex-auto-layout-horizontal {
+         display: flex;
+         flex-direction: row;
+         gap: 12px;
+         padding: 8px 16px 24px 32px;
+         justify-content: space-between;
+         align-items: center;
+         width: 400px;
+         height: 100px;
+       }
+       #flex-auto-layout-vertical {
+         display: flex;
+         flex-direction: column;
+         gap: 10px;
+         padding: 4px 12px 20px 28px;
+         justify-content: flex-end;
+         align-items: flex-start;
+         width: 400px;
+         height: 140px;
+       }
+       #flex-horizontal-growing-item, #flex-vertical-growing-item { flex-grow: 1; }
+       #grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
       #normal-gap-layout { display: flex; gap: normal; }
       #background-image {
         width: 64px;
@@ -64,9 +85,17 @@
          <p id="pseudo-element">Pseudo-element host</p>
          <p id="mixed-text-runs"><span id="mixed-text-regular">Regular run</span><em id="mixed-text-emphasis">emphasized run</em><strong id="mixed-text-strong">strong run</strong></p>
          <p id="direct-mixed-text">Hello <em id="direct-text-emphasis">world</em> again</p>
-         <section id="hidden-text-subtree" hidden>Hidden direct <span>hidden child</span> text</section>
-         <div id="flex-layout"><div>Flex first item</div><div>Flex second item</div></div>
-        <div id="grid-layout"><div>Grid first item</div><div>Grid second item</div></div>
+          <section id="hidden-text-subtree" hidden>Hidden direct <span>hidden child</span> text</section>
+          <div id="flex-layout"><div>Flex first item</div><div>Flex second item</div></div>
+          <div id="flex-auto-layout-horizontal">
+            <div id="flex-horizontal-growing-item">Horizontal growing item</div>
+            <div>Horizontal fixed item</div>
+          </div>
+          <div id="flex-auto-layout-vertical">
+            <div id="flex-vertical-growing-item">Vertical growing item</div>
+            <div>Vertical fixed item</div>
+          </div>
+         <div id="grid-layout"><div>Grid first item</div><div>Grid second item</div></div>
         <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
         <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
         <div id="background-image" role="img" aria-label="Background image fixture"></div>

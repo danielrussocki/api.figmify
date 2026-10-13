@@ -403,7 +403,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** los contratos representan `strokeWeight` uniforme, `strokeWeights` y `strokes` por lado, además de efectos `DROP_SHADOW` e `INNER_SHADOW` con color, desplazamiento, radio y extensión numéricos.
 
-- [ ] **T96. Crear una fixture de Auto Layout flex con padding y separación efectiva.**
+- [x] **T96. Crear una fixture de Auto Layout flex con padding y separación efectiva.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture contiene un contenedor flex horizontal y otro vertical con `gap`, padding físico, `justify-content`, `align-items` e hijo con `flex-grow` verificables.
 

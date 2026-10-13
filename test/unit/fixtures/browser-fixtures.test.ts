@@ -65,6 +65,34 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves horizontal and vertical flex Auto Layout scenarios with effective spacing', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="flex-auto-layout-horizontal"');
+      expect(document).toContain('flex-direction: row');
+      expect(document).toContain('gap: 12px');
+      expect(document).toContain('padding: 8px 16px 24px 32px');
+      expect(document).toContain('justify-content: space-between');
+      expect(document).toContain('align-items: center');
+      expect(document).toContain('id="flex-horizontal-growing-item"');
+      expect(document).toContain('flex-grow: 1');
+      expect(document).toContain('id="flex-auto-layout-vertical"');
+      expect(document).toContain('flex-direction: column');
+      expect(document).toContain('gap: 10px');
+      expect(document).toContain('padding: 4px 12px 20px 28px');
+      expect(document).toContain('justify-content: flex-end');
+      expect(document).toContain('align-items: flex-start');
+      expect(document).toContain('id="flex-vertical-growing-item"');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serve failed resources and redirect secondary resources without redirecting the document', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 
