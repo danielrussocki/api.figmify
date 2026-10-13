@@ -120,6 +120,67 @@ describe('transformExtractionNode', () => {
     expect(transformExtractionNode(extraction).characters).toBeUndefined();
   });
 
+  test('interleaves direct text runs and element text leaves in DOM order with independent styles', () => {
+    const parentStyles = {
+      'font-family': 'Inter, sans-serif',
+      'font-size': '16px',
+      'font-weight': '400',
+      'line-height': 'normal',
+      'letter-spacing': 'normal',
+      'text-align': 'left',
+    };
+    const extraction = node({
+      id: 'node-paragraph',
+      tagName: 'p',
+      styles: parentStyles,
+      directTextRuns: [
+        { characters: 'Hello ', childNodeIndex: 0, styles: parentStyles },
+        { characters: '!', childNodeIndex: 2, styles: parentStyles },
+      ],
+      children: [node({
+        id: 'node-emphasis',
+        tagName: 'em',
+        text: 'world',
+        styles: {
+          ...parentStyles,
+          'font-weight': '700',
+          'font-style': 'italic',
+        },
+      })],
+    });
+
+    const result = transformExtractionNode(extraction);
+
+    expect(result.type).toBe('FRAME');
+    expect(result.characters).toBeUndefined();
+    expect(result.children).toMatchObject([
+      {
+        id: 'node-paragraph-text-0',
+        tag: '#text',
+        type: 'TEXT',
+        characters: 'Hello ',
+        styles: { fontFamily: 'Inter', fontWeight: 400, lineHeight: 19.2 },
+        children: [],
+      },
+      {
+        id: 'node-emphasis',
+        tag: 'em',
+        type: 'TEXT',
+        characters: 'world',
+        styles: { fontFamily: 'Inter', fontWeight: 700, lineHeight: 19.2 },
+        children: [],
+      },
+      {
+        id: 'node-paragraph-text-2',
+        tag: '#text',
+        type: 'TEXT',
+        characters: '!',
+        styles: { fontFamily: 'Inter', fontWeight: 400, lineHeight: 19.2 },
+        children: [],
+      },
+    ]);
+  });
+
   test('normalizes the style of every TEXT run into Figma typography values', () => {
     const result = transformExtractionNode(node({
       tagName: 'span',

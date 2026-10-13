@@ -345,7 +345,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el extractor conserva cada nodo de texto renderizado que sea hijo directo de un elemento, con sus caracteres y estilos efectivos, e ignora texto no renderizado sin duplicarlo en el texto de sus contenedores.
 
-- [ ] **T82. Transformar texto directo y texto de elementos en nodos `TEXT` hoja.**
+- [x] **T82. Transformar texto directo y texto de elementos en nodos `TEXT` hoja.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `/v1/figma` emite todas las ejecuciones de texto en orden DOM, incluidos casos como `Hello <em>world</em>`, no asigna `characters` a contenedores y normaliza el estilo de cada ejecución de forma independiente.
 

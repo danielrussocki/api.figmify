@@ -1,4 +1,4 @@
-import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
+import type { DirectTextRun, ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
 import type {
   FigmaDocument,
   FigmaLayoutMode,
@@ -60,29 +60,31 @@ function mapExtractionNode(
   const positioning = determinePositioning(node.styles);
   const paints = parseFigmaPaints(node.styles);
   const image = imageData(node, type);
-  const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
+  const contentOrigin = getContentOrigin(rect, node.styles);
+  const mapChild = (child: ExtractionNode): FigmaNode | undefined => {
     if (isExcludedFigmaTag(child.tagName)) {
-      return [];
+      return undefined;
     }
 
     if (!includeHidden && !isVisible) {
-      return [];
+      return undefined;
     }
 
     const childRect = toFigmaRect(child.layout?.rect);
     const childIsVisible = isVisible && determineVisibility(child, childRect, false);
     if (!includeHidden && !childIsVisible) {
-      return [];
+      return undefined;
     }
 
-    return [mapExtractionNode(
+    return mapExtractionNode(
       child,
-      getContentOrigin(rect, node.styles),
+      contentOrigin,
       isVisible,
       false,
       includeHidden,
-    )];
-  });
+    );
+  };
+  const children = mapChildrenAndDirectTextRuns(node, mapChild, rect, contentOrigin, isVisible, includeHidden);
 
   return {
     id: node.id,
@@ -107,6 +109,77 @@ function mapExtractionNode(
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     ...(textStyle === undefined ? {} : { styles: textStyle }),
     children,
+  };
+}
+
+/**
+ * Rebuilds direct text placement among element children from their retained
+ * child-node indexes. Shadow children remain after the light-DOM sequence.
+ */
+function mapChildrenAndDirectTextRuns(
+  node: ExtractionNode,
+  mapChild: (child: ExtractionNode) => FigmaNode | undefined,
+  parentRect: FigmaRect,
+  parentContentOrigin: ContentOrigin,
+  isVisible: boolean,
+  includeHidden: boolean,
+): FigmaNode[] {
+  const children: FigmaNode[] = [];
+  const directTextRuns = [...(node.directTextRuns ?? [])]
+    .sort((left, right) => left.childNodeIndex - right.childNodeIndex);
+  let childIndex = 0;
+
+  for (const [textRunIndex, textRun] of directTextRuns.entries()) {
+    const elementCountBeforeRun = Math.max(0, Math.min(
+      node.children.length,
+      textRun.childNodeIndex - textRunIndex,
+    ));
+    while (childIndex < elementCountBeforeRun) {
+      const child = mapChild(node.children[childIndex++]);
+      if (child !== undefined) children.push(child);
+    }
+
+    if (includeHidden || isVisible) {
+      children.push(mapDirectTextRun(node, textRun, parentRect, parentContentOrigin, isVisible));
+    }
+  }
+
+  for (; childIndex < node.children.length; childIndex += 1) {
+    const child = mapChild(node.children[childIndex]);
+    if (child !== undefined) children.push(child);
+  }
+
+  for (const shadowChild of node.shadowChildren ?? []) {
+    const child = mapChild(shadowChild);
+    if (child !== undefined) children.push(child);
+  }
+
+  return children;
+}
+
+function mapDirectTextRun(
+  parent: ExtractionNode,
+  textRun: DirectTextRun,
+  parentRect: FigmaRect,
+  parentContentOrigin: ContentOrigin,
+  isVisible: boolean,
+): FigmaNode {
+  const paints = parseFigmaPaints(textRun.styles);
+  const textStyle = normalizeTextStyle(textRun.styles);
+
+  return {
+    id: `${parent.id}-text-${textRun.childNodeIndex}`,
+    tag: '#text',
+    type: 'TEXT',
+    rect: parentRect,
+    relativeRect: toRelativeRect(parentRect, parentContentOrigin),
+    isVisible,
+    ...(paints.fills === null ? {} : { fills: paints.fills }),
+    ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
+    ...(paints.effects === null ? {} : { effects: paints.effects }),
+    characters: textRun.characters,
+    ...(textStyle === undefined ? {} : { styles: textStyle }),
+    children: [],
   };
 }
 
