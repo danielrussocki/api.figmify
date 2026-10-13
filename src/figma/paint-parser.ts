@@ -18,9 +18,12 @@ export interface FigmaPaintProperties {
 }
 
 /** Converts the supported computed CSS paint values to structured Figma values. */
-export function parseFigmaPaints(styles: Record<string, string>): FigmaPaintProperties {
+export function parseFigmaPaints(
+  styles: Record<string, string>,
+  includeTextColor = true,
+): FigmaPaintProperties {
   const backgroundFill = perceptibleColor(styles['background-color']);
-  const textFill = perceptibleColor(styles.color);
+  const textFill = includeTextColor ? perceptibleColor(styles.color) : null;
   const fills = backgroundFill ?? textFill;
   const radii = parseCornerRadii(styles);
   const strokes = parseStrokes(styles);

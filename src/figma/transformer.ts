@@ -62,7 +62,7 @@ function mapExtractionNode(
   const autoLayout = determineAutoLayout(node.styles);
   const positioning = determinePositioning(node.styles);
   const layoutGrow = determineLayoutGrow(node.styles, parentHasAutoLayout);
-  const paints = parseFigmaPaints(node.styles);
+  const paints = parseFigmaPaints(node.styles, type === 'TEXT');
   const image = imageData(node, type);
   const mapChild = (child: ExtractionNode): FigmaNode | undefined => {
     if (isExcludedFigmaTag(child.tagName)) {
@@ -108,7 +108,7 @@ function mapExtractionNode(
     ...(layoutGrow === undefined ? {} : { layoutGrow }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
-    ...(paints.fills === null ? {} : { fills: paints.fills }),
+    fills: paints.fills ?? [],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
     ...(paints.strokeWeight === undefined ? {} : { strokeWeight: paints.strokeWeight }),
     ...(paints.strokeWeights === undefined ? {} : { strokeWeights: paints.strokeWeights }),
@@ -187,7 +187,7 @@ function mapDirectTextRun(
     rect: parentRect,
     relativeRect: toRelativeRect(parentRect, parentRect),
     isVisible,
-    ...(paints.fills === null ? {} : { fills: paints.fills }),
+    fills: paints.fills ?? [],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
     ...(paints.effects === null ? {} : { effects: paints.effects }),
     characters: textRun.characters,

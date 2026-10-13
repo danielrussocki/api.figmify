@@ -477,7 +477,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `fills` representa una colección que puede estar vacía y una pintura de imagen exige `type: "IMAGE"`, `src` y `scaleMode: "FILL"`, sin permitir que se modele como pintura sólida.
 
-- [ ] **T114. Emitir `fills: []` para nodos sin relleno perceptible.**
+- [x] **T114. Emitir `fills: []` para nodos sin relleno perceptible.**
   - **RF:** RF-5.
   - **Hecho cuando:** el transformador devuelve siempre un arreglo vacío de `fills` para un nodo sin fondo sólido, gradiente ni imagen perceptible y no genera un color de respaldo.
 

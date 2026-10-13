@@ -19,6 +19,14 @@ function node(overrides: Partial<ExtractionNode> = {}): ExtractionNode {
 }
 
 describe('transformExtractionNode', () => {
+  test('emits an empty fills array for a frame without a perceptible background', () => {
+    const transformed = transformExtractionNode(node({
+      styles: { color: 'rgb(17, 24, 39)', 'background-color': 'transparent' },
+    }));
+
+    expect(transformed.fills).toEqual([]);
+  });
+
   test('excludes non-renderable and metadata tags from the Figma tree', () => {
     const excludedTags = ['head', 'meta', 'title', 'script', 'link', 'style', 'base', 'template', 'noscript'];
     const extraction = node({
@@ -79,6 +87,7 @@ describe('transformExtractionNode', () => {
           rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           isVisible: true,
+          fills: [],
           characters: 'Welcome',
           children: [],
         },
@@ -89,6 +98,7 @@ describe('transformExtractionNode', () => {
           rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           isVisible: true,
+          fills: [],
           characters: 'From shadow DOM',
           children: [],
         },
