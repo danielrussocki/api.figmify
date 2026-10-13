@@ -95,7 +95,9 @@ function mapExtractionNode(
       : { relativeRect: toRelativeRect(rect, parentRect) }),
     isVisible,
     ...(autoLayout.layoutMode === undefined ? {} : { layoutMode: autoLayout.layoutMode }),
+    ...(autoLayout.itemSpacing === undefined ? {} : { itemSpacing: autoLayout.itemSpacing }),
     ...(autoLayout.gap === undefined ? {} : { gap: autoLayout.gap }),
+    ...(autoLayout.padding === undefined ? {} : { padding: autoLayout.padding }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     ...(paints.fills === null ? {} : { fills: paints.fills }),
@@ -273,22 +275,53 @@ function escapeSvgText(value: string): string {
 
 function determineAutoLayout(styles: Record<string, string>): {
   layoutMode?: FigmaLayoutMode;
+  itemSpacing?: number;
   gap?: number;
+  padding?: FigmaNode['padding'];
 } {
   const display = styles.display?.trim().toLowerCase();
   if (display !== 'flex' && display !== 'inline-flex' && display !== 'grid' && display !== 'inline-grid') {
     return {};
   }
 
-  const layoutMode: FigmaLayoutMode = display === 'flex' || display === 'inline-flex'
-    ? flexLayoutMode(styles['flex-direction'])
-    : 'HORIZONTAL';
-  const gap = cssNumber(styles.gap);
+  if (display === 'grid' || display === 'inline-grid') {
+    const gap = cssNumber(styles.gap);
+    return {
+      layoutMode: 'HORIZONTAL',
+      ...(gap === undefined || gap === 0 ? {} : { gap }),
+    };
+  }
+
+  const layoutMode = flexLayoutMode(styles['flex-direction']);
+  const spacing = flexMainAxisSpacing(styles, layoutMode);
 
   return {
     layoutMode,
-    ...(gap === undefined || gap === 0 ? {} : { gap }),
+    itemSpacing: spacing,
+    gap: spacing,
+    padding: flexPadding(styles),
   };
+}
+
+/** Returns the effective flex main-axis gap, treating CSS `normal` as zero. */
+function flexMainAxisSpacing(styles: Record<string, string>, layoutMode: FigmaLayoutMode): number {
+  const property = layoutMode === 'HORIZONTAL' ? 'column-gap' : 'row-gap';
+  return nonNegativeCssNumber(styles[property] ?? styles.gap);
+}
+
+/** Emits the complete physical padding required by every Figma Auto Layout node. */
+function flexPadding(styles: Record<string, string>): NonNullable<FigmaNode['padding']> {
+  return {
+    top: nonNegativeCssNumber(styles['padding-top']),
+    right: nonNegativeCssNumber(styles['padding-right']),
+    bottom: nonNegativeCssNumber(styles['padding-bottom']),
+    left: nonNegativeCssNumber(styles['padding-left']),
+  };
+}
+
+function nonNegativeCssNumber(value: string | undefined): number {
+  const number = cssNumber(value);
+  return number === undefined || number < 0 ? 0 : number;
 }
 
 /** Maps the computed CSS flex main axis to its corresponding Figma layout axis. */

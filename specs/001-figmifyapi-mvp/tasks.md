@@ -427,7 +427,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** `row` y `row-reverse` producen `HORIZONTAL`, `column` y `column-reverse` producen `VERTICAL`, y los nodos que no son flex ni grid omiten las propiedades de Auto Layout.
 
-- [ ] **T102. Implementar la separación y el padding de Auto Layout para flex.**
+- [x] **T102. Implementar la separación y el padding de Auto Layout para flex.**
   - **RF:** RF-5.
   - **Hecho cuando:** un contenedor flex emite `itemSpacing` y `gap` iguales según su eje principal, normaliza la separación no efectiva a `0` e incluye siempre los cuatro valores numéricos de `padding`.
 

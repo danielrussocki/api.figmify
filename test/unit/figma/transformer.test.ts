@@ -219,6 +219,45 @@ describe('transformExtractionNode', () => {
     expect(result).toMatchObject({ layoutMode, gap: 16 });
   });
 
+  test('maps flex main-axis spacing and all physical padding values', () => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'flex',
+        'flex-direction': 'row',
+        'column-gap': '16px',
+        'row-gap': '8px',
+        'padding-top': '4px',
+        'padding-right': '8px',
+        'padding-bottom': '12px',
+        'padding-left': '16px',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      layoutMode: 'HORIZONTAL',
+      itemSpacing: 16,
+      gap: 16,
+      padding: { top: 4, right: 8, bottom: 12, left: 16 },
+    });
+  });
+
+  test('uses row-gap as the spacing for vertical flex layouts', () => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'inline-flex',
+        'flex-direction': 'column-reverse',
+        'column-gap': '16px',
+        'row-gap': '8px',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      layoutMode: 'VERTICAL',
+      itemSpacing: 8,
+      gap: 8,
+    });
+  });
+
   test('omits Auto Layout properties for a node that is neither flex nor grid', () => {
     const result = transformExtractionNode(node({
       styles: { display: 'block', 'flex-direction': 'column', gap: '16px' },
@@ -340,13 +379,21 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test('prunes a zero CSS gap while retaining the structural Auto Layout mode', () => {
+  test('normalizes ineffective flex spacing and omitted padding to zero', () => {
     const result = transformExtractionNode(node({
-      styles: { display: 'flex', 'flex-direction': 'row', gap: '0px' },
+      styles: {
+        display: 'flex',
+        'flex-direction': 'row',
+        'column-gap': 'normal',
+        'padding-top': '0px',
+        'padding-left': 'invalid',
+      },
     }));
 
     expect(result.layoutMode).toBe('HORIZONTAL');
-    expect(result.gap).toBeUndefined();
+    expect(result.itemSpacing).toBe(0);
+    expect(result.gap).toBe(0);
+    expect(result.padding).toEqual({ top: 0, right: 0, bottom: 0, left: 0 });
   });
 
   test('keeps normalized typography values required by the structured text contract', () => {
