@@ -43,6 +43,17 @@ const nonPublicUrls = [
 ] as const;
 
 describe('enforcePublicUrlPolicy', () => {
+  test.each([
+    ['IPv4 private', '10.0.0.1'],
+    ['IPv6 private', 'fc00::1'],
+  ])('rejects a hostname resolving to a non-public %s address', async (_, address) => {
+    const policy = new PublicUrlPolicy(async () => [address]);
+
+    await expect(
+      policy.enforceResolved(new URL('https://internal.example'), 'production'),
+    ).rejects.toMatchObject({ code: 'URL_NOT_PUBLIC' });
+  });
+
   test('rejects a production hostname when any resolved address is not public', async () => {
     const resolver = async (): Promise<readonly string[]> => [
       '203.0.114.10',
@@ -66,6 +77,29 @@ describe('enforcePublicUrlPolicy', () => {
       '203.0.114.10',
       '2001:4860:4860::8888',
     ]);
+  });
+
+  test('allows a hostname when every resolved address is public', async () => {
+    const resolver = async (): Promise<readonly string[]> => [
+      '8.8.8.8',
+      '2001:4860:4860::8888',
+    ];
+    const policy = new PublicUrlPolicy(resolver);
+
+    await expect(
+      policy.enforceResolved(new URL('https://public.example'), 'production'),
+    ).resolves.toBeUndefined();
+  });
+
+  test('allows a hostname resolving to a non-public address in development', async () => {
+    const resolver = async (): Promise<readonly string[]> => {
+      throw new Error('Development must not resolve hostnames for the public URL policy.');
+    };
+    const policy = new PublicUrlPolicy(resolver);
+
+    await expect(
+      policy.enforceResolved(new URL('https://internal.example'), 'development'),
+    ).resolves.toBeUndefined();
   });
 
   test('keeps literal address validation without resolving it', async () => {

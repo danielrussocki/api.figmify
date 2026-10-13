@@ -333,7 +333,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** antes de cargar la URL inicial y cada destino de navegación principal se comprueban todas las direcciones resueltas; si cualquiera es loopback, privada, reservada o interna se devuelve `URL_NOT_PUBLIC` y no se carga el destino.
 
-- [ ] **T79. Probar la política DNS para URL inicial y destinos de navegación principal.**
+- [x] **T79. Probar la política DNS para URL inicial y destinos de navegación principal.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las pruebas unitarias cubren hostnames que resuelven a IPv4 e IPv6 no públicas y a direcciones públicas, las de integración cubren un destino principal no público resuelto por DNS, y desarrollo continúa permitiendo esos destinos.
 

@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vite
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
 import type { ExtractionNode, Viewport } from '../../../src/contracts/extraction/extraction-document.js';
+import { PublicUrlPolicy } from '../../../src/security/url-policy/public-url-policy.js';
 import { startBrowserFixtureServer, type BrowserFixtureServer } from '../../fixtures/browser/server.js';
 
 const requestViewport = {
@@ -69,6 +70,22 @@ describe('PlaywrightExtractor integration', () => {
     })).rejects.toMatchObject({
       code: 'UPSTREAM_FAILURE',
       message: 'The upstream site could not be processed.',
+    });
+  });
+
+  test('blocks a DNS-resolved non-public main document destination in production', async () => {
+    const policy = new PublicUrlPolicy(async (hostname) => {
+      expect(hostname).toBe('internal.example');
+      return ['fd00::1'];
+    });
+    const extractor = new PlaywrightExtractor(browser, 'production', policy);
+
+    await expect(extractor.extract({
+      url: 'https://internal.example/private',
+      viewport: requestViewport,
+    })).rejects.toMatchObject({
+      code: 'URL_NOT_PUBLIC',
+      message: 'The URL must resolve to a public address.',
     });
   });
 
