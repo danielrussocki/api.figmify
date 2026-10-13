@@ -1,19 +1,27 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import { CreateFigmaDocumentUseCase } from '../../../../src/application/create-figma-document/create-figma-document.js';
+import {
+  CreateFigmaDocumentUseCase,
+  type CreateFigmaDocumentRequest,
+} from '../../../../src/application/create-figma-document/create-figma-document.js';
 import type { ExtractionDocument } from '../../../../src/contracts/extraction/extraction-document.js';
 import type { ExtractionPort, ExtractionRequest } from '../../../../src/contracts/extraction/extraction-port.js';
 
-const request: ExtractionRequest = {
+const extractionRequest: ExtractionRequest = {
   url: 'https://example.com/page',
   viewport: { width: 1280, height: 720, deviceScaleFactor: 2 },
+};
+
+const request: CreateFigmaDocumentRequest = {
+  ...extractionRequest,
+  includeHidden: false,
 };
 
 const extraction: ExtractionDocument = {
   schemaVersion: '1.0',
   source: {
-    url: request.url,
-    viewport: request.viewport,
+    url: extractionRequest.url,
+    viewport: extractionRequest.viewport,
     environment: {
       locale: 'en-US',
       timezone: 'UTC',
@@ -52,7 +60,7 @@ describe('CreateFigmaDocumentUseCase', () => {
         children: [],
       },
     });
-    expect(extractor.extract).toHaveBeenCalledWith(request);
+    expect(extractor.extract).toHaveBeenCalledWith(extractionRequest);
   });
 
   test('filters hidden nodes according to includeHidden without passing it to the extraction port', async () => {
@@ -80,8 +88,8 @@ describe('CreateFigmaDocumentUseCase', () => {
 
     expect(hiddenExcluded.document.children).toEqual([]);
     expect(hiddenIncluded.document.children).toMatchObject([{ id: 'node-hidden', isVisible: false }]);
-    expect(extractor.extract).toHaveBeenNthCalledWith(1, request);
-    expect(extractor.extract).toHaveBeenNthCalledWith(2, request);
+    expect(extractor.extract).toHaveBeenNthCalledWith(1, extractionRequest);
+    expect(extractor.extract).toHaveBeenNthCalledWith(2, extractionRequest);
   });
 
   test('propagates extraction errors without attempting to return a partial Figma document', async () => {

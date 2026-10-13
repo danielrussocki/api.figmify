@@ -381,7 +381,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** fixtures y pruebas de transformación cubren una fuente accesible con URL, una fuente sin URL determinable y una fuente usada exclusivamente por nodos ocultos o excluidos.
 
-- [ ] **T91. Corregir los errores de tipos de la suite de pruebas.**
+- [x] **T91. Corregir los errores de tipos de la suite de pruebas.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** las solicitudes de prueba de `CreateFigmaDocumentUseCase` incluyen `includeHidden` y `pnpm typecheck` termina sin errores.
 

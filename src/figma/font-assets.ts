@@ -48,17 +48,21 @@ function sourceUrlForFamily(
   family: string,
   weights: ReadonlySet<number>,
 ): string | undefined {
-  if (sources instanceof Map) {
-    return resolvedHttpUrl(sources.get(family));
+  if (isFontFaceSourceList(sources)) {
+    const matchingSource = sources
+      .filter((source) => source.family === family && weights.has(source.weight))
+      .map((source) => ({ ...source, url: resolvedHttpUrl(source.url) }))
+      .filter((source): source is FontFaceSource & { url: string } => source.url !== undefined)
+      .sort((left, right) => left.weight - right.weight || left.url.localeCompare(right.url))[0];
+
+    return matchingSource?.url;
   }
 
-  const matchingSource = sources
-    .filter((source) => source.family === family && weights.has(source.weight))
-    .map((source) => ({ ...source, url: resolvedHttpUrl(source.url) }))
-    .filter((source): source is FontFaceSource & { url: string } => source.url !== undefined)
-    .sort((left, right) => left.weight - right.weight || left.url.localeCompare(right.url))[0];
+  return resolvedHttpUrl(sources.get(family));
+}
 
-  return matchingSource?.url;
+function isFontFaceSourceList(sources: FontSourceUrls): sources is readonly FontFaceSource[] {
+  return Array.isArray(sources);
 }
 
 function resolvedHttpUrl(value: string | undefined): string | undefined {

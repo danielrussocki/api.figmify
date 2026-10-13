@@ -135,7 +135,9 @@ function mapChildrenAndDirectTextRuns(
       textRun.childNodeIndex - textRunIndex,
     ));
     while (childIndex < elementCountBeforeRun) {
-      const child = mapChild(node.children[childIndex++]);
+      const rawChild = node.children[childIndex++];
+      if (rawChild === undefined) continue;
+      const child = mapChild(rawChild);
       if (child !== undefined) children.push(child);
     }
 
@@ -145,7 +147,9 @@ function mapChildrenAndDirectTextRuns(
   }
 
   for (; childIndex < node.children.length; childIndex += 1) {
-    const child = mapChild(node.children[childIndex]);
+    const rawChild = node.children[childIndex];
+    if (rawChild === undefined) continue;
+    const child = mapChild(rawChild);
     if (child !== undefined) children.push(child);
   }
 
