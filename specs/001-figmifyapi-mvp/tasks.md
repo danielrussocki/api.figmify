@@ -505,6 +505,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-3, RF-5.
   - **Hecho cuando:** una solicitud HTTP real valida en el contrato JSON que no hay fallback gris para el nodo transparente y que los nodos `IMAGE` contienen `fills` de tipo `IMAGE` con `src` y `scaleMode: "FILL"`.
 
-- [ ] **T121. Ejecutar la regresión final de rellenos transparentes e imágenes.**
+- [x] **T121. Ejecutar la regresión final de rellenos transparentes e imágenes.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las pruebas nuevas quedan incluidas en la suite y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
