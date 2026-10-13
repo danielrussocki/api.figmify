@@ -501,7 +501,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la extracción de las nuevas fixtures y su transformación preservan el nodo sin relleno como `fills: []` y emiten las dos fuentes de imagen como pinturas `IMAGE` con URL resuelta.
 
-- [ ] **T120. Añadir una prueba de extremo a extremo de `/v1/figma` para los nuevos rellenos.**
+- [x] **T120. Añadir una prueba de extremo a extremo de `/v1/figma` para los nuevos rellenos.**
   - **RF:** RF-1, RF-3, RF-5.
   - **Hecho cuando:** una solicitud HTTP real valida en el contrato JSON que no hay fallback gris para el nodo transparente y que los nodos `IMAGE` contienen `fills` de tipo `IMAGE` con `src` y `scaleMode: "FILL"`.
 

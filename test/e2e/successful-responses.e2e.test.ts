@@ -139,6 +139,30 @@ describe('successful HTTP responses', () => {
     });
   });
 
+  test('GET /v1/figma returns empty transparent fills and IMAGE paints for resolved images', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+    const source = `${fixtureServer.url}/resources/fixture-image.svg`;
+    const transparentNode = findParentOfCharacters(document.document, 'No perceptible background fixture');
+    const imageNodes = flattenNodes(document.document)
+      .filter((node) => node.type === 'IMAGE' && node.image?.src === source);
+
+    expect(validateFigmaDocumentV1(document)).toEqual([]);
+    expect(transparentNode?.fills).toEqual([]);
+    expect(imageNodes).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        image: expect.objectContaining({ naturalWidth: expect.any(Number) }),
+        fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
+      }),
+      expect.objectContaining({
+        image: { src: source, backgroundSize: 'cover' },
+        fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
+      }),
+    ]));
+    expect(imageNodes.flatMap((node) => node.fills ?? [])).toEqual(
+      imageNodes.map(() => ({ type: 'IMAGE', src: source, scaleMode: 'FILL' })),
+    );
+  });
+
   test('GET /v1/figma applies includeHidden to the hidden text subtree', async () => {
     const withoutHidden = await requestJson<FigmaDocument>('/v1/figma');
     const withHidden = await requestJson<FigmaDocument>('/v1/figma', { includeHidden: 'true' });
