@@ -2,6 +2,19 @@ import type { ResourceReference, Viewport } from '../extraction/extraction-docum
 
 export type FigmaSchemaVersion = '1.0';
 
+export interface FigmaRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
+
+export interface FigmaRelativeRect extends FigmaRect {}
+
+export type FigmaIsVisible = boolean;
+
 export type FigmaNodeType = 'DOCUMENT' | 'FRAME' | 'TEXT' | 'IMAGE' | 'VECTOR' | 'RECTANGLE';
 
 export type ColorStyleId = `color-${string}`;

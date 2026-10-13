@@ -211,7 +211,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** los tipos de extracción representan el rectángulo de documento, los datos de `offsetParent`, las dimensiones naturales y `objectFit` sin usar valores CSS textuales para la geometría.
 
-- [ ] **T49. Definir los contratos tipados de geometría y visibilidad Figma.**
+- [x] **T49. Definir los contratos tipados de geometría y visibilidad Figma.**
   - **RF:** RF-5.
   - **Hecho cuando:** existen tipos para `rect`, `relativeRect` e `isVisible`, y cada rectángulo exige `x`, `y`, `width`, `height`, `top` y `left` numéricos.
 

@@ -5,13 +5,47 @@ import type {
   ColorStyle,
   ColorStyleId,
   FigmaDocument,
+  FigmaIsVisible,
   FigmaNode,
   FigmaNodeType,
+  FigmaRect,
+  FigmaRelativeRect,
   FigmaRgbaColor,
   FigmaStyleCatalog,
   TypographyStyle,
   TypographyStyleId,
 } from '../../../src/contracts/figma/figma-document.js';
+
+test('models Figma absolute and relative rectangles with typed visibility', () => {
+  const rect: FigmaRect = {
+    x: 24,
+    y: 32,
+    width: 180,
+    height: 39,
+    top: 32,
+    left: 24,
+  };
+  const relativeRect: FigmaRelativeRect = {
+    x: 24,
+    y: 32,
+    width: 180,
+    height: 39,
+    top: 32,
+    left: 24,
+  };
+  const isVisible: FigmaIsVisible = true;
+
+  expectTypeOf(rect).toEqualTypeOf<FigmaRect>();
+  expectTypeOf(relativeRect).toEqualTypeOf<FigmaRelativeRect>();
+  expectTypeOf(isVisible).toEqualTypeOf<boolean>();
+  expectTypeOf(rect.x).toEqualTypeOf<number>();
+  expectTypeOf(rect.y).toEqualTypeOf<number>();
+  expectTypeOf(rect.width).toEqualTypeOf<number>();
+  expectTypeOf(rect.height).toEqualTypeOf<number>();
+  expectTypeOf(rect.top).toEqualTypeOf<number>();
+  expectTypeOf(rect.left).toEqualTypeOf<number>();
+  expectTypeOf(relativeRect).toEqualTypeOf<FigmaRect>();
+});
 
 test('models the versioned Figma document contract and reusable style catalogs', () => {
   const viewport: Viewport = {
