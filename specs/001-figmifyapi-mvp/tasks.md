@@ -557,7 +557,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la extracción de la fixture conserva las opacidades textuales en el documento raw y su transformación emite las opacidades numéricas en los nodos Figma correspondientes.
 
-- [ ] **T133. Añadir pruebas de extremo a extremo de opacidad en ambas rutas.**
+- [x] **T133. Añadir pruebas de extremo a extremo de opacidad en ambas rutas.**
   - **RF:** RF-1, RF-2, RF-3, RF-5.
   - **Hecho cuando:** solicitudes HTTP reales a `/v1/extract` y `/v1/figma` verifican respectivamente `styles.opacity` textual y `opacity` numérico para los nodos visibles de la fixture.
 

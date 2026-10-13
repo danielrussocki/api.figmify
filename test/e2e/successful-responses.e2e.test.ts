@@ -174,6 +174,29 @@ describe('successful HTTP responses', () => {
     }]);
   });
 
+  test('GET /v1/extract preserves textual fractional opacity for visible fixture nodes', async () => {
+    const document = await requestJson<ExtractionDocument>('/v1/extract');
+    const element = findExtractionNodeById(document.document, 'fractional-opacity-element');
+    const directText = findExtractionNodeById(document.document, 'fractional-opacity-direct-text');
+
+    expect(element?.styles.opacity).toBe('0.8');
+    expect(directText?.directTextRuns).toEqual([
+      expect.objectContaining({
+        characters: 'Visible direct text with fractional opacity',
+        styles: expect.objectContaining({ opacity: '0.5' }),
+      }),
+    ]);
+  });
+
+  test('GET /v1/figma maps fractional opacity to visible numeric node opacity', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+    const element = findParentOfCharacters(document.document, 'Visible element with fractional opacity');
+    const directText = findNodeByCharacters(document.document, 'Visible direct text with fractional opacity');
+
+    expect(element).toMatchObject({ opacity: 0.8, isVisible: true });
+    expect(directText).toMatchObject({ opacity: 0.5, isVisible: true });
+  });
+
   test('GET /v1/figma returns a FigmaDocument v1 with the configured viewport', async () => {
     const document = await requestJson<FigmaDocument>('/v1/figma', {
       width: '1440',
@@ -255,6 +278,20 @@ function findNodeByCharacters(
 
   for (const child of node.children) {
     const match = findNodeByCharacters(child, characters);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findExtractionNodeById(
+  node: ExtractionDocument['document'],
+  id: string,
+): ExtractionDocument['document'] | undefined {
+  if (node.attributes.id === id) return node;
+
+  for (const child of node.children) {
+    const match = findExtractionNodeById(child, id);
     if (match !== undefined) return match;
   }
 
