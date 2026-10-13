@@ -451,7 +451,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** un borde sólido perceptible e idéntico en sus cuatro lados emite una pintura `SOLID` RGBA normalizada y un `strokeWeight` numérico.
 
-- [ ] **T108. Implementar la preservación de bordes sólidos distintos por lado.**
+- [x] **T108. Implementar la preservación de bordes sólidos distintos por lado.**
   - **RF:** RF-5.
   - **Hecho cuando:** colores o grosores distintos generan entradas de `strokes` identificadas por lado y `strokeWeights` sin colapsarlos a un único borde uniforme.
 

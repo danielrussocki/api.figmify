@@ -47,6 +47,33 @@ describe('parseFigmaPaints', () => {
     });
   });
 
+  test('preserves distinct solid borders by physical side and retains all widths', () => {
+    expect(parseFigmaPaints({
+      'border-top-width': '1px',
+      'border-right-width': '2px',
+      'border-bottom-width': '3px',
+      'border-left-width': '4px',
+      'border-top-style': 'solid',
+      'border-right-style': 'solid',
+      'border-bottom-style': 'solid',
+      'border-left-style': 'solid',
+      'border-top-color': 'rgb(255, 0, 0)',
+      'border-right-color': 'rgb(0, 255, 0)',
+      'border-bottom-color': 'rgb(0, 0, 255)',
+      'border-left-color': 'rgb(255, 255, 0)',
+    })).toEqual({
+      fills: null,
+      strokes: [
+        { type: 'SOLID', side: 'TOP', weight: 1, color: { r: 1, g: 0, b: 0, a: 1 } },
+        { type: 'SOLID', side: 'RIGHT', weight: 2, color: { r: 0, g: 1, b: 0, a: 1 } },
+        { type: 'SOLID', side: 'BOTTOM', weight: 3, color: { r: 0, g: 0, b: 1, a: 1 } },
+        { type: 'SOLID', side: 'LEFT', weight: 4, color: { r: 1, g: 1, b: 0, a: 1 } },
+      ],
+      strokeWeights: { top: 1, right: 2, bottom: 3, left: 4 },
+      effects: null,
+    });
+  });
+
   test('converts perceptible CSS box shadows to DROP_SHADOW effects', () => {
     expect(parseFigmaPaints({
       'box-shadow': 'rgba(0, 0, 0, 0.25) 2px -3px 4px 1px, 0 1px 2px rgb(10, 20, 30)',

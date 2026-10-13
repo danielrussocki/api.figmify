@@ -4,12 +4,14 @@ import type {
   FigmaFills,
   FigmaRgbaColor,
   FigmaStrokes,
+  FigmaStrokeWeights,
 } from '../contracts/figma/figma-document.js';
 
 export interface FigmaPaintProperties {
   fills: FigmaFills;
   strokes: FigmaStrokes;
   strokeWeight?: number;
+  strokeWeights?: FigmaStrokeWeights;
   effects: FigmaEffect[] | null;
   cornerRadius?: number;
   cornerRadii?: FigmaCornerRadii;
@@ -31,7 +33,7 @@ export function parseFigmaPaints(styles: Record<string, string>): FigmaPaintProp
   };
 }
 
-function parseStrokes(styles: Record<string, string>): Pick<FigmaPaintProperties, 'strokes' | 'strokeWeight'> {
+function parseStrokes(styles: Record<string, string>): Pick<FigmaPaintProperties, 'strokes' | 'strokeWeight' | 'strokeWeights'> {
   const sides = ['top', 'right', 'bottom', 'left'] as const;
   const strokes = sides.flatMap((side) => {
     const style = styles[`border-${side}-style`]?.trim().toLowerCase();
@@ -41,11 +43,16 @@ function parseStrokes(styles: Record<string, string>): Pick<FigmaPaintProperties
       return [];
     }
 
-    return [{ type: 'SOLID' as const, weight, color }];
+    return [{ type: 'SOLID' as const, side: side.toUpperCase() as Uppercase<typeof side>, weight, color }];
   });
 
   if (strokes.length === 0) return { strokes: null };
-  if (!isUniformStroke(strokes)) return { strokes };
+  if (!isUniformStroke(strokes)) {
+    const [top, right, bottom, left] = sides.map((side) => cssNumber(styles[`border-${side}-width`]));
+    return top === undefined || right === undefined || bottom === undefined || left === undefined
+      ? { strokes: strokes.map(({ side: _side, ...stroke }) => stroke) }
+      : { strokes, strokeWeights: { top, right, bottom, left } };
+  }
 
   return {
     strokes: [{ type: 'SOLID', weight: strokes[0]!.weight, color: strokes[0]!.color }],
