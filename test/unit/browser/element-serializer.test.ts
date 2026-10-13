@@ -7,10 +7,20 @@ interface ElementFixture {
   children: ElementFixture[];
   shadowRoot?: { children: ElementFixture[] } | null;
   innerText?: string;
+  getBoundingClientRect?: () => {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    top: number;
+    left: number;
+  };
   hasAttribute(name: string): boolean;
   ownerDocument?: {
-    defaultView?: {
-      getComputedStyle(element: Element, pseudoElement?: string): {
+      defaultView?: {
+        scrollX?: number;
+        scrollY?: number;
+        getComputedStyle(element: Element, pseudoElement?: string): {
         getPropertyValue(property: string): unknown;
         display?: string;
         visibility?: string;
@@ -107,9 +117,55 @@ describe('serializeElement', () => {
       attributes: {},
       resources: [],
       text: null,
+      layout: {
+        rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+      },
       styles: {},
       pseudoElements: { before: null, after: null },
       children: [],
+    });
+  });
+
+  test('converts a viewport rectangle to absolute document coordinates', () => {
+    const root = element('DIV');
+    root.getBoundingClientRect = () => ({
+      x: 20,
+      y: 30,
+      width: 40,
+      height: 50,
+      top: 30,
+      left: 20,
+    });
+    root.ownerDocument = {
+      defaultView: {
+        scrollX: 100,
+        scrollY: 200,
+        getComputedStyle: () => ({ getPropertyValue: () => '' }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.layout).toEqual({
+      rect: { x: 120, y: 230, width: 40, height: 50, top: 230, left: 120 },
+    });
+  });
+
+  test('uses six zero values when an element has no box', () => {
+    const root = element('DIV');
+    root.getBoundingClientRect = () => ({
+      x: 20,
+      y: 30,
+      width: 0,
+      height: 0,
+      top: 30,
+      left: 20,
+    });
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.layout).toEqual({
+      rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
     });
   });
 

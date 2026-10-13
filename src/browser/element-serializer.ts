@@ -1,4 +1,5 @@
 import type { ExtractionNode, PseudoElement } from '../contracts/extraction/extraction-document.js';
+import { inspectLayout } from './layout-inspector.js';
 import { VISUAL_PROPERTIES } from './visual-properties.js';
 
 const ALLOWED_ATTRIBUTE_NAMES = [
@@ -50,6 +51,7 @@ export function serializeElement(element: Element): ExtractionNode {
       attributes: selectAllowedAttributes(currentElement),
       resources: resolveResourceReferences(currentElement),
       text: readRenderedText(currentElement),
+      layout: inspectLayout(currentElement),
       styles: readVisualStyles(currentElement),
       pseudoElements: {
         before: readPseudoElement(currentElement, '::before'),

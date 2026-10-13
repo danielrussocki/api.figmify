@@ -253,6 +253,26 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
     return result;
   };
 
+  const layout = (element: Element): ExtractionNode['layout'] => {
+    const zeroRect = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
+    try {
+      const box = element.getBoundingClientRect();
+      if (box.width === 0 && box.height === 0) return { rect: zeroRect };
+
+      const rect = {
+        x: box.x + window.scrollX,
+        y: box.y + window.scrollY,
+        width: box.width,
+        height: box.height,
+        top: box.top + window.scrollY,
+        left: box.left + window.scrollX,
+      };
+      return Object.values(rect).every(Number.isFinite) ? { rect } : { rect: zeroRect };
+    } catch {
+      return { rect: zeroRect };
+    }
+  };
+
   const serialize = (element: Element): ExtractionNode => {
     const attributes: Record<string, string> = {};
     for (const name of element.getAttributeNames()) {
@@ -269,6 +289,7 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
       attributes,
       resources: resources(element),
       text,
+      layout: layout(element),
       styles: readStyles(element),
       pseudoElements: { before: pseudoElement(element, '::before'), after: pseudoElement(element, '::after') },
       children: Array.from(element.children, serialize),

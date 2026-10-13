@@ -235,7 +235,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4, RF-5.
   - **Hecho cuando:** las pruebas cubren omisión, ambos valores válidos y valores inválidos con el error HTTP normalizado.
 
-- [ ] **T55. Extraer el rectángulo absoluto del documento en el inspector de layout.**
+- [x] **T55. Extraer el rectángulo absoluto del documento en el inspector de layout.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el serializador convierte `getBoundingClientRect()` a coordenadas de documento y entrega seis números, incluidos ceros para nodos sin caja.
 
