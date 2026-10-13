@@ -283,10 +283,33 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test('does not invent image data for an element classified from its background', () => {
+  test('maps a single resolvable background image with its known size', () => {
     const result = transformExtractionNode(node({
       tagName: 'div',
-      styles: { 'background-image': 'url("https://example.com/background.png")' },
+      styles: {
+        'background-image': 'url("https://example.com/background.png")',
+        'background-size': 'cover',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      type: 'IMAGE',
+      image: {
+        src: 'https://example.com/background.png',
+        backgroundSize: 'cover',
+      },
+    });
+  });
+
+  test.each([
+    ['multiple background sources', 'url("https://example.com/first.png"), url("https://example.com/second.png")', 'cover'],
+    ['unknown background size', 'url("https://example.com/background.png")', 'auto'],
+    ['unresolvable background source', 'url("/background.png")', 'contain'],
+  ])('omits background image data for %s', (_, backgroundImage, backgroundSize) => {
+    const result = transformExtractionNode(node({
+      tagName: 'div',
+      resources: [{ kind: 'image', url: 'https://example.com/background.png' }],
+      styles: { 'background-image': backgroundImage, 'background-size': backgroundSize },
     }));
 
     expect(result.type).toBe('IMAGE');

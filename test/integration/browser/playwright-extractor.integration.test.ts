@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vite
 
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
 import type { ExtractionNode, Viewport } from '../../../src/contracts/extraction/extraction-document.js';
+import { transformExtractionNode } from '../../../src/figma/transformer.js';
 import { PublicUrlPolicy } from '../../../src/security/url-policy/public-url-policy.js';
 import { startBrowserFixtureServer, type BrowserFixtureServer } from '../../fixtures/browser/server.js';
 
@@ -107,6 +108,26 @@ describe('PlaywrightExtractor integration', () => {
     expect(findNodeById(document.document, 'visible-text')?.styles['font-weight']).toBe('700');
     expect(iframe).toMatchObject({ tagName: 'iframe', children: [] });
     expect(JSON.stringify(iframe)).not.toContain('Iframe-only content');
+  });
+
+  test('extracts and transforms a resolvable background image with its known size', async () => {
+    await shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+
+    const document = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: requestViewport,
+    });
+    const background = findNodeById(document.document, 'background-image');
+
+    expect(background).toBeDefined();
+    expect(transformExtractionNode(background as ExtractionNode)).toMatchObject({
+      type: 'IMAGE',
+      image: {
+        src: `${fixtureServer.url}/resources/fixture-image.svg`,
+        backgroundSize: 'cover',
+      },
+    });
   });
 
   test('preserves ordered direct text runs without duplicating mixed text and omits hidden text runs', async () => {

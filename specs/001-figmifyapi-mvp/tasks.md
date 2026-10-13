@@ -357,7 +357,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** antes de cambiar la respuesta se actualizan la especificación versionada y el plan para permitir que un nodo `IMAGE` de fondo incluya fuente y ajuste resueltos sin exigir dimensiones naturales que no puedan determinarse.
 
-- [ ] **T85. Extraer y transformar las fuentes y ajustes de imágenes de fondo determinables.**
+- [x] **T85. Extraer y transformar las fuentes y ajustes de imágenes de fondo determinables.**
   - **RF:** RF-5.
   - **Hecho cuando:** una imagen de fondo con URL absoluta o resoluble y `background-size` conocido produce un nodo `IMAGE` con su fuente y ajuste; los valores ambiguos, múltiples o no resolubles se omiten sin inventar datos.
 

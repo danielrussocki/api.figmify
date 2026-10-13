@@ -184,7 +184,11 @@ function mapDirectTextRun(
 }
 
 function imageData(node: ExtractionNode, type: FigmaNodeType): FigmaNode['image'] | undefined {
-  if (type !== 'IMAGE' || node.tagName.toLowerCase() !== 'img') return undefined;
+  if (type !== 'IMAGE') return undefined;
+
+  if (node.tagName.toLowerCase() !== 'img') {
+    return backgroundImageData(node);
+  }
 
   const src = node.resources.find((resource) => resource.kind === 'image')?.url;
   const { naturalWidth, naturalHeight, objectFit } = node.layout ?? {};
@@ -196,6 +200,51 @@ function imageData(node: ExtractionNode, type: FigmaNodeType): FigmaNode['image'
   }
 
   return { src, naturalWidth, naturalHeight, objectFit };
+}
+
+/**
+ * Retains background image data only when the computed declarations identify a
+ * single, absolute source and an unambiguous size. Relative declarations have
+ * already been resolved by the browser when computed styles are extracted.
+ */
+function backgroundImageData(node: ExtractionNode): FigmaNode['image'] | undefined {
+  const src = singleAbsoluteBackgroundUrl(node.styles['background-image']);
+  const backgroundSize = knownBackgroundSize(node.styles['background-size']);
+
+  if (src === undefined || backgroundSize === undefined) {
+    return undefined;
+  }
+
+  return { src, backgroundSize };
+}
+
+function singleAbsoluteBackgroundUrl(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+
+  const match = /^\s*url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]+))\s*\)\s*$/iu.exec(value);
+  const reference = match?.[1] ?? match?.[2] ?? match?.[3];
+  if (reference === undefined || reference.length === 0) return undefined;
+
+  try {
+    return new URL(reference).href;
+  } catch {
+    return undefined;
+  }
+}
+
+function knownBackgroundSize(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  if (normalized === undefined || normalized.length === 0 || normalized.includes(',')) {
+    return undefined;
+  }
+
+  const lowerCase = normalized.toLowerCase();
+  if (['auto', 'normal', 'initial', 'inherit', 'unset', 'revert', 'revert-layer'].includes(lowerCase)
+    || /(^|\s)auto(\s|$)/u.test(lowerCase)) {
+    return undefined;
+  }
+
+  return normalized;
 }
 
 function isNaturalDimension(value: number | undefined): value is number {
