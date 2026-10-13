@@ -200,6 +200,45 @@ describe('transformExtractionNode', () => {
     expect(result.children.map((child) => child.isVisible)).toEqual([true, true]);
   });
 
+  test('removes invisible subtrees when includeHidden is false', () => {
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
+    const result = transformExtractionNode(node({
+      id: 'node-root',
+      layout: visibleBox,
+      children: [
+        node({ id: 'node-visible', layout: visibleBox }),
+        node({
+          id: 'node-hidden',
+          styles: { display: 'none' },
+          layout: visibleBox,
+          children: [node({ id: 'node-hidden-descendant', layout: visibleBox })],
+        }),
+      ],
+    }), { includeHidden: false });
+
+    expect(result.children.map((child) => child.id)).toEqual(['node-visible']);
+  });
+
+  test('preserves invisible subtrees marked as hidden when includeHidden is true', () => {
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 } };
+    const result = transformExtractionNode(node({
+      id: 'node-root',
+      layout: visibleBox,
+      children: [node({
+        id: 'node-hidden',
+        styles: { opacity: '0' },
+        layout: visibleBox,
+        children: [node({ id: 'node-hidden-descendant', layout: visibleBox })],
+      })],
+    }), { includeHidden: true });
+
+    expect(result.children).toMatchObject([{
+      id: 'node-hidden',
+      isVisible: false,
+      children: [{ id: 'node-hidden-descendant', isVisible: false }],
+    }]);
+  });
+
   test.each([
     ['html', null, [], {}, 'FRAME'],
     ['svg', null, [], {}, 'FRAME'],

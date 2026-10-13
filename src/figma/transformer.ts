@@ -23,18 +23,48 @@ const EXCLUDED_FIGMA_TAGS = new Set([
  * Reusable style catalog references are assigned when the full document is
  * assembled; this conversion intentionally preserves raw computed styles.
  */
-export function transformExtractionNode(node: ExtractionNode): FigmaNode {
-  return mapExtractionNode(node);
+export interface TransformExtractionNodeOptions {
+  includeHidden?: boolean;
 }
 
-function mapExtractionNode(node: ExtractionNode, parentContentOrigin?: ContentOrigin): FigmaNode {
+export function transformExtractionNode(
+  node: ExtractionNode,
+  options: TransformExtractionNodeOptions = {},
+): FigmaNode {
+  return mapExtractionNode(node, undefined, true, true, options.includeHidden ?? true);
+}
+
+function mapExtractionNode(
+  node: ExtractionNode,
+  parentContentOrigin: ContentOrigin | undefined,
+  parentIsVisible: boolean,
+  isRoot: boolean,
+  includeHidden: boolean,
+): FigmaNode {
   const rect = toFigmaRect(node.layout?.rect);
+  const isVisible = parentIsVisible && determineVisibility(node, rect, isRoot);
   const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
     if (isExcludedFigmaTag(child.tagName)) {
       return [];
     }
 
-    return [mapExtractionNode(child, getContentOrigin(rect, node.styles))];
+    if (!includeHidden && !isVisible) {
+      return [];
+    }
+
+    const childRect = toFigmaRect(child.layout?.rect);
+    const childIsVisible = isVisible && determineVisibility(child, childRect, false);
+    if (!includeHidden && !childIsVisible) {
+      return [];
+    }
+
+    return [mapExtractionNode(
+      child,
+      getContentOrigin(rect, node.styles),
+      isVisible,
+      false,
+      includeHidden,
+    )];
   });
 
   return {
@@ -45,7 +75,7 @@ function mapExtractionNode(node: ExtractionNode, parentContentOrigin?: ContentOr
     ...(parentContentOrigin === undefined
       ? {}
       : { relativeRect: toRelativeRect(rect, parentContentOrigin) }),
-    isVisible: determineVisibility(node, rect, parentContentOrigin === undefined),
+    isVisible,
     children,
   };
 }

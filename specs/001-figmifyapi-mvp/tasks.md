@@ -271,7 +271,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** se consideran `display`, `visibility`, `hidden`, opacidad, tamaño y `offsetParent` aplicable, sin ocultar falsamente raíz, SVG o elementos fijos con caja.
 
-- [ ] **T64. Implementar el filtrado de subárboles por `includeHidden`.**
+- [x] **T64. Implementar el filtrado de subárboles por `includeHidden`.**
   - **RF:** RF-1, RF-5.
   - **Hecho cuando:** con `false` se eliminan nodos invisibles y descendientes, y con `true` se conservan con `isVisible: false`.
 
