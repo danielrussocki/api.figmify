@@ -49,6 +49,7 @@ export function serializeElement(element: Element): ExtractionNode {
     const id = `node-${nextId++}`;
     nodeIds.set(currentElement, id);
     const directTextRuns = readDirectTextRuns(currentElement);
+    const svg = readInlineSvgMarkup(currentElement);
     const node: ExtractionNode = {
       id,
       tagName: currentElement.tagName.toLowerCase(),
@@ -61,6 +62,7 @@ export function serializeElement(element: Element): ExtractionNode {
         before: readPseudoElement(currentElement, '::before'),
         after: readPseudoElement(currentElement, '::after'),
       },
+      ...(svg === undefined ? {} : { svg }),
       children: Array.from(currentElement.children, serialize),
     };
 
@@ -76,6 +78,15 @@ export function serializeElement(element: Element): ExtractionNode {
   };
 
   return serialize(element);
+}
+
+function readInlineSvgMarkup(element: Element): string | undefined {
+  if (element.tagName.toLowerCase() !== 'svg') {
+    return undefined;
+  }
+
+  const markup = element.outerHTML;
+  return typeof markup === 'string' && markup.length > 0 ? markup : undefined;
 }
 
 function selectAllowedAttributes(element: Element): Record<string, string> {

@@ -87,6 +87,7 @@ test('models the versioned extraction document contract', () => {
     { content: string | null; styles: Record<string, string> } | null
   >();
   expectTypeOf(document.document.resources).toEqualTypeOf<ResourceReference[]>();
+  expectTypeOf(document.document.svg).toEqualTypeOf<string | undefined>();
   expectTypeOf(document.document.directTextRuns).toEqualTypeOf<DirectTextRun[] | undefined>();
   expectTypeOf(node.directTextRuns?.[0]?.characters).toEqualTypeOf<string | undefined>();
   expectTypeOf(node.directTextRuns?.[0]?.childNodeIndex).toEqualTypeOf<number | undefined>();

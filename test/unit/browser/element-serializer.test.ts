@@ -4,6 +4,7 @@ import { serializeElement } from '../../../src/browser/element-serializer.js';
 
 interface ElementFixture {
   tagName: string;
+  outerHTML?: string;
   children: ElementFixture[];
   childNodes?: Array<ElementFixture | { nodeType: number; textContent: string | null }>;
   shadowRoot?: { children: ElementFixture[] } | null;
@@ -458,6 +459,28 @@ describe('serializeElement', () => {
       'aria-label': 'Featured content',
       href: '/products',
     });
+  });
+
+  test('preserves complete inline SVG markup without expanding ordinary HTML attributes', () => {
+    const graphic = {
+      ...element('PATH'),
+      outerHTML: '<path d="M1 2L3 4" fill="#123456"></path>',
+    };
+    const svg = {
+      ...element('SVG', [graphic]),
+      outerHTML: '<svg viewBox="0 0 24 24"><path d="M1 2L3 4" fill="#123456"></path></svg>',
+      getAttributeNames: () => ['viewBox', 'data-private'],
+      getAttribute: (name: string) => ({ viewBox: '0 0 24 24', 'data-private': 'do not expose' })[name] ?? null,
+    };
+
+    const serialized = serializeElement(svg as unknown as Element);
+
+    expect(serialized).toMatchObject({
+      tagName: 'svg',
+      attributes: { viewBox: '0 0 24 24' },
+      svg: '<svg viewBox="0 0 24 24"><path d="M1 2L3 4" fill="#123456"></path></svg>',
+    });
+    expect(serialized.children[0]?.attributes).toEqual({});
   });
 
   test('resolves allowed resource references without treating ordinary links as resources', () => {

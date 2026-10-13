@@ -74,6 +74,8 @@ export interface ExtractionNode {
   layout?: ExtractionLayout;
   styles: Record<string, string>;
   pseudoElements: PseudoElements;
+  /** Complete serialized markup for an inline SVG root, when available. */
+  svg?: string;
   directTextRuns?: DirectTextRun[];
   children: ExtractionNode[];
   shadowChildren?: ExtractionNode[];

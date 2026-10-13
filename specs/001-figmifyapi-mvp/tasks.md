@@ -361,7 +361,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** una imagen de fondo con URL absoluta o resoluble y `background-size` conocido produce un nodo `IMAGE` con su fuente y ajuste; los valores ambiguos, múltiples o no resolubles se omiten sin inventar datos.
 
-- [ ] **T86. Conservar el marcado completo de los SVG inline en la extracción.**
+- [x] **T86. Conservar el marcado completo de los SVG inline en la extracción.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** la extracción conserva el marcado serializado del SVG inline, incluidos atributos y descendientes gráficos necesarios para recrearlo, sin convertirlo en una imagen basada en URL ni relajar la lista de atributos ordinarios de HTML.
 

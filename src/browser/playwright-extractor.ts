@@ -331,6 +331,9 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
     const text = textRuns.length === 0 && isRendered(element) && typeof (element as HTMLElement).innerText === 'string'
       ? (element as HTMLElement).innerText.trim() || null
       : null;
+    const svg = element.tagName.toLowerCase() === 'svg' && typeof element.outerHTML === 'string' && element.outerHTML.length > 0
+      ? element.outerHTML
+      : undefined;
     const node: ExtractionNode = {
       id,
       tagName: element.tagName.toLowerCase(),
@@ -340,6 +343,7 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
       layout: layout(element),
       styles: readStyles(element),
       pseudoElements: { before: pseudoElement(element, '::before'), after: pseudoElement(element, '::after') },
+      ...(svg === undefined ? {} : { svg }),
       children: Array.from(element.children, serialize),
     };
     if (textRuns.length > 0) node.directTextRuns = textRuns;

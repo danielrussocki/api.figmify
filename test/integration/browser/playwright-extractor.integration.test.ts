@@ -130,6 +130,26 @@ describe('PlaywrightExtractor integration', () => {
     });
   });
 
+  test('preserves complete inline SVG markup including graphical descendants and attributes', async () => {
+    await shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+
+    const document = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: requestViewport,
+    });
+    const svg = findNodeById(document.document, 'inline-svg');
+
+    expect(svg?.svg).toContain('<svg');
+    expect(svg?.svg).toContain('viewBox="0 0 64 48"');
+    expect(svg?.svg).toContain('<circle');
+    expect(svg?.svg).toContain('cx="24"');
+    expect(svg?.svg).toContain('cy="24"');
+    expect(svg?.svg).toContain('r="16"');
+    expect(svg?.svg).toContain('fill="rgb(20, 80, 160)"');
+    expect(svg?.resources).toEqual([]);
+  });
+
   test('preserves ordered direct text runs without duplicating mixed text and omits hidden text runs', async () => {
     await shortenPostLoadWait();
     const extractor = new PlaywrightExtractor(browser, 'development');
