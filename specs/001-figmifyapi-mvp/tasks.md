@@ -349,7 +349,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `/v1/figma` emite todas las ejecuciones de texto en orden DOM, incluidos casos como `Hello <em>world</em>`, no asigna `characters` a contenedores y normaliza el estilo de cada ejecución de forma independiente.
 
-- [ ] **T83. Añadir pruebas de texto directo, mixto y oculto.**
+- [x] **T83. Añadir pruebas de texto directo, mixto y oculto.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** las pruebas unitarias, de integración con Playwright y de extremo a extremo verifican que no se pierde ni se duplica texto directo, que los cambios de estilo producen ejecuciones ordenadas y que `includeHidden` aplica al subárbol correspondiente.
 

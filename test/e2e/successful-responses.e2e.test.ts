@@ -103,6 +103,28 @@ describe('successful HTTP responses', () => {
     expect(findNodesByTag(document.document, 'p').filter((node) => !node.isVisible)).toHaveLength(3);
   });
 
+  test('GET /v1/figma emits direct and styled text leaves in DOM order without duplication', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+    const textNodes = flattenNodes(document.document).filter((node) => node.type === 'TEXT');
+    const mixedCharacters = textNodes
+      .filter((node) => ['Hello ', 'world', ' again'].includes(node.characters ?? ''))
+      .map((node) => node.characters);
+
+    expect(mixedCharacters).toEqual(['Hello ', 'world', ' again']);
+    expect(textNodes.filter((node) => node.characters === 'Hello world again')).toHaveLength(0);
+  });
+
+  test('GET /v1/figma applies includeHidden to the hidden text subtree', async () => {
+    const withoutHidden = await requestJson<FigmaDocument>('/v1/figma');
+    const withHidden = await requestJson<FigmaDocument>('/v1/figma', { includeHidden: 'true' });
+
+    expect(findNodesByTag(withoutHidden.document, 'section')).toHaveLength(0);
+    expect(findNodesByTag(withHidden.document, 'section')).toMatchObject([{
+      isVisible: false,
+      children: [{ tag: 'span', isVisible: false }],
+    }]);
+  });
+
   test('GET /v1/figma returns a FigmaDocument v1 with the configured viewport', async () => {
     const document = await requestJson<FigmaDocument>('/v1/figma', {
       width: '1440',
@@ -172,4 +194,8 @@ function findNodesByTag(
 ): FigmaDocument['document'][] {
   return [node, ...node.children.flatMap((child) => findNodesByTag(child, tag))]
     .filter((candidate) => candidate.tag === tag);
+}
+
+function flattenNodes(node: FigmaDocument['document']): FigmaDocument['document'][] {
+  return [node, ...node.children.flatMap(flattenNodes)];
 }

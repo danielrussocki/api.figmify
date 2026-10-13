@@ -300,6 +300,24 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
     }
   };
 
+  const directTextRuns = (element: Element): NonNullable<ExtractionNode['directTextRuns']> => {
+    if (!isRendered(element)) return [];
+
+    const styles = readStyles(element);
+    const runs: NonNullable<ExtractionNode['directTextRuns']> = [];
+    for (const [childNodeIndex, childNode] of Array.from(element.childNodes).entries()) {
+      if (childNode.nodeType !== Node.TEXT_NODE
+        || typeof childNode.textContent !== 'string'
+        || childNode.textContent.trim().length === 0) {
+        continue;
+      }
+
+      runs.push({ characters: childNode.textContent, childNodeIndex, styles });
+    }
+
+    return runs;
+  };
+
   const serialize = (element: Element): ExtractionNode => {
     const id = `node-${nextId++}`;
     nodeIds.set(element, id);
@@ -309,7 +327,8 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
       const value = element.getAttribute(name);
       if (outputName !== undefined && value !== null) attributes[outputName] = value;
     }
-    const text = isRendered(element) && typeof (element as HTMLElement).innerText === 'string'
+    const textRuns = directTextRuns(element);
+    const text = textRuns.length === 0 && isRendered(element) && typeof (element as HTMLElement).innerText === 'string'
       ? (element as HTMLElement).innerText.trim() || null
       : null;
     const node: ExtractionNode = {
@@ -323,6 +342,7 @@ function serializeDocumentElement(visualProperties: string[]): ExtractionNode {
       pseudoElements: { before: pseudoElement(element, '::before'), after: pseudoElement(element, '::after') },
       children: Array.from(element.children, serialize),
     };
+    if (textRuns.length > 0) node.directTextRuns = textRuns;
     if (element.shadowRoot !== null) node.shadowChildren = Array.from(element.shadowRoot.children, serialize);
     return node;
   };

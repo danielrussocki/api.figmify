@@ -7,6 +7,7 @@ interface ElementFixture {
   children: ElementFixture[];
   childNodes?: Array<ElementFixture | { nodeType: number; textContent: string | null }>;
   shadowRoot?: { children: ElementFixture[] } | null;
+  parentElement?: ElementFixture | null;
   innerText?: string;
   offsetParent?: ElementFixture | null;
   naturalWidth?: number;
@@ -39,13 +40,18 @@ function element(
   innerText?: string,
   hidden = false,
 ): ElementFixture {
-  return {
+  const fixture: ElementFixture = {
     tagName,
     children,
     shadowRoot: null,
     innerText,
     hasAttribute: (name) => hidden && name === 'hidden',
   };
+  for (const child of children) {
+    child.parentElement = fixture;
+  }
+
+  return fixture;
 }
 
 describe('serializeElement', () => {
@@ -280,6 +286,38 @@ describe('serializeElement', () => {
     expect(serialized.children[0]?.text).toBeNull();
     expect(serialized.children[1]).not.toHaveProperty('directTextRuns');
     expect(serialized.children[1]?.text).toBeNull();
+  });
+
+  test('keeps mixed direct text separate from styled element text and excludes hidden text subtrees', () => {
+    const emphasis = element('EM', [], 'world');
+    const mixed = element('P', [emphasis], 'Hello world again');
+    mixed.childNodes = [
+      { nodeType: 3, textContent: 'Hello ' },
+      emphasis,
+      { nodeType: 3, textContent: ' again' },
+    ];
+    const hiddenEmphasis = element('EM', [], 'hidden child');
+    const hidden = element('SECTION', [hiddenEmphasis], 'Hidden direct hidden child', true);
+    hidden.childNodes = [
+      { nodeType: 3, textContent: 'Hidden direct ' },
+      hiddenEmphasis,
+    ];
+    const root = element('MAIN', [mixed, hidden]);
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.children[0]).toMatchObject({
+      text: null,
+      directTextRuns: [
+        { characters: 'Hello ', childNodeIndex: 0 },
+        { characters: ' again', childNodeIndex: 2 },
+      ],
+      children: [{ tagName: 'em', text: 'world' }],
+    });
+    expect(serialized.children[1]).toMatchObject({ text: null, children: [{ text: null }] });
+    expect(serialized.children[1]).not.toHaveProperty('directTextRuns');
+    expect(JSON.stringify(serialized.children[0])).toContain('Hello ');
+    expect(JSON.stringify(serialized.children[0])).not.toContain('Hello world again');
   });
 
   test('reads only permitted computed visual properties', () => {

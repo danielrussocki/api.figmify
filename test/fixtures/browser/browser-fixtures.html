@@ -12,9 +12,11 @@
       #fixed-position { position: fixed; top: 16px; left: 24px; width: 120px; height: 40px; }
       #pseudo-element::before { content: "Before fixture"; color: rgb(1, 2, 3); }
       #pseudo-element::after { content: "After fixture"; font-size: 16px; }
-      #mixed-text-runs { font: 16px/24px Arial, sans-serif; }
-      #mixed-text-emphasis { color: rgb(180, 20, 20); font-style: italic; }
-      #mixed-text-strong { font-size: 20px; font-weight: 700; }
+       #mixed-text-runs { font: 16px/24px Arial, sans-serif; }
+       #mixed-text-emphasis { color: rgb(180, 20, 20); font-style: italic; }
+       #mixed-text-strong { font-size: 20px; font-weight: 700; }
+       #direct-mixed-text { font: 16px/24px Arial, sans-serif; }
+       #direct-text-emphasis { color: rgb(180, 20, 20); font-size: 20px; font-style: italic; }
       #flex-layout { display: flex; flex-direction: row; gap: 12px; }
       #grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
       #normal-gap-layout { display: flex; gap: normal; }
@@ -37,9 +39,11 @@
        <svg id="fixture-svg" width="80" height="40" viewBox="0 0 80 40" role="img" aria-label="Boxed SVG fixture">
          <rect width="80" height="40" fill="rgb(1, 2, 3)"></rect>
        </svg>
-        <p id="pseudo-element">Pseudo-element host</p>
-        <p id="mixed-text-runs"><span id="mixed-text-regular">Regular run</span><em id="mixed-text-emphasis">emphasized run</em><strong id="mixed-text-strong">strong run</strong></p>
-        <div id="flex-layout"><div>Flex first item</div><div>Flex second item</div></div>
+         <p id="pseudo-element">Pseudo-element host</p>
+         <p id="mixed-text-runs"><span id="mixed-text-regular">Regular run</span><em id="mixed-text-emphasis">emphasized run</em><strong id="mixed-text-strong">strong run</strong></p>
+         <p id="direct-mixed-text">Hello <em id="direct-text-emphasis">world</em> again</p>
+         <section id="hidden-text-subtree" hidden>Hidden direct <span>hidden child</span> text</section>
+         <div id="flex-layout"><div>Flex first item</div><div>Flex second item</div></div>
         <div id="grid-layout"><div>Grid first item</div><div>Grid second item</div></div>
         <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
         <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">

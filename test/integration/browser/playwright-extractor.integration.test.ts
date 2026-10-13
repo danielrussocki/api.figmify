@@ -41,7 +41,10 @@ describe('PlaywrightExtractor integration', () => {
     });
 
     expect(requestedDelays).toEqual([30_000]);
-    expect(findNodeById(document.document, 'async-content')?.text).toBe('Asynchronous fixture text');
+    expect(findNodeById(document.document, 'async-content')).toMatchObject({
+      text: null,
+      directTextRuns: [{ characters: 'Asynchronous fixture text', childNodeIndex: 0 }],
+    });
   });
 
   test.each([
@@ -104,6 +107,34 @@ describe('PlaywrightExtractor integration', () => {
     expect(findNodeById(document.document, 'visible-text')?.styles['font-weight']).toBe('700');
     expect(iframe).toMatchObject({ tagName: 'iframe', children: [] });
     expect(JSON.stringify(iframe)).not.toContain('Iframe-only content');
+  });
+
+  test('preserves ordered direct text runs without duplicating mixed text and omits hidden text runs', async () => {
+    await shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+
+    const document = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: requestViewport,
+    });
+    const mixed = findNodeById(document.document, 'direct-mixed-text');
+    const hidden = findNodeById(document.document, 'hidden-text-subtree');
+
+    expect(mixed).toMatchObject({
+      text: null,
+      directTextRuns: [
+        { characters: 'Hello ', childNodeIndex: 0, styles: { 'font-size': '16px' } },
+        { characters: ' again', childNodeIndex: 2, styles: { 'font-size': '16px' } },
+      ],
+      children: [{
+        attributes: { id: 'direct-text-emphasis' },
+        text: null,
+        directTextRuns: [{ characters: 'world', childNodeIndex: 0 }],
+      }],
+    });
+    expect(JSON.stringify(mixed)).not.toContain('Hello world again');
+    expect(hidden).toMatchObject({ text: null, children: [{ text: null }] });
+    expect(hidden).not.toHaveProperty('directTextRuns');
   });
 });
 
