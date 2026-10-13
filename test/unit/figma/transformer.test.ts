@@ -144,6 +144,45 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test('maps flex layouts to their Figma axis and numeric gap', () => {
+    const horizontal = transformExtractionNode(node({
+      styles: { display: 'flex', 'flex-direction': 'row', gap: '16px' },
+    }));
+    const vertical = transformExtractionNode(node({
+      styles: { display: 'inline-flex', 'flex-direction': 'column-reverse', gap: '1.5px' },
+    }));
+
+    expect(horizontal).toMatchObject({ layoutMode: 'HORIZONTAL', gap: 16 });
+    expect(vertical).toMatchObject({ layoutMode: 'VERTICAL', gap: 1.5 });
+  });
+
+  test('maps grids to horizontal Auto Layout and omits non-numeric gaps', () => {
+    const result = transformExtractionNode(node({
+      styles: { display: 'grid', gap: 'normal' },
+    }));
+
+    expect(result.layoutMode).toBe('HORIZONTAL');
+    expect(result.gap).toBeUndefined();
+  });
+
+  test('maps absolute and sticky positioning with a numeric z-index only', () => {
+    const absolute = transformExtractionNode(node({
+      styles: { position: 'absolute', 'z-index': '20' },
+    }));
+    const sticky = transformExtractionNode(node({
+      styles: { position: 'sticky', 'z-index': 'auto' },
+    }));
+    const relative = transformExtractionNode(node({
+      styles: { position: 'relative', 'z-index': '4' },
+    }));
+
+    expect(absolute).toMatchObject({ position: 'absolute', zIndex: 20 });
+    expect(sticky).toMatchObject({ position: 'sticky' });
+    expect(sticky.zIndex).toBeUndefined();
+    expect(relative.position).toBeUndefined();
+    expect(relative.zIndex).toBeUndefined();
+  });
+
   test('omits the root relative rect and positions descendants from their represented parent content area', () => {
     const extraction = node({
       id: 'node-root',

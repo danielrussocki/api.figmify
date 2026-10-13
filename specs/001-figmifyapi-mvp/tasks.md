@@ -283,7 +283,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** cada run incluye familia sin fallbacks, tamaño, peso, `lineHeight`, `letterSpacing`, `textAlign` y `textAutoResize` con los tipos establecidos por el plan.
 
-- [ ] **T67. Implementar el mapeo de Auto Layout y posicionamiento.**
+- [x] **T67. Implementar el mapeo de Auto Layout y posicionamiento.**
   - **RF:** RF-5.
   - **Hecho cuando:** flex y grid emiten `layoutMode` y `gap` numéricos, mientras que nodos `absolute` o `sticky` incluyen `position` y `zIndex` cuando aplica.
 

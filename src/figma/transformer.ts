@@ -1,8 +1,10 @@
 import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction/extraction-document.js';
 import type {
   FigmaDocument,
+  FigmaLayoutMode,
   FigmaNode,
   FigmaNodeType,
+  FigmaPosition,
   FigmaRect,
   FigmaTextAlign,
   FigmaTextStyle,
@@ -52,6 +54,8 @@ function mapExtractionNode(
   const isVisible = parentIsVisible && determineVisibility(node, rect, isRoot);
   const type = determineFigmaNodeType(node);
   const textStyle = type === 'TEXT' ? normalizeTextStyle(node.styles) : undefined;
+  const autoLayout = determineAutoLayout(node.styles);
+  const positioning = determinePositioning(node.styles);
   const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
     if (isExcludedFigmaTag(child.tagName)) {
       return [];
@@ -85,9 +89,49 @@ function mapExtractionNode(
       ? {}
       : { relativeRect: toRelativeRect(rect, parentContentOrigin) }),
     isVisible,
+    ...(autoLayout.layoutMode === undefined ? {} : { layoutMode: autoLayout.layoutMode }),
+    ...(autoLayout.gap === undefined ? {} : { gap: autoLayout.gap }),
+    ...(positioning.position === undefined ? {} : { position: positioning.position }),
+    ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     ...(textStyle === undefined ? {} : { styles: textStyle }),
     children,
+  };
+}
+
+function determineAutoLayout(styles: Record<string, string>): {
+  layoutMode?: FigmaLayoutMode;
+  gap?: number;
+} {
+  const display = styles.display?.trim().toLowerCase();
+  if (display !== 'flex' && display !== 'inline-flex' && display !== 'grid' && display !== 'inline-grid') {
+    return {};
+  }
+
+  const flexDirection = styles['flex-direction']?.trim().toLowerCase();
+  const layoutMode: FigmaLayoutMode = (display === 'flex' || display === 'inline-flex')
+    && (flexDirection === 'column' || flexDirection === 'column-reverse')
+    ? 'VERTICAL'
+    : 'HORIZONTAL';
+  const gap = cssNumber(styles.gap);
+
+  return {
+    layoutMode,
+    ...(gap === undefined ? {} : { gap }),
+  };
+}
+
+function determinePositioning(styles: Record<string, string>): {
+  position?: FigmaPosition;
+  zIndex?: number;
+} {
+  const position = styles.position?.trim().toLowerCase();
+  if (position !== 'absolute' && position !== 'sticky') return {};
+
+  const zIndex = cssInteger(styles['z-index']);
+  return {
+    position,
+    ...(zIndex === undefined ? {} : { zIndex }),
   };
 }
 
@@ -136,6 +180,14 @@ function cssNumber(value: string | undefined): number | undefined {
 
   const number = Number(match[1]);
   return Number.isFinite(number) ? number : undefined;
+}
+
+function cssInteger(value: string | undefined): number | undefined {
+  const normalized = value?.trim();
+  if (normalized === undefined || !/^-?\d+$/u.test(normalized)) return undefined;
+
+  const number = Number(normalized);
+  return Number.isSafeInteger(number) ? number : undefined;
 }
 
 function fontWeightNumber(value: string | undefined): number | undefined {

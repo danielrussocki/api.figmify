@@ -17,6 +17,10 @@ export type FigmaIsVisible = boolean;
 
 export type FigmaNodeType = 'FRAME' | 'TEXT' | 'IMAGE';
 
+export type FigmaLayoutMode = 'HORIZONTAL' | 'VERTICAL';
+
+export type FigmaPosition = 'absolute' | 'sticky';
+
 export type ColorStyleId = `color-${string}`;
 
 export type TypographyStyleId = `type-${string}`;
@@ -127,6 +131,10 @@ export interface FigmaNode {
   rect: FigmaRect;
   relativeRect?: FigmaRelativeRect;
   isVisible: FigmaIsVisible;
+  layoutMode?: FigmaLayoutMode;
+  gap?: number;
+  position?: FigmaPosition;
+  zIndex?: number;
   fills?: FigmaFills;
   strokes?: FigmaStrokes;
   effects?: FigmaEffect[] | null;
