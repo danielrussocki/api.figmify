@@ -149,6 +149,58 @@ describe('transformExtractionNode', () => {
   });
 
   test.each([
+    ['display none', { display: 'none' }, {}, { width: 100, height: 50 }, false],
+    ['hidden visibility', { visibility: 'hidden' }, {}, { width: 100, height: 50 }, false],
+    ['hidden attribute', {}, { hidden: '' }, { width: 100, height: 50 }, false],
+    ['zero opacity', { opacity: '0' }, {}, { width: 100, height: 50 }, false],
+    ['zero-sized box', {}, {}, { width: 0, height: 50 }, false],
+    ['visible measured element', { display: 'block', visibility: 'visible', opacity: '1' }, {}, { width: 100, height: 50 }, true, true],
+  ] as const)('determines real visibility for %s', (
+    _description,
+    styles,
+    attributes,
+    dimensions,
+    isVisible,
+    hasOffsetParent,
+  ) => {
+    const result = transformExtractionNode(node({
+      styles,
+      attributes,
+      layout: {
+        rect: { x: 0, y: 0, top: 0, left: 0, ...dimensions },
+        ...(hasOffsetParent === undefined ? {} : { hasOffsetParent }),
+      },
+    }));
+
+    expect(result.isVisible).toBe(isVisible);
+  });
+
+  test('marks a regular descendant without an applicable offset parent as hidden', () => {
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 }, hasOffsetParent: false };
+    const result = transformExtractionNode(node({
+      layout: { rect: { x: 0, y: 0, width: 200, height: 100, top: 0, left: 0 } },
+      children: [node({ id: 'node-child', layout: visibleBox })],
+    }));
+
+    expect(result.children[0]?.isVisible).toBe(false);
+  });
+
+  test('does not treat the root, SVG, or fixed elements with a box as hidden when offsetParent is absent', () => {
+    const visibleBox = { rect: { x: 0, y: 0, width: 100, height: 50, top: 0, left: 0 }, hasOffsetParent: false };
+    const result = transformExtractionNode(node({
+      tagName: 'html',
+      layout: visibleBox,
+      children: [
+        node({ id: 'node-svg', tagName: 'svg', layout: visibleBox }),
+        node({ id: 'node-fixed', styles: { position: 'fixed' }, layout: visibleBox }),
+      ],
+    }));
+
+    expect(result.isVisible).toBe(true);
+    expect(result.children.map((child) => child.isVisible)).toEqual([true, true]);
+  });
+
+  test.each([
     ['html', null, [], {}, 'FRAME'],
     ['svg', null, [], {}, 'FRAME'],
     ['img', null, [], {}, 'IMAGE'],

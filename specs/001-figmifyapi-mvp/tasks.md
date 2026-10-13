@@ -267,7 +267,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** el nodo raíz omite `relativeRect`, los descendientes lo calculan respecto al área de contenido del padre representado y no se emiten valores no numéricos.
 
-- [ ] **T63. Implementar la determinación de visibilidad real.**
+- [x] **T63. Implementar la determinación de visibilidad real.**
   - **RF:** RF-5.
   - **Hecho cuando:** se consideran `display`, `visibility`, `hidden`, opacidad, tamaño y `offsetParent` aplicable, sin ocultar falsamente raíz, SVG o elementos fijos con caja.
 

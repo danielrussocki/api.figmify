@@ -45,9 +45,39 @@ function mapExtractionNode(node: ExtractionNode, parentContentOrigin?: ContentOr
     ...(parentContentOrigin === undefined
       ? {}
       : { relativeRect: toRelativeRect(rect, parentContentOrigin) }),
-    isVisible: true,
+    isVisible: determineVisibility(node, rect, parentContentOrigin === undefined),
     children,
   };
+}
+
+/**
+ * Determines whether the browser measurements describe a renderable node.
+ * `offsetParent` is only a visibility signal for regular descendants: browser
+ * roots, SVG roots, and fixed-position boxes intentionally have no offset
+ * parent while remaining visible.
+ */
+function determineVisibility(node: ExtractionNode, rect: FigmaRect, isRoot: boolean): boolean {
+  if (normalizedStyle(node, 'display') === 'none') return false;
+  if (normalizedStyle(node, 'visibility') === 'hidden' || normalizedStyle(node, 'visibility') === 'collapse') return false;
+  if ('hidden' in node.attributes) return false;
+
+  const opacity = Number.parseFloat(node.styles.opacity ?? '1');
+  if (Number.isFinite(opacity) && opacity <= 0) return false;
+  if (node.layout !== undefined && (rect.width <= 0 || rect.height <= 0)) return false;
+
+  if (node.layout?.hasOffsetParent === false
+    && !isRoot
+    && node.tagName.toLowerCase() !== 'svg'
+    && normalizedStyle(node, 'position') !== 'fixed') {
+    return false;
+  }
+
+  return true;
+}
+
+function normalizedStyle(node: ExtractionNode, property: string): string | undefined {
+  const value = node.styles[property];
+  return value?.trim().toLowerCase();
 }
 
 interface ContentOrigin {
