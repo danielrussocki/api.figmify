@@ -407,7 +407,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture contiene un contenedor flex horizontal y otro vertical con `gap`, padding físico, `justify-content`, `align-items` e hijo con `flex-grow` verificables.
 
-- [ ] **T97. Crear una fixture de Auto Layout grid y casos sin equivalencia de alineación.**
+- [x] **T97. Crear una fixture de Auto Layout grid y casos sin equivalencia de alineación.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture cubre `grid-auto-flow`, `row-gap` y `column-gap` distintos, `gap: normal`, dirección invertida y valores de alineación que deben omitirse.
 

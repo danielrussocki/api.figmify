@@ -93,6 +93,39 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves grid Auto Layout and non-equivalent alignment scenarios', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="grid-auto-layout-column-flow"');
+      expect(document).toContain('grid-auto-flow: column');
+      expect(document).toContain('row-gap: 6px');
+      expect(document).toContain('column-gap: 18px');
+      expect(document).toContain('id="grid-auto-layout-row-flow"');
+      expect(document).toContain('grid-auto-flow: row');
+      expect(document).toContain('row-gap: 14px');
+      expect(document).toContain('column-gap: 4px');
+      expect(document).toContain('id="grid-auto-layout-normal-gap"');
+      expect(document).toContain('gap: normal');
+      expect(document).toContain('id="flex-auto-layout-row-reverse"');
+      expect(document).toContain('flex-direction: row-reverse');
+      expect(document).toContain('id="flex-auto-layout-column-reverse"');
+      expect(document).toContain('flex-direction: column-reverse');
+      expect(document).toContain('id="alignment-space-around"');
+      expect(document).toContain('justify-content: space-around');
+      expect(document).toContain('align-items: stretch');
+      expect(document).toContain('id="alignment-space-evenly"');
+      expect(document).toContain('justify-content: space-evenly');
+      expect(document).toContain('align-items: baseline');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serve failed resources and redirect secondary resources without redirecting the document', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 

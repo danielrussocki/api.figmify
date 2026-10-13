@@ -57,9 +57,49 @@
          width: 400px;
          height: 140px;
        }
-       #flex-horizontal-growing-item, #flex-vertical-growing-item { flex-grow: 1; }
-       #grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-      #normal-gap-layout { display: flex; gap: normal; }
+        #flex-horizontal-growing-item, #flex-vertical-growing-item { flex-grow: 1; }
+        #grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        #grid-auto-layout-column-flow {
+          display: grid;
+          grid-auto-flow: column;
+          grid-template-rows: repeat(2, 32px);
+          row-gap: 6px;
+          column-gap: 18px;
+        }
+        #grid-auto-layout-row-flow {
+          display: grid;
+          grid-auto-flow: row;
+          grid-template-columns: repeat(2, 80px);
+          row-gap: 14px;
+          column-gap: 4px;
+        }
+        #grid-auto-layout-normal-gap {
+          display: grid;
+          grid-auto-flow: row;
+          grid-template-columns: repeat(2, 80px);
+          gap: normal;
+        }
+        #flex-auto-layout-row-reverse {
+          display: flex;
+          flex-direction: row-reverse;
+          gap: 9px;
+        }
+        #flex-auto-layout-column-reverse {
+          display: flex;
+          flex-direction: column-reverse;
+          gap: 11px;
+        }
+        #alignment-space-around {
+          display: flex;
+          justify-content: space-around;
+          align-items: stretch;
+        }
+        #alignment-space-evenly {
+          display: flex;
+          justify-content: space-evenly;
+          align-items: baseline;
+        }
+       #normal-gap-layout { display: flex; gap: normal; }
       #background-image {
         width: 64px;
         height: 48px;
@@ -95,8 +135,15 @@
             <div id="flex-vertical-growing-item">Vertical growing item</div>
             <div>Vertical fixed item</div>
           </div>
-         <div id="grid-layout"><div>Grid first item</div><div>Grid second item</div></div>
-        <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
+          <div id="grid-layout"><div>Grid first item</div><div>Grid second item</div></div>
+          <div id="grid-auto-layout-column-flow"><div>Column-flow first item</div><div>Column-flow second item</div><div>Column-flow third item</div></div>
+          <div id="grid-auto-layout-row-flow"><div>Row-flow first item</div><div>Row-flow second item</div><div>Row-flow third item</div></div>
+          <div id="grid-auto-layout-normal-gap"><div>Normal grid gap first item</div><div>Normal grid gap second item</div></div>
+          <div id="flex-auto-layout-row-reverse"><div>Row-reverse first item</div><div>Row-reverse second item</div></div>
+          <div id="flex-auto-layout-column-reverse"><div>Column-reverse first item</div><div>Column-reverse second item</div></div>
+          <div id="alignment-space-around"><div>Space-around item</div><div>Stretch item</div></div>
+          <div id="alignment-space-evenly"><div>Space-evenly item</div><div>Baseline item</div></div>
+         <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
         <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
         <div id="background-image" role="img" aria-label="Background image fixture"></div>
         <svg id="inline-svg" width="64" height="48" viewBox="0 0 64 48" role="img" aria-label="Inline SVG fixture">
