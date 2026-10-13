@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { PlaywrightExtractor } from '../../../src/browser/playwright-extractor.js';
 import type { ExtractionNode } from '../../../src/contracts/extraction/extraction-document.js';
 import type { ExtractionRequest } from '../../../src/contracts/extraction/extraction-port.js';
+import { PublicUrlPolicy } from '../../../src/security/url-policy/public-url-policy.js';
 import type { Browser, BrowserContext, Frame, Page, Request, Response, Route } from 'playwright';
 
 const request: ExtractionRequest = {
@@ -311,6 +312,43 @@ describe('PlaywrightExtractor', () => {
     expect(continueRequest).not.toHaveBeenCalled();
     expect(waitForLoadState).not.toHaveBeenCalled();
     expect(waitForTimeout).not.toHaveBeenCalled();
+  });
+
+  test('blocks a hostname resolving to a non-public address before loading the main document', async () => {
+    const { browser } = createBrowser();
+    const response = {
+      status: vi.fn().mockReturnValue(200),
+      request: vi.fn().mockReturnValue({
+        isNavigationRequest: vi.fn().mockReturnValue(true),
+        frame: vi.fn(),
+      }),
+    } as unknown as Response;
+    const { page, applyRoute } = createPage(response);
+    const abort = vi.fn().mockResolvedValue(undefined);
+    const continueRequest = vi.fn().mockResolvedValue(undefined);
+    const navigationRequest = {
+      isNavigationRequest: vi.fn().mockReturnValue(true),
+      frame: vi.fn().mockReturnValue(page.mainFrame()),
+      url: vi.fn().mockReturnValue('https://internal.example/private'),
+    } as unknown as Request;
+    const route = {
+      request: vi.fn().mockReturnValue(navigationRequest),
+      abort,
+      continue: continueRequest,
+    } as unknown as Route;
+    vi.mocked(page.goto).mockImplementation(async () => {
+      await applyRoute(route);
+      throw new Error('net::ERR_FAILED');
+    });
+    const policy = new PublicUrlPolicy(async () => ['10.0.0.1']);
+    const extractor = new PlaywrightExtractor(browser, 'production', policy);
+
+    await expect(extractor.navigateMainDocument(page, request.url)).rejects.toMatchObject({
+      code: 'URL_NOT_PUBLIC',
+    });
+
+    expect(abort).toHaveBeenCalledTimes(1);
+    expect(continueRequest).not.toHaveBeenCalled();
   });
 
   test('waits for load and an additional 30 seconds before completing navigation', async () => {

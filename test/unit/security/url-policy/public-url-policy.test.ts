@@ -43,6 +43,18 @@ const nonPublicUrls = [
 ] as const;
 
 describe('enforcePublicUrlPolicy', () => {
+  test('rejects a production hostname when any resolved address is not public', async () => {
+    const resolver = async (): Promise<readonly string[]> => [
+      '203.0.114.10',
+      '127.0.0.1',
+    ];
+    const policy = new PublicUrlPolicy(resolver);
+
+    await expect(
+      policy.enforceResolved(new URL('https://mixed-addresses.example'), 'production'),
+    ).rejects.toMatchObject({ code: 'URL_NOT_PUBLIC' });
+  });
+
   test('resolves hostnames through an injected resolver', async () => {
     const resolver = async (hostname: string): Promise<readonly string[]> => {
       expect(hostname).toBe('public.example');

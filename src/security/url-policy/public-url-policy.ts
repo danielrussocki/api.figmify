@@ -33,6 +33,23 @@ export class PublicUrlPolicy {
     }
   }
 
+  async enforceResolved(url: URL, environment: RuntimeEnvironment): Promise<void> {
+    this.enforce(url, environment);
+    if (environment !== 'production') {
+      return;
+    }
+
+    const hostname = normalizeHostname(url.hostname);
+    if (isIP(hostname) !== 0) {
+      return;
+    }
+
+    const addresses = await this.resolveHostname(hostname);
+    if (addresses.some((address) => isNonPublicIpAddress(normalizeHostname(address)))) {
+      throw new PublicUrlPolicyError();
+    }
+  }
+
   async resolveHostname(hostname: string): Promise<readonly string[]> {
     const normalizedHostname = normalizeHostname(hostname);
     if (isIP(normalizedHostname) !== 0) {

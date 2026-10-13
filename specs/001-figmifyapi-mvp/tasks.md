@@ -329,7 +329,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** la política puede resolver un hostname mediante una abstracción basada en las APIs estándar de Node.js, conserva la comprobación de literales IPv4 e IPv6 y permite sustituir el resolvedor de DNS en pruebas sin añadir dependencias.
 
-- [ ] **T78. Rechazar en producción los hostnames que resuelven a direcciones no públicas.**
+- [x] **T78. Rechazar en producción los hostnames que resuelven a direcciones no públicas.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** antes de cargar la URL inicial y cada destino de navegación principal se comprueban todas las direcciones resueltas; si cualquiera es loopback, privada, reservada o interna se devuelve `URL_NOT_PUBLIC` y no se carga el destino.
 

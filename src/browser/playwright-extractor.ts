@@ -8,7 +8,7 @@ import type { ExtractionDocument, ExtractionNode } from '../contracts/extraction
 import type { ExtractionPort, ExtractionRequest } from '../contracts/extraction/extraction-port.js';
 import { FIXED_RENDERING_ENVIRONMENT } from '../contracts/extraction/defaults.js';
 import {
-  enforcePublicUrlPolicy,
+  PublicUrlPolicy,
   PublicUrlPolicyError,
   type RuntimeEnvironment,
 } from '../security/url-policy/public-url-policy.js';
@@ -23,6 +23,7 @@ export class PlaywrightExtractor implements ExtractionPort {
   constructor(
     private readonly browser: Browser,
     private readonly environment: RuntimeEnvironment = 'production',
+    private readonly publicUrlPolicy = new PublicUrlPolicy(),
   ) {}
 
   createContext(request: ExtractionRequest): Promise<BrowserContext> {
@@ -116,7 +117,10 @@ export class PlaywrightExtractor implements ExtractionPort {
       }
 
       try {
-        enforcePublicUrlPolicy(new URL(navigationRequest.url()), this.environment);
+        await this.publicUrlPolicy.enforceResolved(
+          new URL(navigationRequest.url()),
+          this.environment,
+        );
       } catch (error) {
         if (error instanceof PublicUrlPolicyError) {
           nonPublicDestinationError = error;
