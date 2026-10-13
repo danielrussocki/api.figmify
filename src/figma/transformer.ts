@@ -273,6 +273,7 @@ function determineVisibility(node: ExtractionNode, rect: FigmaRect, isRoot: bool
 
   if (node.layout?.hasOffsetParent === false
     && !isRoot
+    && node.tagName.toLowerCase() !== 'body'
     && node.tagName.toLowerCase() !== 'svg'
     && normalizedStyle(node, 'position') !== 'fixed') {
     return false;

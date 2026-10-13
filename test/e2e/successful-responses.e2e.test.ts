@@ -94,6 +94,13 @@ describe('successful HTTP responses', () => {
         isVisible: expect.any(Boolean),
       },
     });
+    expect(findNodesByTag(document.document, 'p').filter((node) => !node.isVisible)).toHaveLength(0);
+  });
+
+  test('GET /v1/figma retains hidden nodes when includeHidden is true', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma', { includeHidden: 'true' });
+
+    expect(findNodesByTag(document.document, 'p').filter((node) => !node.isVisible)).toHaveLength(3);
   });
 
   test('GET /v1/figma returns a FigmaDocument v1 with the configured viewport', async () => {
@@ -143,4 +150,26 @@ function shortenPostLoadWait(browserInstance: Browser): void {
     });
     return context;
   });
+}
+
+function findNodeByCharacters(
+  node: FigmaDocument['document'],
+  characters: string,
+): FigmaDocument['document'] | undefined {
+  if (node.characters === characters) return node;
+
+  for (const child of node.children) {
+    const match = findNodeByCharacters(child, characters);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findNodesByTag(
+  node: FigmaDocument['document'],
+  tag: string,
+): FigmaDocument['document'][] {
+  return [node, ...node.children.flatMap((child) => findNodesByTag(child, tag))]
+    .filter((candidate) => candidate.tag === tag);
 }

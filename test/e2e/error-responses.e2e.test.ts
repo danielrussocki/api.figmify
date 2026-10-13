@@ -41,6 +41,20 @@ describe('error HTTP responses', () => {
       'The url query parameter must be an absolute HTTP or HTTPS URL.');
   });
 
+  test('GET /v1/figma rejects an invalid includeHidden value without a partial document', async () => {
+    const applicationUrl = await startApplication('development');
+    const response = await fetch(`${applicationUrl}/v1/figma?${new URLSearchParams({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      includeHidden: 'yes',
+    })}`);
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      code: 'INVALID_REQUEST',
+      message: 'The includeHidden query parameter must be true or false.',
+    });
+  });
+
   test.each(routes)('%s returns a normalized 422 for a non-public URL in production', async (route) => {
     const applicationUrl = await startApplication('production');
 

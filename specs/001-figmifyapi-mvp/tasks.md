@@ -315,7 +315,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas cubren tipos, geometría, visibilidad, exclusiones, runs, Auto Layout, pinturas, imágenes, SVG, assets y poda de catálogos.
 
-- [ ] **T75. Añadir pruebas de integración y extremo a extremo del nuevo contrato Figma.**
+- [x] **T75. Añadir pruebas de integración y extremo a extremo del nuevo contrato Figma.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** las fixtures y solicitudes reales validan `includeHidden` por omisión y habilitado, el JSON compacto versionado y los errores 400 sin respuestas parciales.
 
