@@ -7,6 +7,7 @@ import type {
   FigmaDocument,
   FigmaDropShadowEffect,
   FigmaEffect,
+  FigmaInnerShadowEffect,
   FigmaFills,
   FigmaFontAsset,
   FigmaImageData,
@@ -22,6 +23,8 @@ import type {
   FigmaRgbaColor,
   FigmaStyleCatalog,
   FigmaStrokes,
+  FigmaStrokeSide,
+  FigmaStrokeWeights,
   FigmaTextAutoResize,
   FigmaTextStyle,
   FigmaTextAlign,
@@ -126,17 +129,26 @@ test('models optional Auto Layout values with their Figma value domains', () => 
   expectTypeOf(padding.left).toEqualTypeOf<number>();
 });
 
-test('models structured paints, strokes, drop shadows, and corner radii', () => {
+test('models structured paints, uniform and side-specific strokes, shadows, and corner radii', () => {
   const rgba: FigmaRgbaColor = { r: 0.067, g: 0.094, b: 0.153, a: 0.8 };
   const paint: FigmaPaint = { type: 'SOLID', color: rgba };
   const fills: FigmaFills = [paint];
-  const strokes: FigmaStrokes = [{ type: 'SOLID', color: rgba, weight: 2 }];
-  const effect: FigmaDropShadowEffect = {
+  const strokeSide: FigmaStrokeSide = 'TOP';
+  const strokes: FigmaStrokes = [{ type: 'SOLID', color: rgba, side: strokeSide, weight: 2 }];
+  const strokeWeights: FigmaStrokeWeights = { top: 2, right: 1, bottom: 3, left: 4 };
+  const dropShadow: FigmaDropShadowEffect = {
     type: 'DROP_SHADOW',
     color: { r: 0, g: 0, b: 0, a: 0.25 },
     offset: { x: 0, y: 4 },
     radius: 8,
     spread: 1,
+  };
+  const innerShadow: FigmaInnerShadowEffect = {
+    type: 'INNER_SHADOW',
+    color: { r: 0, g: 0, b: 0, a: 0.25 },
+    offset: { x: 0, y: 2 },
+    radius: 4,
+    spread: 0,
   };
   const node: FigmaNode = {
     id: 'node-3',
@@ -146,7 +158,9 @@ test('models structured paints, strokes, drop shadows, and corner radii', () => 
     isVisible: true,
     fills,
     strokes,
-    effects: [effect],
+    strokeWeight: 2,
+    strokeWeights,
+    effects: [dropShadow, innerShadow],
     cornerRadius: 8,
     cornerRadii: { topLeft: 8, topRight: 4, bottomRight: 2, bottomLeft: 0 },
     children: [],
@@ -159,15 +173,22 @@ test('models structured paints, strokes, drop shadows, and corner radii', () => 
   expectTypeOf(paint).toEqualTypeOf<FigmaPaint>();
   expectTypeOf<FigmaFills>().toEqualTypeOf<FigmaPaint[] | null>();
   expectTypeOf<FigmaStrokes>().toEqualTypeOf<
-    | { type: 'SOLID'; color: FigmaRgbaColor; weight: number }[]
+    | { type: 'SOLID'; color: FigmaRgbaColor; side?: FigmaStrokeSide; weight: number }[]
     | null
   >();
-  expectTypeOf(effect).toEqualTypeOf<FigmaEffect>();
-  expectTypeOf(effect.type).toEqualTypeOf<'DROP_SHADOW'>();
-  expectTypeOf(effect.offset.x).toEqualTypeOf<number>();
-  expectTypeOf(effect.offset.y).toEqualTypeOf<number>();
-  expectTypeOf(effect.radius).toEqualTypeOf<number>();
-  expectTypeOf(effect.spread).toEqualTypeOf<number>();
+  expectTypeOf(strokeSide).toMatchTypeOf<FigmaStrokeSide>();
+  expectTypeOf(strokeWeights.top).toEqualTypeOf<number>();
+  expectTypeOf(strokeWeights.right).toEqualTypeOf<number>();
+  expectTypeOf(strokeWeights.bottom).toEqualTypeOf<number>();
+  expectTypeOf(strokeWeights.left).toEqualTypeOf<number>();
+  expectTypeOf(dropShadow).toMatchTypeOf<FigmaEffect>();
+  expectTypeOf(innerShadow).toMatchTypeOf<FigmaEffect>();
+  expectTypeOf(dropShadow.offset.x).toEqualTypeOf<number>();
+  expectTypeOf(innerShadow.offset.y).toEqualTypeOf<number>();
+  expectTypeOf(dropShadow.radius).toEqualTypeOf<number>();
+  expectTypeOf(innerShadow.spread).toEqualTypeOf<number>();
+  expectTypeOf(node.strokeWeight).toEqualTypeOf<number | undefined>();
+  expectTypeOf(node.strokeWeights).toEqualTypeOf<FigmaStrokeWeights | undefined>();
   expectTypeOf(node.cornerRadius).toEqualTypeOf<number | undefined>();
   expectTypeOf(node.cornerRadii).toEqualTypeOf<
     | { topLeft: number; topRight: number; bottomRight: number; bottomLeft: number }

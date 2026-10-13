@@ -54,10 +54,22 @@ export type FigmaPaint = FigmaSolidPaint;
 export type FigmaFills = FigmaPaint[] | null;
 
 export interface FigmaStroke extends FigmaSolidPaint {
+  /** Identifies the physical border when strokes cannot be represented uniformly. */
+  side?: FigmaStrokeSide;
   weight: number;
 }
 
+export type FigmaStrokeSide = 'TOP' | 'RIGHT' | 'BOTTOM' | 'LEFT';
+
 export type FigmaStrokes = FigmaStroke[] | null;
+
+/** Physical border widths preserved when the four sides differ. */
+export interface FigmaStrokeWeights {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
 
 export interface FigmaEffectOffset {
   x: number;
@@ -72,7 +84,15 @@ export interface FigmaDropShadowEffect {
   spread: number;
 }
 
-export type FigmaEffect = FigmaDropShadowEffect;
+export interface FigmaInnerShadowEffect {
+  type: 'INNER_SHADOW';
+  color: FigmaRgbaColor;
+  offset: FigmaEffectOffset;
+  radius: number;
+  spread: number;
+}
+
+export type FigmaEffect = FigmaDropShadowEffect | FigmaInnerShadowEffect;
 
 export interface FigmaCornerRadii {
   topLeft: number;
@@ -162,6 +182,8 @@ export interface FigmaNode {
   zIndex?: number;
   fills?: FigmaFills;
   strokes?: FigmaStrokes;
+  strokeWeight?: number;
+  strokeWeights?: FigmaStrokeWeights;
   effects?: FigmaEffect[] | null;
   cornerRadius?: number;
   cornerRadii?: FigmaCornerRadii;

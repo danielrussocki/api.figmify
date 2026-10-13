@@ -399,7 +399,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** los contratos tipados representan `layoutMode`, `itemSpacing`, `gap`, `padding`, `primaryAxisAlign`, `counterAxisAlign` y `layoutGrow` con los tipos y opcionalidad definidos en el plan.
 
-- [ ] **T95. Ampliar los tipos Figma para bordes por lado y sombras internas.**
+- [x] **T95. Ampliar los tipos Figma para bordes por lado y sombras internas.**
   - **RF:** RF-5.
   - **Hecho cuando:** los contratos representan `strokeWeight` uniforme, `strokeWeights` y `strokes` por lado, además de efectos `DROP_SHADOW` e `INNER_SHADOW` con color, desplazamiento, radio y extensión numéricos.
 
