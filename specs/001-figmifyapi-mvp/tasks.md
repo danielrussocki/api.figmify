@@ -259,11 +259,11 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** `head`, `meta`, `title`, `script`, `link`, `style`, `base`, `template` y `noscript` no aparecen en el árbol Figma.
 
-- [ ] **T61. Implementar la clasificación `FRAME`, `TEXT` e `IMAGE`.**
+- [x] **T61. Implementar la clasificación `FRAME`, `TEXT` e `IMAGE`.**
   - **RF:** RF-5.
   - **Hecho cuando:** los contenedores visuales son `FRAME`, los `img` y fondos renderizables son `IMAGE`, y solo ejecuciones de texto puro son `TEXT`.
 
-- [ ] **T62. Implementar el cálculo de `rect` y `relativeRect` en el mapeador Figma.**
+- [x] **T62. Implementar el cálculo de `rect` y `relativeRect` en el mapeador Figma.**
   - **RF:** RF-5.
   - **Hecho cuando:** el nodo raíz omite `relativeRect`, los descendientes lo calculan respecto al área de contenido del padre representado y no se emiten valores no numéricos.
 

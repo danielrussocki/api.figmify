@@ -67,7 +67,7 @@ describe('transformExtractionNode', () => {
     expect(transformExtractionNode(extraction)).toEqual({
       id: 'node-root',
       tag: 'section',
-      type: 'IMAGE',
+      type: 'FRAME',
       rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
       isVisible: true,
       children: [
@@ -76,6 +76,7 @@ describe('transformExtractionNode', () => {
           tag: 'h1',
           type: 'TEXT',
           rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+          relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           isVisible: true,
           children: [],
         },
@@ -84,6 +85,7 @@ describe('transformExtractionNode', () => {
           tag: 'span',
           type: 'TEXT',
           rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+          relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           isVisible: true,
           children: [],
         },
@@ -91,14 +93,81 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test('omits the root relative rect and positions descendants from their represented parent content area', () => {
+    const extraction = node({
+      id: 'node-root',
+      layout: {
+        rect: { x: 10, y: 20, width: 400, height: 300, top: 20, left: 10 },
+      },
+      styles: {
+        'border-left-width': '2px',
+        'border-top-width': '3px',
+        'padding-left': '11px',
+        'padding-top': '13px',
+      },
+      children: [node({
+        id: 'node-child',
+        layout: {
+          rect: { x: 40, y: 60, width: 100, height: 50, top: 60, left: 40 },
+        },
+        children: [node({
+          id: 'node-grandchild',
+          layout: {
+            rect: { x: 50, y: 70, width: 20, height: 10, top: 70, left: 50 },
+          },
+        })],
+      })],
+    });
+
+    const result = transformExtractionNode(extraction);
+
+    expect(result.relativeRect).toBeUndefined();
+    expect(result.children[0]?.relativeRect).toEqual({
+      x: 17, y: 24, width: 100, height: 50, top: 24, left: 17,
+    });
+    expect(result.children[0]?.children[0]?.relativeRect).toEqual({
+      x: 10, y: 10, width: 20, height: 10, top: 10, left: 10,
+    });
+  });
+
+  test('emits only finite numeric values when source layout measurements are invalid', () => {
+    const result = transformExtractionNode(node({
+      layout: {
+        rect: { x: Number.NaN, y: Number.POSITIVE_INFINITY, width: Number.NEGATIVE_INFINITY, height: 4, top: Number.NaN, left: 3 },
+      },
+      children: [node({
+        id: 'node-child',
+        layout: {
+          rect: { x: Number.NaN, y: 5, width: 6, height: Number.POSITIVE_INFINITY, top: 5, left: Number.NaN },
+        },
+      })],
+    }));
+
+    expect(result.rect).toEqual({ x: 0, y: 0, width: 0, height: 4, top: 0, left: 3 });
+    expect(result.children[0]?.rect).toEqual({ x: 0, y: 5, width: 6, height: 0, top: 5, left: 0 });
+    expect(result.children[0]?.relativeRect).toEqual({ x: 0, y: 5, width: 6, height: 0, top: 5, left: 0 });
+  });
+
   test.each([
-    ['html', null, 'FRAME'],
-    ['svg', null, 'FRAME'],
-    ['img', null, 'IMAGE'],
-    ['div', 'Visible text', 'TEXT'],
-    ['div', null, 'FRAME'],
-  ] as [string, string | null, FigmaNodeType][])('maps %s nodes to the permitted node type', (tagName, text, type) => {
-    expect(transformExtractionNode(node({ tagName, text }))).toMatchObject({ type });
+    ['html', null, [], {}, 'FRAME'],
+    ['svg', null, [], {}, 'FRAME'],
+    ['img', null, [], {}, 'IMAGE'],
+    ['div', null, [], { 'background-image': 'url("https://example.com/background.png")' }, 'IMAGE'],
+    ['div', null, [], { 'background-image': 'none' }, 'FRAME'],
+    ['div', 'Visible text', [], {}, 'TEXT'],
+    ['div', '', [], {}, 'FRAME'],
+    ['div', 'Text with an element child', [node({ id: 'node-child' })], {}, 'FRAME'],
+    ['div', 'Text with a shadow child', [], {}, 'FRAME', [node({ id: 'node-shadow-child' })]],
+    ['div', null, [], {}, 'FRAME'],
+  ] as [
+    string,
+    string | null,
+    ExtractionNode[],
+    Record<string, string>,
+    FigmaNodeType,
+    ExtractionNode[]?,
+  ][])('maps %s nodes to the permitted node type', (tagName, text, children, styles, type, shadowChildren) => {
+    expect(transformExtractionNode(node({ tagName, text, children, styles, shadowChildren }))).toMatchObject({ type });
   });
 });
 
@@ -186,8 +255,9 @@ describe('transformExtractionDocument', () => {
           {
             id: 'node-heading',
             tag: 'h1',
-            type: 'TEXT',
+            type: 'FRAME',
             rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+            relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
             isVisible: true,
             children: [
               {
@@ -195,6 +265,7 @@ describe('transformExtractionDocument', () => {
                 tag: 'span',
                 type: 'TEXT',
                 rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+                relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
                 isVisible: true,
                 children: [],
               },
