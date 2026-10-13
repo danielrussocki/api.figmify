@@ -109,13 +109,22 @@ export interface FigmaTextStyle {
   textAutoResize: FigmaTextAutoResize;
 }
 
-/** Rendered source data preserved for an IMAGE node. */
-export interface FigmaImageData {
+/** Rendered source data for an IMAGE node originating from an img element. */
+export interface FigmaElementImageData {
   src: string;
   naturalWidth: number;
   naturalHeight: number;
   objectFit: string;
 }
+
+/** Rendered source data for an IMAGE node originating from a CSS background. */
+export interface FigmaBackgroundImageData {
+  src: string;
+  backgroundSize: string;
+}
+
+/** Rendered source data preserved for an IMAGE node. */
+export type FigmaImageData = FigmaElementImageData | FigmaBackgroundImageData;
 
 /** A font family used by included text runs, optionally linked to its source. */
 export interface FigmaFontAsset {

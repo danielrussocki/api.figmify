@@ -146,12 +146,12 @@ test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () 
     textAlign,
     textAutoResize,
   };
-  const image: FigmaImageData = {
+  const image = {
     src: 'https://example.com/hero.png',
     naturalWidth: 1600,
     naturalHeight: 900,
     objectFit: 'cover',
-  };
+  } satisfies FigmaImageData;
   const asset: FigmaFontAsset = {
     family: 'Inter',
     weights: [400, 700],
@@ -192,6 +192,25 @@ test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () 
   expectTypeOf(imageNode.svg).toEqualTypeOf<string | undefined>();
   expectTypeOf(asset.weights).toEqualTypeOf<number[]>();
   expectTypeOf(asset.url).toEqualTypeOf<string | undefined>();
+});
+
+test('models resolved background IMAGE data without natural dimensions', () => {
+  const image = {
+    src: 'https://example.com/hero-background.png',
+    backgroundSize: 'cover',
+  } satisfies FigmaImageData;
+  const imageNode: FigmaNode = {
+    id: 'node-6',
+    tag: 'section',
+    type: 'IMAGE',
+    rect: { x: 0, y: 0, width: 100, height: 40, top: 0, left: 0 },
+    isVisible: true,
+    image,
+    children: [],
+  };
+
+  expectTypeOf(image.backgroundSize).toEqualTypeOf<string>();
+  expectTypeOf(imageNode.image).toEqualTypeOf<FigmaImageData | undefined>();
 });
 
 test('models the versioned Figma document contract and reusable style catalogs', () => {

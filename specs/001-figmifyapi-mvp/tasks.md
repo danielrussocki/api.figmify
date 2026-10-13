@@ -353,7 +353,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** las pruebas unitarias, de integración con Playwright y de extremo a extremo verifican que no se pierde ni se duplica texto directo, que los cambios de estilo producen ejecuciones ordenadas y que `includeHidden` aplica al subárbol correspondiente.
 
-- [ ] **T84. Versionar el contrato de imagen para fondos resolubles.**
+- [x] **T84. Versionar el contrato de imagen para fondos resolubles.**
   - **RF:** RF-5.
   - **Hecho cuando:** antes de cambiar la respuesta se actualizan la especificación versionada y el plan para permitir que un nodo `IMAGE` de fondo incluya fuente y ajuste resueltos sin exigir dimensiones naturales que no puedan determinarse.
 

@@ -20,6 +20,27 @@ describe('JSON contract regression', () => {
     expect(validateFigmaDocumentV1(document)).toEqual([]);
   });
 
+  test('validates a background IMAGE without undeterminable natural dimensions', async () => {
+    const document = await readJsonFixture('figma-document.1.0.json') as {
+      document: { children: unknown[] };
+    };
+    document.document.children.push({
+      id: 'node-background',
+      tag: 'section',
+      type: 'IMAGE',
+      rect: { x: 0, y: 0, width: 640, height: 360, top: 0, left: 0 },
+      relativeRect: { x: 0, y: 0, width: 640, height: 360, top: 0, left: 0 },
+      isVisible: true,
+      image: {
+        src: 'https://example.com/hero-background.png',
+        backgroundSize: 'cover',
+      },
+      children: [],
+    });
+
+    expect(validateFigmaDocumentV1(document)).toEqual([]);
+  });
+
   test('rejects an extraction node with incomplete layout metadata', async () => {
     const document = await readJsonFixture('extraction-document.1.0.json') as {
       document: { layout: { rect: Record<string, unknown> } };

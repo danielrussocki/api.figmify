@@ -214,6 +214,14 @@ function textStyle(value: unknown, path: string, errors: string[]): void {
 function image(value: unknown, path: string, errors: string[]): void {
   const data = object(value, path, errors);
   if (data === undefined) return;
+
+  if ('backgroundSize' in data) {
+    keys(data, path, ['src', 'backgroundSize'], [], errors);
+    url(data.src, `${path}.src`, errors);
+    string(data.backgroundSize, `${path}.backgroundSize`, errors);
+    return;
+  }
+
   keys(data, path, ['src', 'naturalWidth', 'naturalHeight', 'objectFit'], [], errors);
   url(data.src, `${path}.src`, errors);
   number(data.naturalWidth, `${path}.naturalWidth`, errors);
