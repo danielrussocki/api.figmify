@@ -166,6 +166,38 @@ describe('transformExtractionNode', () => {
     expect(result.gap).toBeUndefined();
   });
 
+  test('maps perceptible paints, borders, shadows, and corner radii to structured Figma values', () => {
+    const result = transformExtractionNode(node({
+      styles: {
+        'background-color': 'rgb(17, 34, 51)',
+        'border-top-style': 'solid',
+        'border-top-width': '2px',
+        'border-top-color': 'rgba(68, 85, 102, 0.5)',
+        'border-right-style': 'none',
+        'border-right-width': '4px',
+        'border-right-color': 'rgb(255, 0, 0)',
+        'box-shadow': '2px 3px 4px 5px rgba(0, 0, 0, 0.25)',
+        'border-top-left-radius': '4px',
+        'border-top-right-radius': '8px',
+        'border-bottom-right-radius': '12px',
+        'border-bottom-left-radius': '16px',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      fills: [{ type: 'SOLID', color: { r: 0.067, g: 0.133, b: 0.2, a: 1 } }],
+      strokes: [{ type: 'SOLID', weight: 2, color: { r: 0.267, g: 0.333, b: 0.4, a: 0.5 } }],
+      effects: [{
+        type: 'DROP_SHADOW',
+        color: { r: 0, g: 0, b: 0, a: 0.25 },
+        offset: { x: 2, y: 3 },
+        radius: 4,
+        spread: 5,
+      }],
+      cornerRadii: { topLeft: 4, topRight: 8, bottomRight: 12, bottomLeft: 16 },
+    });
+  });
+
   test('maps an img with its resolved source and measured image data', () => {
     const result = transformExtractionNode(node({
       tagName: 'img',
