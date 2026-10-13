@@ -5,6 +5,7 @@ import { serializeElement } from '../../../src/browser/element-serializer.js';
 interface ElementFixture {
   tagName: string;
   children: ElementFixture[];
+  childNodes?: Array<ElementFixture | { nodeType: number; textContent: string | null }>;
   shadowRoot?: { children: ElementFixture[] } | null;
   innerText?: string;
   offsetParent?: ElementFixture | null;
@@ -226,6 +227,59 @@ describe('serializeElement', () => {
       tagName: 'p',
       text: null,
     });
+  });
+
+  test('serializes rendered direct text runs in child-node order without duplicating container text', () => {
+    const emphasis = element('EM', [], 'world');
+    const root = element('P', [emphasis], 'Hello world again');
+    root.childNodes = [
+      { nodeType: 3, textContent: 'Hello ' },
+      emphasis,
+      { nodeType: 3, textContent: ' again' },
+    ];
+    root.ownerDocument = {
+      defaultView: {
+        getComputedStyle: () => ({
+          getPropertyValue: (property) => ({
+            color: 'rgb(1, 2, 3)',
+            'font-size': '16px',
+            'not-permitted': 'must not be serialized',
+          })[property] ?? '',
+        }),
+      },
+    };
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.text).toBeNull();
+    expect(serialized.directTextRuns).toEqual([
+      {
+        characters: 'Hello ',
+        childNodeIndex: 0,
+        styles: { color: 'rgb(1, 2, 3)', 'font-size': '16px' },
+      },
+      {
+        characters: ' again',
+        childNodeIndex: 2,
+        styles: { color: 'rgb(1, 2, 3)', 'font-size': '16px' },
+      },
+    ]);
+    expect(serialized.children).toHaveLength(1);
+  });
+
+  test('omits non-rendered and whitespace-only direct text runs', () => {
+    const hidden = element('P', [], 'Hidden text', true);
+    hidden.childNodes = [{ nodeType: 3, textContent: 'Hidden text' }];
+    const whitespace = element('P', [], '   ');
+    whitespace.childNodes = [{ nodeType: 3, textContent: '   ' }];
+    const root = element('MAIN', [hidden, whitespace]);
+
+    const serialized = serializeElement(root as unknown as Element);
+
+    expect(serialized.children[0]).not.toHaveProperty('directTextRuns');
+    expect(serialized.children[0]?.text).toBeNull();
+    expect(serialized.children[1]).not.toHaveProperty('directTextRuns');
+    expect(serialized.children[1]?.text).toBeNull();
   });
 
   test('reads only permitted computed visual properties', () => {

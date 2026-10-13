@@ -341,7 +341,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** antes de modificar la respuesta se actualizan la especificación versionada y el plan para definir una representación ordenada de nodos de texto directos y sus estilos calculados, sin romper el árbol de elementos ni inventar contenido.
 
-- [ ] **T81. Serializar las ejecuciones de texto directo en el orden del DOM.**
+- [x] **T81. Serializar las ejecuciones de texto directo en el orden del DOM.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el extractor conserva cada nodo de texto renderizado que sea hijo directo de un elemento, con sus caracteres y estilos efectivos, e ignora texto no renderizado sin duplicarlo en el texto de sus contenedores.
 

@@ -1,4 +1,4 @@
-import type { ExtractionNode, PseudoElement } from '../contracts/extraction/extraction-document.js';
+import type { DirectTextRun, ExtractionNode, PseudoElement } from '../contracts/extraction/extraction-document.js';
 import { inspectLayout } from './layout-inspector.js';
 import { VISUAL_PROPERTIES } from './visual-properties.js';
 
@@ -48,12 +48,13 @@ export function serializeElement(element: Element): ExtractionNode {
   const serialize = (currentElement: Element): ExtractionNode => {
     const id = `node-${nextId++}`;
     nodeIds.set(currentElement, id);
+    const directTextRuns = readDirectTextRuns(currentElement);
     const node: ExtractionNode = {
       id,
       tagName: currentElement.tagName.toLowerCase(),
       attributes: selectAllowedAttributes(currentElement),
       resources: resolveResourceReferences(currentElement),
-      text: readRenderedText(currentElement),
+      text: directTextRuns.length > 0 ? null : readRenderedText(currentElement),
       layout: inspectLayout(currentElement, (candidate) => nodeIds.get(candidate)),
       styles: readVisualStyles(currentElement),
       pseudoElements: {
@@ -62,6 +63,10 @@ export function serializeElement(element: Element): ExtractionNode {
       },
       children: Array.from(currentElement.children, serialize),
     };
+
+    if (directTextRuns.length > 0) {
+      node.directTextRuns = directTextRuns;
+    }
 
     if (currentElement.shadowRoot !== null) {
       node.shadowChildren = Array.from(currentElement.shadowRoot.children, serialize);
@@ -259,6 +264,29 @@ function readRenderedText(element: Element): string | null {
   const text = (element as HTMLElement).innerText;
 
   return typeof text === 'string' && text.trim().length > 0 ? text : null;
+}
+
+function readDirectTextRuns(element: Element): DirectTextRun[] {
+  if (!isRendered(element)) {
+    return [];
+  }
+
+  const styles = readVisualStyles(element);
+  const textRuns: DirectTextRun[] = [];
+
+  for (const [childNodeIndex, childNode] of Array.from(element.childNodes ?? []).entries()) {
+    if (childNode.nodeType !== 3 || typeof childNode.textContent !== 'string' || childNode.textContent.trim().length === 0) {
+      continue;
+    }
+
+    textRuns.push({
+      characters: childNode.textContent,
+      childNodeIndex,
+      styles,
+    });
+  }
+
+  return textRuns;
 }
 
 function isRendered(element: Element): boolean {
