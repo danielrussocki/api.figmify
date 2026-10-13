@@ -523,6 +523,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-4.
   - **Hecho cuando:** las pruebas HTTP reales verifican que `/v1/extract` y `/v1/figma` devuelven `REDIRECT_NOT_ALLOWED` ante una redirección principal y `UPSTREAM_FAILURE` ante un fallo de origen, siempre con estado 502, mensaje en inglés y sin documento parcial.
 
-- [ ] **T125. Ejecutar la validación final de las brechas detectadas.**
+- [x] **T125. Ejecutar la validación final de las brechas detectadas.**
   - **RF:** RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, y la revisión requisito por requisito confirma que cada nodo con `layoutMode` incluye `padding` y que ambas rutas tienen cobertura E2E de redirección y fallo de origen.
