@@ -65,6 +65,26 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves distinct transparent, img, and background image paint scenarios', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="no-perceptible-background"');
+      expect(document).toContain('background-color: transparent');
+      expect(document).toContain('id="resolvable-img-image"');
+      expect(document).toContain('src="/resources/fixture-image.svg"');
+      expect(document).toContain('id="resolvable-background-image"');
+      expect(document).toContain('background-image: url("/resources/fixture-image.svg")');
+      expect(document).toContain('background-size: cover');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serves horizontal and vertical flex Auto Layout scenarios with effective spacing', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 

@@ -485,7 +485,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** los nodos `IMAGE` procedentes de `img` o de fondos resolubles incluyen en `fills` una pintura con `type: "IMAGE"`, URL absoluta en `src` y `scaleMode: "FILL"`, sin una pintura `SOLID` sustitutiva.
 
-- [ ] **T116. Añadir fixtures para un nodo sin fondo y para imágenes de `img` y de fondo.**
+- [x] **T116. Añadir fixtures para un nodo sin fondo y para imágenes de `img` y de fondo.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** las fixtures contienen un nodo visible sin relleno perceptible, un `img` con URL resoluble y un nodo con `background-image` resoluble, con resultados esperados distinguibles.
 

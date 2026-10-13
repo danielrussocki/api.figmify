@@ -99,8 +99,20 @@
           justify-content: space-evenly;
           align-items: baseline;
         }
-       #normal-gap-layout { display: flex; gap: normal; }
-       #background-image {
+        #normal-gap-layout { display: flex; gap: normal; }
+        #no-perceptible-background {
+          width: 64px;
+          height: 48px;
+          background-color: transparent;
+          border: 1px solid rgb(20, 40, 60);
+        }
+        #resolvable-background-image {
+          width: 64px;
+          height: 48px;
+          background-image: url("/resources/fixture-image.svg");
+          background-size: cover;
+        }
+        #background-image {
          width: 64px;
          height: 48px;
          background-image: url("/resources/fixture-image.svg");
@@ -183,8 +195,11 @@
           <div id="flex-auto-layout-column-reverse"><div>Column-reverse first item</div><div>Column-reverse second item</div></div>
           <div id="alignment-space-around"><div>Space-around item</div><div>Stretch item</div></div>
           <div id="alignment-space-evenly"><div>Space-evenly item</div><div>Baseline item</div></div>
-         <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
-        <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
+          <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
+         <div id="no-perceptible-background">No perceptible background fixture</div>
+         <img id="resolvable-img-image" src="/resources/fixture-image.svg" alt="Resolvable img fixture">
+          <div id="resolvable-background-image" role="img" aria-label="Resolvable background image fixture"></div>
+         <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
          <div id="background-image" role="img" aria-label="Background image fixture"></div>
          <div id="uniform-border">Uniform border fixture</div>
          <div id="per-side-borders">Per-side border fixture</div>
