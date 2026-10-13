@@ -29,6 +29,19 @@ describe('JSON contract regression', () => {
     expect(validateExtractionDocumentV1(document)).toContain('$.document.layout.rect.width is required.');
   });
 
+  test('rejects a direct text run without its ordered position or effective styles', async () => {
+    const document = await readJsonFixture('extraction-document.1.0.json') as {
+      document: { directTextRuns: Array<Record<string, unknown>> };
+    };
+    delete document.document.directTextRuns[0]?.childNodeIndex;
+    delete document.document.directTextRuns[0]?.styles;
+
+    expect(validateExtractionDocumentV1(document)).toEqual(expect.arrayContaining([
+      '$.document.directTextRuns[0].childNodeIndex is required.',
+      '$.document.directTextRuns[0].styles is required.',
+    ]));
+  });
+
   test('rejects the legacy Figma node shape', () => {
     const legacyDocument = {
       schemaVersion: '1.0',

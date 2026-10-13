@@ -337,7 +337,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las pruebas unitarias cubren hostnames que resuelven a IPv4 e IPv6 no públicas y a direcciones públicas, las de integración cubren un destino principal no público resuelto por DNS, y desarrollo continúa permitiendo esos destinos.
 
-- [ ] **T80. Versionar el contrato de extracción necesario para conservar ejecuciones de texto directo.**
+- [x] **T80. Versionar el contrato de extracción necesario para conservar ejecuciones de texto directo.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** antes de modificar la respuesta se actualizan la especificación versionada y el plan para definir una representación ordenada de nodos de texto directos y sus estilos calculados, sin romper el árbol de elementos ni inventar contenido.
 

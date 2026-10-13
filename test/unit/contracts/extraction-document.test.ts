@@ -1,6 +1,7 @@
 import { expectTypeOf, test } from 'vitest';
 
 import type {
+  DirectTextRun,
   DocumentRect,
   ExtractionDocument,
   ExtractionLayout,
@@ -60,6 +61,11 @@ test('models the versioned extraction document contract', () => {
       before: { content: '""', styles: { display: 'inline' } },
       after: null,
     },
+    directTextRuns: [{
+      characters: 'Hello ',
+      childNodeIndex: 0,
+      styles: { color: 'rgb(17, 24, 39)', 'font-size': '16px' },
+    }],
     children: [],
     shadowChildren: [],
   };
@@ -81,6 +87,10 @@ test('models the versioned extraction document contract', () => {
     { content: string | null; styles: Record<string, string> } | null
   >();
   expectTypeOf(document.document.resources).toEqualTypeOf<ResourceReference[]>();
+  expectTypeOf(document.document.directTextRuns).toEqualTypeOf<DirectTextRun[] | undefined>();
+  expectTypeOf(node.directTextRuns?.[0]?.characters).toEqualTypeOf<string | undefined>();
+  expectTypeOf(node.directTextRuns?.[0]?.childNodeIndex).toEqualTypeOf<number | undefined>();
+  expectTypeOf(node.directTextRuns?.[0]?.styles).toEqualTypeOf<Record<string, string> | undefined>();
   expectTypeOf(document.document.layout).toEqualTypeOf<ExtractionLayout | undefined>();
   expectTypeOf(layout.rect).toEqualTypeOf<DocumentRect>();
   expectTypeOf(layout.rect.x).toEqualTypeOf<number>();

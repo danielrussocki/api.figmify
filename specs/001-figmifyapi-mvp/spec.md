@@ -53,6 +53,7 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Cuando un elemento tenga los pseudoelementos `::before` o `::after`, el primer endpoint deberá incluir sus estilos y contenido calculables.
 - Cuando una propiedad visual computada no tenga un valor textual serializable o no pueda determinarse, el primer endpoint deberá omitir esa propiedad.
 - Cuando la página contenga un Shadow DOM cerrado, el primer endpoint deberá excluir su contenido y continuar con los elementos observables.
+- Cuando un elemento contenga nodos de texto renderizados que sean hijos directos, el contrato podrá representarlos en `directTextRuns` sin alterar el árbol de elementos `children`; cada ejecución deberá conservar sus caracteres, su posición entre `childNodes` y sus estilos calculados efectivos, sin inventar ni concatenar contenido descendiente.
 
 ### RF-3. Extracción orientada a Figma
 **Criterios de aceptación**
@@ -84,6 +85,7 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Cuando un nodo sea un contenedor visual, el sistema deberá asignarle `type: "FRAME"`; cuando represente una ejecución de texto puro, deberá asignarle `type: "TEXT"`; cuando sea un elemento `img` o tenga una imagen de fondo renderizable, deberá asignarle `type: "IMAGE"`.
 - Cuando un nodo contenedor tenga texto descendiente, el sistema no deberá duplicar dicho texto en `characters`; solo los nodos `TEXT` hoja podrán incluir `characters`.
 - Cuando un bloque de texto contenga tramos con estilos distintos, el sistema deberá devolver sus ejecuciones en orden DOM, cada una con sus propios caracteres y estilo de texto. Cada ejecución deberá incluir una única familia en `fontFamily` sin fallbacks, `fontSize`, `fontWeight`, `lineHeight` numérico, `letterSpacing`, `textAlign` y `textAutoResize`.
+- La representación de extracción de las ejecuciones de texto directas deberá conservar su orden frente a los elementos hermanos, para que `/v1/figma` pueda emitir nodos `TEXT` hoja sin perder ni duplicar texto.
 - Cuando un contenedor use `display: flex`, el sistema deberá devolver `layoutMode: "HORIZONTAL"` o `"VERTICAL"` según su dirección principal, y `gap` como número en píxeles. Cuando use `display: grid`, deberá devolver el modo equivalente a su eje principal y `gap` numérico. Cuando no use flex ni grid, deberá omitir `layoutMode` y `gap`.
 - Cuando un nodo tenga posición calculada `absolute` o `sticky`, el sistema deberá devolver `position` y `zIndex` numérico cuando sea aplicable, para que el consumidor pueda decidir su posicionamiento absoluto en Figma.
 - Cuando un nodo tenga estilos visuales, el sistema deberá limitar `styles` a las propiedades útiles para su recreación y deberá omitir valores calculados no significativos, incluidos `auto`, `normal`, `none`, `0px` y `visible`, salvo que su presencia cambie el resultado visual o el contrato estructurado requiera representarlos.

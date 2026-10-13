@@ -58,7 +58,7 @@ function validateFigmaSource(value: unknown, path: string, errors: string[]): vo
 function validateExtractionNode(value: unknown, path: string, errors: string[]): void {
   const node = object(value, path, errors);
   if (node === undefined) return;
-  keys(node, path, ['id', 'tagName', 'attributes', 'resources', 'text', 'styles', 'pseudoElements', 'children'], ['layout', 'shadowChildren'], errors);
+  keys(node, path, ['id', 'tagName', 'attributes', 'resources', 'text', 'styles', 'pseudoElements', 'children'], ['layout', 'directTextRuns', 'shadowChildren'], errors);
   string(node.id, `${path}.id`, errors);
   string(node.tagName, `${path}.tagName`, errors);
   stringRecord(node.attributes, `${path}.attributes`, errors);
@@ -67,8 +67,20 @@ function validateExtractionNode(value: unknown, path: string, errors: string[]):
   if ('layout' in node) extractionLayout(node.layout, `${path}.layout`, errors);
   stringRecord(node.styles, `${path}.styles`, errors);
   pseudoElements(node.pseudoElements, `${path}.pseudoElements`, errors);
+  if ('directTextRuns' in node) directTextRuns(node.directTextRuns, `${path}.directTextRuns`, errors);
   nested(node.children, `${path}.children`, errors, validateExtractionNode);
   if ('shadowChildren' in node) nested(node.shadowChildren, `${path}.shadowChildren`, errors, validateExtractionNode);
+}
+
+function directTextRuns(value: unknown, path: string, errors: string[]): void {
+  array(value, path, errors, (run, runPath) => {
+    const entry = object(run, runPath, errors);
+    if (entry === undefined) return;
+    keys(entry, runPath, ['characters', 'childNodeIndex', 'styles'], [], errors);
+    string(entry.characters, `${runPath}.characters`, errors);
+    number(entry.childNodeIndex, `${runPath}.childNodeIndex`, errors);
+    stringRecord(entry.styles, `${runPath}.styles`, errors);
+  });
 }
 
 function extractionLayout(value: unknown, path: string, errors: string[]): void {

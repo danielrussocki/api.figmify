@@ -113,6 +113,8 @@ Los atributos se incluyen solo cuando existan en el elemento. `resources` contie
 
 El contrato de `/v1/extract` es versionado mediante `schemaVersion: "1.0"`. La secuencia de `children` expresa el orden DOM. `text` es `null` cuando no hay texto renderizado. Un `iframe` se representa como nodo, pero no se atraviesa su documento. Las raíces Shadow DOM abiertas se representan mediante `shadowChildren`; una raíz cerrada no produce dicha propiedad.
 
+Para conservar texto directo sin convertirlo en elementos ni cambiar `children`, un nodo puede incluir `directTextRuns`. Cada entrada contiene `characters`, `childNodeIndex` y `styles`. `childNodeIndex` es el índice entero basado en cero del nodo de texto en `element.childNodes`; las entradas se ordenan ascendentemente por ese valor y, junto con `children`, permiten reconstruir el orden DOM frente a hermanos de elemento. `characters` contiene exclusivamente el contenido del nodo de texto renderizado, sin texto inventado ni contenido agregado de descendientes. `styles` usa la misma lista cerrada de propiedades visuales y refleja los estilos calculados efectivos para esa ejecución. La propiedad es opcional para mantener compatibilidad durante la introducción incremental del serializador; su ausencia no modifica el árbol de elementos existente. **Cubre RF-2 y RF-5.**
+
 ```json
 {
   "schemaVersion": "1.0",
@@ -127,6 +129,13 @@ El contrato de `/v1/extract` es versionado mediante `schemaVersion: "1.0"`. La s
     "attributes": { "class": "page" },
     "resources": [],
     "text": null,
+    "directTextRuns": [
+      {
+        "characters": "Hello ",
+        "childNodeIndex": 0,
+        "styles": { "color": "rgb(17, 24, 39)", "font-size": "16px" }
+      }
+    ],
     "layout": { "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080, "top": 0, "left": 0 } },
     "styles": { "display": "block", "background-color": "rgb(255, 255, 255)" },
     "pseudoElements": {

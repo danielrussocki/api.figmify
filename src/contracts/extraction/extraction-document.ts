@@ -54,6 +54,17 @@ export interface ExtractionLayout {
   objectFit?: ObjectFit;
 }
 
+/**
+ * A rendered text node directly owned by an extraction element. Its index
+ * preserves placement among the element's child nodes without changing the
+ * element-only children tree.
+ */
+export interface DirectTextRun {
+  characters: string;
+  childNodeIndex: number;
+  styles: Record<string, string>;
+}
+
 export interface ExtractionNode {
   id: string;
   tagName: string;
@@ -63,6 +74,7 @@ export interface ExtractionNode {
   layout?: ExtractionLayout;
   styles: Record<string, string>;
   pseudoElements: PseudoElements;
+  directTextRuns?: DirectTextRun[];
   children: ExtractionNode[];
   shadowChildren?: ExtractionNode[];
 }
