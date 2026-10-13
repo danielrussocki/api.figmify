@@ -291,7 +291,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** el mapeador omite `auto`, `normal`, `none`, `0px` y `visible` salvo cuando cambien el resultado visual o sean exigidos por el contrato estructurado.
 
-- [ ] **T69. Implementar el parseo de rellenos, bordes, efectos y radios Figma.**
+- [x] **T69. Implementar el parseo de rellenos, bordes, efectos y radios Figma.**
   - **RF:** RF-5.
   - **Hecho cuando:** colores perceptibles se normalizan a RGBA, sombras se convierten a `DROP_SHADOW`, radios se expresan numéricamente y ausencias no se representan como cadenas CSS.
 

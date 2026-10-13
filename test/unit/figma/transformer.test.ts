@@ -70,6 +70,7 @@ describe('transformExtractionNode', () => {
       type: 'FRAME',
       rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
       isVisible: true,
+      fills: [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 1 } }],
       children: [
         {
           id: 'node-heading',

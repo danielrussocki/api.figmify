@@ -13,6 +13,7 @@ import {
   createColorStyleCatalog,
   createTypographyStyleCatalog,
 } from './style-catalog.js';
+import { parseFigmaPaints } from './paint-parser.js';
 
 const EMPTY_RECT = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
 const EXCLUDED_FIGMA_TAGS = new Set([
@@ -56,6 +57,7 @@ function mapExtractionNode(
   const textStyle = type === 'TEXT' ? normalizeTextStyle(node.styles) : undefined;
   const autoLayout = determineAutoLayout(node.styles);
   const positioning = determinePositioning(node.styles);
+  const paints = parseFigmaPaints(node.styles);
   const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
     if (isExcludedFigmaTag(child.tagName)) {
       return [];
@@ -93,6 +95,11 @@ function mapExtractionNode(
     ...(autoLayout.gap === undefined ? {} : { gap: autoLayout.gap }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
+    ...(paints.fills === null ? {} : { fills: paints.fills }),
+    ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
+    ...(paints.effects === null ? {} : { effects: paints.effects }),
+    ...(paints.cornerRadius === undefined ? {} : { cornerRadius: paints.cornerRadius }),
+    ...(paints.cornerRadii === undefined ? {} : { cornerRadii: paints.cornerRadii }),
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     ...(textStyle === undefined ? {} : { styles: textStyle }),
     children,
