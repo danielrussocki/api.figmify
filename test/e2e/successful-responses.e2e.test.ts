@@ -86,7 +86,13 @@ describe('successful HTTP responses', () => {
         viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
       },
       styles: { colors: expect.any(Array), typographies: expect.any(Array) },
-      document: { sourceId: expect.any(String), type: 'DOCUMENT', name: 'html' },
+      document: {
+        id: expect.any(String),
+        tag: 'html',
+        type: expect.stringMatching(/^(FRAME|TEXT|IMAGE)$/),
+        rect: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }),
+        isVisible: expect.any(Boolean),
+      },
     });
   });
 
@@ -103,7 +109,13 @@ describe('successful HTTP responses', () => {
         viewport: { width: 1440, height: 900, deviceScaleFactor: 3 },
       },
       styles: { colors: expect.any(Array), typographies: expect.any(Array) },
-      document: { sourceId: expect.any(String), type: 'DOCUMENT', name: 'html' },
+      document: {
+        id: expect.any(String),
+        tag: 'html',
+        type: expect.stringMatching(/^(FRAME|TEXT|IMAGE)$/),
+        rect: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }),
+        isVisible: expect.any(Boolean),
+      },
     });
   });
 });

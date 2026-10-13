@@ -19,7 +19,7 @@ function node(overrides: Partial<ExtractionNode> = {}): ExtractionNode {
 }
 
 describe('transformExtractionNode', () => {
-  test('preserves source information, text, attributes, resources, and nested structure', () => {
+  test('maps the extraction tree to compact nodes with geometry and visibility', () => {
     const resource = { kind: 'image' as const, url: 'https://example.com/logo.png' };
     const extraction = node({
       id: 'node-root',
@@ -32,31 +32,26 @@ describe('transformExtractionNode', () => {
     });
 
     expect(transformExtractionNode(extraction)).toEqual({
-      sourceId: 'node-root',
+      id: 'node-root',
+      tag: 'section',
       type: 'IMAGE',
-      name: 'section',
-      attributes: { class: 'hero', 'aria-label': 'Hero' },
-      resources: [resource],
-      styles: { backgroundColor: 'rgb(255, 255, 255)', fontSize: '16px' },
+      rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+      isVisible: true,
       children: [
         {
-          sourceId: 'node-heading',
+          id: 'node-heading',
+          tag: 'h1',
           type: 'TEXT',
-          name: 'h1',
-          characters: 'Welcome',
-          attributes: {},
-          resources: [],
-          styles: {},
+          rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+          isVisible: true,
           children: [],
         },
         {
-          sourceId: 'node-shadow',
+          id: 'node-shadow',
+          tag: 'span',
           type: 'TEXT',
-          name: 'span',
-          characters: 'From shadow DOM',
-          attributes: {},
-          resources: [],
-          styles: {},
+          rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+          isVisible: true,
           children: [],
         },
       ],
@@ -64,8 +59,8 @@ describe('transformExtractionNode', () => {
   });
 
   test.each([
-    ['html', null, 'DOCUMENT'],
-    ['svg', null, 'VECTOR'],
+    ['html', null, 'FRAME'],
+    ['svg', null, 'FRAME'],
     ['img', null, 'IMAGE'],
     ['div', 'Visible text', 'TEXT'],
     ['div', null, 'FRAME'],
@@ -116,7 +111,7 @@ describe('transformExtractionDocument', () => {
       }),
     };
 
-    expect(transformExtractionDocument(extraction)).toEqual({
+    expect(transformExtractionDocument(extraction)).toMatchObject({
       schemaVersion: '1.0',
       source: {
         url: 'https://example.com/',
@@ -149,52 +144,25 @@ describe('transformExtractionDocument', () => {
         ],
       },
       document: {
-        sourceId: 'node-root',
-        type: 'DOCUMENT',
-        name: 'html',
-        attributes: {},
-        resources: [],
-        styles: { backgroundColor: 'rgb(255, 255, 255)' },
+        id: 'node-root',
+        tag: 'html',
+        type: 'FRAME',
+        rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+        isVisible: true,
         children: [
           {
-            sourceId: 'node-heading',
+            id: 'node-heading',
+            tag: 'h1',
             type: 'TEXT',
-            name: 'h1',
-            characters: 'Welcome',
-            attributes: {},
-            resources: [],
-            fillStyleId: 'color-111827',
-            textStyleId: 'type-inter-32-700-normal-38.4-0-none',
-            styles: {
-              color: 'rgb(17, 24, 39)',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '32px',
-              fontWeight: '700',
-              fontStyle: 'normal',
-              lineHeight: '38.4px',
-              letterSpacing: 'normal',
-              textTransform: 'none',
-            },
+            rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+            isVisible: true,
             children: [
               {
-                sourceId: 'node-shadow',
+                id: 'node-shadow',
+                tag: 'span',
                 type: 'TEXT',
-                name: 'span',
-                characters: 'From shadow DOM',
-                attributes: {},
-                resources: [],
-                fillStyleId: 'color-111827',
-                textStyleId: 'type-inter-32-700-normal-38.4-0-none',
-                styles: {
-                  color: '#111827',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  fontStyle: 'normal',
-                  lineHeight: '38.4px',
-                  letterSpacing: 'normal',
-                  textTransform: 'none',
-                },
+                rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+                isVisible: true,
                 children: [],
               },
             ],

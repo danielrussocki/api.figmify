@@ -15,7 +15,7 @@ export interface FigmaRelativeRect extends FigmaRect {}
 
 export type FigmaIsVisible = boolean;
 
-export type FigmaNodeType = 'DOCUMENT' | 'FRAME' | 'TEXT' | 'IMAGE' | 'VECTOR' | 'RECTANGLE';
+export type FigmaNodeType = 'FRAME' | 'TEXT' | 'IMAGE';
 
 export type ColorStyleId = `color-${string}`;
 
@@ -53,15 +53,12 @@ export interface FigmaStyleCatalog {
 export type FigmaStyleValue = string | number | boolean | FigmaRgbaColor;
 
 export interface FigmaNode {
-  sourceId: string;
+  id: string;
+  tag: string;
   type: FigmaNodeType;
-  name: string;
-  characters?: string;
-  attributes: Record<string, string>;
-  resources: ResourceReference[];
-  fillStyleId?: ColorStyleId;
-  textStyleId?: TypographyStyleId;
-  styles: Record<string, FigmaStyleValue>;
+  rect: FigmaRect;
+  relativeRect?: FigmaRelativeRect;
+  isVisible: FigmaIsVisible;
   children: FigmaNode[];
 }
 

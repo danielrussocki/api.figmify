@@ -3,20 +3,9 @@ import type { FigmaDocument, FigmaNode, FigmaNodeType } from '../contracts/figma
 import {
   createColorStyleCatalog,
   createTypographyStyleCatalog,
-  findColorStyleForNode,
-  findTypographyStyleForNode,
 } from './style-catalog.js';
 
-const VECTOR_TAG_NAMES = new Set([
-  'svg',
-  'path',
-  'circle',
-  'ellipse',
-  'line',
-  'polygon',
-  'polyline',
-  'rect',
-]);
+const EMPTY_RECT = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
 
 /**
  * Converts an extracted node tree into the Figma-oriented node contract.
@@ -27,13 +16,11 @@ export function transformExtractionNode(node: ExtractionNode): FigmaNode {
   const children = [...node.children, ...(node.shadowChildren ?? [])].map(transformExtractionNode);
 
   return {
-    sourceId: node.id,
+    id: node.id,
+    tag: node.tagName,
     type: determineFigmaNodeType(node),
-    name: node.tagName,
-    ...(node.text === null ? {} : { characters: node.text }),
-    attributes: { ...node.attributes },
-    resources: node.resources.map((resource) => ({ ...resource })),
-    styles: transformStyles(node.styles),
+    rect: { ...(node.layout?.rect ?? EMPTY_RECT) },
+    isVisible: true,
     children,
   };
 }
@@ -42,9 +29,6 @@ export function transformExtractionNode(node: ExtractionNode): FigmaNode {
 export function transformExtractionDocument(extraction: ExtractionDocument): FigmaDocument {
   const colors = createColorStyleCatalog(extraction.document);
   const typographies = createTypographyStyleCatalog(extraction.document);
-  const colorIds = new Set(colors.map((style) => style.id));
-  const typographyIds = new Set(typographies.map((style) => style.id));
-
   return {
     schemaVersion: '1.0',
     source: {
@@ -52,40 +36,12 @@ export function transformExtractionDocument(extraction: ExtractionDocument): Fig
       viewport: { ...extraction.source.viewport },
     },
     styles: { colors, typographies },
-    document: transformNodeWithStyleReferences(extraction.document, colorIds, typographyIds),
-  };
-}
-
-function transformNodeWithStyleReferences(
-  node: ExtractionNode,
-  colorIds: ReadonlySet<string>,
-  typographyIds: ReadonlySet<string>,
-): FigmaNode {
-  const colorStyle = findColorStyleForNode(node.styles);
-  const typographyStyle = findTypographyStyleForNode(node.styles);
-
-  return {
-    ...transformExtractionNode({ ...node, children: [], shadowChildren: [] }),
-    ...(colorStyle !== null && colorIds.has(colorStyle.id) ? { fillStyleId: colorStyle.id } : {}),
-    ...(typographyStyle !== null && typographyIds.has(typographyStyle.id)
-      ? { textStyleId: typographyStyle.id }
-      : {}),
-    children: [...node.children, ...(node.shadowChildren ?? [])].map((child) =>
-      transformNodeWithStyleReferences(child, colorIds, typographyIds),
-    ),
+    document: transformExtractionNode(extraction.document),
   };
 }
 
 function determineFigmaNodeType(node: ExtractionNode): FigmaNodeType {
   const tagName = node.tagName.toLowerCase();
-
-  if (tagName === 'html') {
-    return 'DOCUMENT';
-  }
-
-  if (VECTOR_TAG_NAMES.has(tagName)) {
-    return 'VECTOR';
-  }
 
   if (tagName === 'img' || node.resources.some((resource) => resource.kind === 'image')) {
     return 'IMAGE';
@@ -96,14 +52,4 @@ function determineFigmaNodeType(node: ExtractionNode): FigmaNodeType {
   }
 
   return 'FRAME';
-}
-
-function transformStyles(styles: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(styles).map(([property, value]) => [toCamelCase(property), value]),
-  );
-}
-
-function toCamelCase(property: string): string {
-  return property.replace(/-([a-z])/gu, (_, character: string) => character.toUpperCase());
 }

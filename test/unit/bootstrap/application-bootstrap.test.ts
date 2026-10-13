@@ -88,7 +88,13 @@ describe('application bootstrap', () => {
         url: 'https://example.com/',
         viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
       },
-      document: { sourceId: 'node-1', characters: 'Hello' },
+      document: {
+        id: 'node-1',
+        tag: 'body',
+        type: 'TEXT',
+        rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+        isVisible: true,
+      },
     });
     expect(extractor.extract).toHaveBeenCalledTimes(2);
   });

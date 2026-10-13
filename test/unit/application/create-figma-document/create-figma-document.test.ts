@@ -43,12 +43,11 @@ describe('CreateFigmaDocumentUseCase', () => {
       source: { url: request.url, viewport: request.viewport },
       styles: { colors: [], typographies: [] },
       document: {
-        sourceId: 'node-1',
-        type: 'DOCUMENT',
-        name: 'html',
-        attributes: {},
-        resources: [],
-        styles: {},
+        id: 'node-1',
+        tag: 'html',
+        type: 'FRAME',
+        rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+        isVisible: true,
         children: [],
       },
     });

@@ -215,7 +215,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** existen tipos para `rect`, `relativeRect` e `isVisible`, y cada rectángulo exige `x`, `y`, `width`, `height`, `top` y `left` numéricos.
 
-- [ ] **T50. Actualizar el contrato de nodo Figma compacto.**
+- [x] **T50. Actualizar el contrato de nodo Figma compacto.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** el tipo exige `id`, `tag`, `type`, `rect` e `isVisible`, permite `relativeRect` fuera de la raíz y limita los tipos a `FRAME`, `TEXT` e `IMAGE`.
 

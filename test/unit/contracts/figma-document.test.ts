@@ -1,6 +1,6 @@
 import { expectTypeOf, test } from 'vitest';
 
-import type { ResourceReference, Viewport } from '../../../src/contracts/extraction/extraction-document.js';
+import type { Viewport } from '../../../src/contracts/extraction/extraction-document.js';
 import type {
   ColorStyle,
   ColorStyleId,
@@ -47,6 +47,34 @@ test('models Figma absolute and relative rectangles with typed visibility', () =
   expectTypeOf(relativeRect).toEqualTypeOf<FigmaRect>();
 });
 
+test('models compact Figma nodes with required geometry and only permitted types', () => {
+  const root: FigmaNode = {
+    id: 'node-1',
+    tag: 'body',
+    type: 'FRAME',
+    rect: { x: 0, y: 0, width: 1920, height: 1080, top: 0, left: 0 },
+    isVisible: true,
+    children: [],
+  };
+  const child: FigmaNode = {
+    id: 'node-2',
+    tag: 'img',
+    type: 'IMAGE',
+    rect: { x: 24, y: 32, width: 180, height: 39, top: 32, left: 24 },
+    relativeRect: { x: 24, y: 32, width: 180, height: 39, top: 32, left: 24 },
+    isVisible: false,
+    children: [],
+  };
+
+  expectTypeOf(root.id).toEqualTypeOf<string>();
+  expectTypeOf(root.tag).toEqualTypeOf<string>();
+  expectTypeOf(root.type).toEqualTypeOf<'FRAME' | 'TEXT' | 'IMAGE'>();
+  expectTypeOf(root.rect).toEqualTypeOf<FigmaRect>();
+  expectTypeOf(root.isVisible).toEqualTypeOf<FigmaIsVisible>();
+  expectTypeOf(root.relativeRect).toEqualTypeOf<FigmaRelativeRect | undefined>();
+  expectTypeOf(child.relativeRect).toEqualTypeOf<FigmaRelativeRect | undefined>();
+});
+
 test('models the versioned Figma document contract and reusable style catalogs', () => {
   const viewport: Viewport = {
     width: 1920,
@@ -80,21 +108,12 @@ test('models the versioned Figma document contract and reusable style catalogs',
     typographies: [typography],
   };
 
-  const resource: ResourceReference = {
-    kind: 'image',
-    url: 'https://example.com/logo.svg',
-  };
-
   const node: FigmaNode = {
-    sourceId: 'node-2',
+    id: 'node-2',
+    tag: 'h1',
     type: 'TEXT',
-    name: 'h1',
-    characters: 'Welcome',
-    attributes: { id: 'welcome' },
-    resources: [resource],
-    fillStyleId: colorId,
-    textStyleId: typographyId,
-    styles: { fontSize: 32, fontWeight: 700 },
+    rect: { x: 24, y: 32, width: 180, height: 39, top: 32, left: 24 },
+    isVisible: true,
     children: [],
   };
 
@@ -113,8 +132,7 @@ test('models the versioned Figma document contract and reusable style catalogs',
   expectTypeOf(document.styles.colors).toEqualTypeOf<ColorStyle[]>();
   expectTypeOf(document.styles.typographies).toEqualTypeOf<TypographyStyle[]>();
   expectTypeOf(document.document.type).toEqualTypeOf<FigmaNodeType>();
-  expectTypeOf(document.document.sourceId).toEqualTypeOf<string>();
-  expectTypeOf(document.document.fillStyleId).toEqualTypeOf<ColorStyleId | undefined>();
-  expectTypeOf(document.document.textStyleId).toEqualTypeOf<TypographyStyleId | undefined>();
-  expectTypeOf(document.document.resources).toEqualTypeOf<ResourceReference[]>();
+  expectTypeOf(document.document.id).toEqualTypeOf<string>();
+  expectTypeOf(document.document.tag).toEqualTypeOf<string>();
+  expectTypeOf(document.document.rect).toEqualTypeOf<FigmaRect>();
 });
