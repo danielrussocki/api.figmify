@@ -19,6 +19,39 @@ function node(overrides: Partial<ExtractionNode> = {}): ExtractionNode {
 }
 
 describe('transformExtractionNode', () => {
+  test('excludes non-renderable and metadata tags from the Figma tree', () => {
+    const excludedTags = ['head', 'meta', 'title', 'script', 'link', 'style', 'base', 'template', 'noscript'];
+    const extraction = node({
+      id: 'node-root',
+      tagName: 'html',
+      children: [
+        node({
+          id: 'node-body',
+          tagName: 'body',
+          children: [
+            ...excludedTags.map((tagName, index) => node({
+              id: `node-excluded-${index}`,
+              tagName,
+              text: 'Metadata',
+            })),
+            node({ id: 'node-visible', tagName: 'main' }),
+          ],
+          shadowChildren: [node({ id: 'node-shadow-style', tagName: 'style' })],
+        }),
+      ],
+    });
+
+    expect(transformExtractionNode(extraction)).toMatchObject({
+      tag: 'html',
+      children: [
+        {
+          tag: 'body',
+          children: [{ id: 'node-visible', tag: 'main' }],
+        },
+      ],
+    });
+  });
+
   test('maps the extraction tree to compact nodes with geometry and visibility', () => {
     const resource = { kind: 'image' as const, url: 'https://example.com/logo.png' };
     const extraction = node({

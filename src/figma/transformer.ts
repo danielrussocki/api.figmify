@@ -6,6 +6,17 @@ import {
 } from './style-catalog.js';
 
 const EMPTY_RECT = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
+const EXCLUDED_FIGMA_TAGS = new Set([
+  'head',
+  'meta',
+  'title',
+  'script',
+  'link',
+  'style',
+  'base',
+  'template',
+  'noscript',
+]);
 
 /**
  * Converts an extracted node tree into the Figma-oriented node contract.
@@ -13,7 +24,13 @@ const EMPTY_RECT = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
  * assembled; this conversion intentionally preserves raw computed styles.
  */
 export function transformExtractionNode(node: ExtractionNode): FigmaNode {
-  const children = [...node.children, ...(node.shadowChildren ?? [])].map(transformExtractionNode);
+  const children = [...node.children, ...(node.shadowChildren ?? [])].flatMap((child) => {
+    if (isExcludedFigmaTag(child.tagName)) {
+      return [];
+    }
+
+    return [transformExtractionNode(child)];
+  });
 
   return {
     id: node.id,
@@ -23,6 +40,10 @@ export function transformExtractionNode(node: ExtractionNode): FigmaNode {
     isVisible: true,
     children,
   };
+}
+
+function isExcludedFigmaTag(tagName: string): boolean {
+  return EXCLUDED_FIGMA_TAGS.has(tagName.toLowerCase());
 }
 
 /** Converts a complete extraction document into the versioned Figma contract. */

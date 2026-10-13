@@ -255,7 +255,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** existen fixtures con runs de texto de estilos distintos, flex, grid, `gap: normal`, imágenes `img`, fondos de imagen y SVG inline.
 
-- [ ] **T60. Implementar la exclusión de etiquetas no renderizables en el mapeador Figma.**
+- [x] **T60. Implementar la exclusión de etiquetas no renderizables en el mapeador Figma.**
   - **RF:** RF-5.
   - **Hecho cuando:** `head`, `meta`, `title`, `script`, `link`, `style`, `base`, `template` y `noscript` no aparecen en el árbol Figma.
 
