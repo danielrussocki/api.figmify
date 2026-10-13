@@ -411,7 +411,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture cubre `grid-auto-flow`, `row-gap` y `column-gap` distintos, `gap: normal`, dirección invertida y valores de alineación que deben omitirse.
 
-- [ ] **T98. Crear una fixture de bordes, sombras y geometría relativa.**
+- [x] **T98. Crear una fixture de bordes, sombras y geometría relativa.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture incluye borde uniforme, bordes distintos por lado, sombras externa e interna múltiples, un margen negativo y un nodo `sticky` bajo un padre con caja conocida.
 

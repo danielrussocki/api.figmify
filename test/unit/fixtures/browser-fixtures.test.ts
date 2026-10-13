@@ -126,6 +126,35 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves borders, multiple shadows, and relative geometry scenarios', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="uniform-border"');
+      expect(document).toContain('border: 3px solid rgb(20, 40, 60)');
+      expect(document).toContain('id="per-side-borders"');
+      expect(document).toContain('border-top: 1px solid rgb(200, 10, 10)');
+      expect(document).toContain('border-right: 2px solid rgb(10, 160, 10)');
+      expect(document).toContain('border-bottom: 3px solid rgb(10, 10, 200)');
+      expect(document).toContain('border-left: 4px solid rgb(180, 120, 10)');
+      expect(document).toContain('id="multiple-shadows"');
+      expect(document).toContain('box-shadow: 2px 4px 6px 1px rgba(0, 0, 0, 0.25), inset -1px -2px 3px 0 rgba(20, 40, 60, 0.5)');
+      expect(document).toContain('id="negative-margin-child"');
+      expect(document).toContain('margin-top: -16px');
+      expect(document).toContain('id="sticky-child"');
+      expect(document).toContain('position: sticky');
+      expect(document).toContain('id="sticky-parent"');
+      expect(document).toContain('width: 360px');
+      expect(document).toContain('height: 180px');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serve failed resources and redirect secondary resources without redirecting the document', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 

@@ -100,12 +100,52 @@
           align-items: baseline;
         }
        #normal-gap-layout { display: flex; gap: normal; }
-      #background-image {
-        width: 64px;
-        height: 48px;
-        background-image: url("/resources/fixture-image.svg");
-        background-size: cover;
-      }
+       #background-image {
+         width: 64px;
+         height: 48px;
+         background-image: url("/resources/fixture-image.svg");
+         background-size: cover;
+       }
+       #uniform-border {
+         width: 120px;
+         height: 48px;
+         border: 3px solid rgb(20, 40, 60);
+       }
+       #per-side-borders {
+         width: 120px;
+         height: 48px;
+         border-top: 1px solid rgb(200, 10, 10);
+         border-right: 2px solid rgb(10, 160, 10);
+         border-bottom: 3px solid rgb(10, 10, 200);
+         border-left: 4px solid rgb(180, 120, 10);
+       }
+       #multiple-shadows {
+         width: 120px;
+         height: 48px;
+         box-shadow: 2px 4px 6px 1px rgba(0, 0, 0, 0.25), inset -1px -2px 3px 0 rgba(20, 40, 60, 0.5);
+       }
+       #relative-geometry-parent {
+         position: relative;
+         width: 360px;
+         height: 180px;
+         overflow: auto;
+       }
+       #negative-margin-child {
+         width: 100px;
+         height: 40px;
+         margin-top: -16px;
+       }
+       #sticky-parent {
+         position: relative;
+         width: 360px;
+         height: 180px;
+       }
+       #sticky-child {
+         position: sticky;
+         top: 12px;
+         width: 120px;
+         height: 40px;
+       }
     </style>
   </head>
   <body>
@@ -145,8 +185,17 @@
           <div id="alignment-space-evenly"><div>Space-evenly item</div><div>Baseline item</div></div>
          <div id="normal-gap-layout"><div>Normal gap first item</div><div>Normal gap second item</div></div>
         <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
-        <div id="background-image" role="img" aria-label="Background image fixture"></div>
-        <svg id="inline-svg" width="64" height="48" viewBox="0 0 64 48" role="img" aria-label="Inline SVG fixture">
+         <div id="background-image" role="img" aria-label="Background image fixture"></div>
+         <div id="uniform-border">Uniform border fixture</div>
+         <div id="per-side-borders">Per-side border fixture</div>
+         <div id="multiple-shadows">Multiple shadow fixture</div>
+         <div id="relative-geometry-parent">
+           <div id="negative-margin-child">Negative margin fixture</div>
+         </div>
+         <div id="sticky-parent">
+           <div id="sticky-child">Sticky fixture</div>
+         </div>
+         <svg id="inline-svg" width="64" height="48" viewBox="0 0 64 48" role="img" aria-label="Inline SVG fixture">
           <circle cx="24" cy="24" r="16" fill="rgb(20, 80, 160)"></circle>
         </svg>
        <div id="open-shadow-host"></div>
