@@ -608,7 +608,8 @@ export function transformExtractionDocument(
 ): FigmaDocument {
   const document = transformExtractionNode(extraction.document, options);
   const referencedNodeIds = collectReferencedCatalogNodeIds(document);
-  const colors = createColorStyleCatalog(extraction.document, referencedNodeIds.colors);
+  const colors = createColorStyleCatalog(extraction.document, referencedNodeIds.colors)
+    .filter((color) => referencedNodeIds.solidFillKeys.has(rgbaKey(color.rgba)));
   const typographies = createTypographyStyleCatalog(extraction.document, referencedNodeIds.typographies);
   return {
     schemaVersion: '1.0',
@@ -626,13 +627,20 @@ export function transformExtractionDocument(
 function collectReferencedCatalogNodeIds(document: FigmaNode): {
   colors: ReadonlySet<string>;
   typographies: ReadonlySet<string>;
+  solidFillKeys: ReadonlySet<string>;
 } {
   const colors = new Set<string>();
   const typographies = new Set<string>();
+  const solidFillKeys = new Set<string>();
 
   const visit = (node: FigmaNode): void => {
     if (node.isVisible) {
       colors.add(node.id);
+      for (const fill of node.fills ?? []) {
+        if (fill.type === 'SOLID') {
+          solidFillKeys.add(rgbaKey(fill.color));
+        }
+      }
       if (node.type === 'TEXT') {
         typographies.add(node.id);
       }
@@ -644,7 +652,11 @@ function collectReferencedCatalogNodeIds(document: FigmaNode): {
   };
 
   visit(document);
-  return { colors, typographies };
+  return { colors, typographies, solidFillKeys };
+}
+
+function rgbaKey({ r, g, b, a }: { r: number; g: number; b: number; a: number }): string {
+  return `${r},${g},${b},${a}`;
 }
 
 function determineFigmaNodeType(node: ExtractionNode): FigmaNodeType {

@@ -489,7 +489,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** las fixtures contienen un nodo visible sin relleno perceptible, un `img` con URL resoluble y un nodo con `background-image` resoluble, con resultados esperados distinguibles.
 
-- [ ] **T117. Añadir pruebas unitarias de relleno vacío.**
+- [x] **T117. Añadir pruebas unitarias de relleno vacío.**
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas verifican que un nodo sin relleno devuelve exactamente `fills: []`, no devuelve `fills: null` ni omite la propiedad, y no crea un color reutilizable de respaldo.
 

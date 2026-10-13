@@ -19,12 +19,25 @@ function node(overrides: Partial<ExtractionNode> = {}): ExtractionNode {
 }
 
 describe('transformExtractionNode', () => {
-  test('emits an empty fills array for a frame without a perceptible background', () => {
-    const transformed = transformExtractionNode(node({
-      styles: { color: 'rgb(17, 24, 39)', 'background-color': 'transparent' },
-    }));
+  test('emits exactly an empty fills array without a fallback color for a frame without a perceptible background', () => {
+    const extraction: ExtractionDocument = {
+      schemaVersion: '1.0',
+      source: {
+        url: 'https://example.com/',
+        viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
+        environment: { locale: 'en-US', timezone: 'UTC', colorScheme: 'light', reducedMotion: 'no-preference' },
+      },
+      document: node({
+        styles: { color: 'rgb(17, 24, 39)', 'background-color': 'transparent' },
+      }),
+    };
 
-    expect(transformed.fills).toEqual([]);
+    const result = transformExtractionDocument(extraction);
+
+    expect(result.document).toHaveProperty('fills');
+    expect(result.document.fills).toEqual([]);
+    expect(result.document.fills).not.toBeNull();
+    expect(result.styles.colors).toEqual([]);
   });
 
   test('excludes non-renderable and metadata tags from the Figma tree', () => {
