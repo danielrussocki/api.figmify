@@ -419,7 +419,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** para cada nodo no raíz con padre representado, `x` e `y` se calculan únicamente como la diferencia de los orígenes de `rect`, y `width` y `height` se conservan sin reajustes.
 
-- [ ] **T100. Probar `relativeRect` con margen negativo, `sticky` y caja cero.**
+- [x] **T100. Probar `relativeRect` con margen negativo, `sticky` y caja cero.**
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas prueban la resta exacta en los tres casos y verifican que no se aplican ajustes adicionales de margen, padding ni posicionamiento.
 

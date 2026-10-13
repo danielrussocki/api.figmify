@@ -419,6 +419,45 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test.each([
+    {
+      description: 'a child with a negative margin',
+      childStyles: { 'margin-left': '-48px', 'margin-top': '-24px' },
+      childRect: { x: 72, y: 224, width: 80, height: 40, top: 224, left: 72 },
+      expected: { x: -28, y: 24, width: 80, height: 40, top: 24, left: -28 },
+    },
+    {
+      description: 'a sticky child',
+      childStyles: { position: 'sticky', top: '12px', left: '8px' },
+      childRect: { x: 180, y: 165, width: 60, height: 30, top: 165, left: 180 },
+      expected: { x: 80, y: -35, width: 60, height: 30, top: -35, left: 80 },
+    },
+    {
+      description: 'a child with a zero-sized box',
+      childStyles: {},
+      childRect: { x: 100, y: 200, width: 0, height: 0, top: 200, left: 100 },
+      expected: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
+    },
+  ])('calculates relativeRect by direct subtraction for $description', ({ childStyles, childRect, expected }) => {
+    const result = transformExtractionNode(node({
+      id: 'node-parent',
+      layout: { rect: { x: 100, y: 200, width: 400, height: 300, top: 200, left: 100 } },
+      styles: {
+        'padding-left': '32px',
+        'padding-top': '16px',
+        'border-left-width': '4px',
+        'border-top-width': '2px',
+      },
+      children: [node({
+        id: 'node-child',
+        layout: { rect: childRect },
+        styles: childStyles,
+      })],
+    }));
+
+    expect(result.children[0]?.relativeRect).toEqual(expected);
+  });
+
   test('emits only finite numeric values when source layout measurements are invalid', () => {
     const result = transformExtractionNode(node({
       layout: {
