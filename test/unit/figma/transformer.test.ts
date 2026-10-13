@@ -442,6 +442,48 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test('uses IMAGE paints rather than SOLID paints for img and resolvable background image nodes', () => {
+    const result = transformExtractionNode(node({
+      id: 'node-root',
+      children: [
+        node({
+          id: 'node-img',
+          tagName: 'img',
+          resources: [{ kind: 'image', url: 'https://example.com/images/logo.png' }],
+          layout: {
+            rect: { x: 0, y: 0, width: 120, height: 80, top: 0, left: 0 },
+            naturalWidth: 240,
+            naturalHeight: 160,
+            objectFit: 'contain',
+          },
+        }),
+        node({
+          id: 'node-background',
+          styles: {
+            'background-image': 'url("https://example.com/images/hero.png")',
+            'background-size': 'cover',
+          },
+        }),
+      ],
+    }));
+
+    const imageNodes = result.children.filter((child) => child.type === 'IMAGE');
+
+    expect(imageNodes).toHaveLength(2);
+    expect(imageNodes).toEqual([
+      expect.objectContaining({
+        id: 'node-img',
+        fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FILL' }],
+      }),
+      expect.objectContaining({
+        id: 'node-background',
+        fills: [{ type: 'IMAGE', src: 'https://example.com/images/hero.png', scaleMode: 'FILL' }],
+      }),
+    ]);
+    expect(imageNodes.flatMap((imageNode) => imageNode.fills ?? []))
+      .not.toContainEqual(expect.objectContaining({ type: 'SOLID' }));
+  });
+
   test('maps an img with its resolved source and measured image data', () => {
     const result = transformExtractionNode(node({
       tagName: 'img',

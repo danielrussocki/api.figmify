@@ -493,7 +493,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas verifican que un nodo sin relleno devuelve exactamente `fills: []`, no devuelve `fills: null` ni omite la propiedad, y no crea un color reutilizable de respaldo.
 
-- [ ] **T118. Añadir pruebas unitarias de pinturas de imagen.**
+- [x] **T118. Añadir pruebas unitarias de pinturas de imagen.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas cubren `img` y fondo resoluble y verifican que cada nodo `IMAGE` usa una pintura `IMAGE` con `src` y `scaleMode: "FILL"`, nunca `SOLID`.
 
