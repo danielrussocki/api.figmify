@@ -21,6 +21,15 @@ describe('browser fixtures', () => {
       expect(document).toContain('id="async-content"');
       expect(document).toContain('/resources/failed-image.png');
       expect(document).toContain('/resources/secondary-redirect.css');
+      expect(document).toContain('name="fixture-metadata"');
+      expect(document).toContain('id="hidden-opacity"');
+      expect(document).toContain('id="zero-size"');
+      expect(document).toContain('id="fixed-position"');
+      expect(document).toContain('id="fixture-svg"');
+      expect(document).toContain('display: none');
+      expect(document).toContain('opacity: 0');
+      expect(document).toContain('position: fixed');
+      expect(document).toContain('width="80" height="40"');
     } finally {
       await fixtureServer.close();
     }

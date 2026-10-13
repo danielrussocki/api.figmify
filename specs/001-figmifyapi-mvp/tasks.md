@@ -247,7 +247,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** las pruebas verifican coordenadas con desplazamiento de documento, caja cero y los datos de una imagen.
 
-- [ ] **T58. Crear fixtures para geometría, visibilidad y nodos excluidos.**
+- [x] **T58. Crear fixtures para geometría, visibilidad y nodos excluidos.**
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** existen fixtures con metadatos HTML, `display: none`, `hidden`, opacidad cero, tamaño cero, posición fija y SVG con caja.
 

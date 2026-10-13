@@ -2,10 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="fixture-metadata" content="Metadata fixture">
     <title>Browser extraction fixtures</title>
     <link rel="stylesheet" href="/resources/secondary-redirect.css">
     <style>
       #hidden-display { display: none; }
+      #hidden-opacity { opacity: 0; }
+      #zero-size { width: 0; height: 0; overflow: hidden; }
+      #fixed-position { position: fixed; top: 16px; left: 24px; width: 120px; height: 40px; }
       #pseudo-element::before { content: "Before fixture"; color: rgb(1, 2, 3); }
       #pseudo-element::after { content: "After fixture"; font-size: 16px; }
     </style>
@@ -13,9 +17,15 @@
   <body>
     <main>
       <p id="visible-text">Visible fixture text</p>
-      <p id="hidden-attribute" hidden>Hidden attribute text</p>
-      <p id="hidden-display">Display hidden text</p>
-      <p id="pseudo-element">Pseudo-element host</p>
+       <p id="hidden-attribute" hidden>Hidden attribute text</p>
+       <p id="hidden-display">Display hidden text</p>
+       <p id="hidden-opacity">Transparent fixture text</p>
+       <div id="zero-size">Zero-size fixture content</div>
+       <div id="fixed-position">Fixed-position fixture content</div>
+       <svg id="fixture-svg" width="80" height="40" viewBox="0 0 80 40" role="img" aria-label="Boxed SVG fixture">
+         <rect width="80" height="40" fill="rgb(1, 2, 3)"></rect>
+       </svg>
+       <p id="pseudo-element">Pseudo-element host</p>
       <div id="open-shadow-host"></div>
       <div id="closed-shadow-host"></div>
       <iframe id="fixture-iframe" src="/iframe.html" title="Fixture iframe"></iframe>
