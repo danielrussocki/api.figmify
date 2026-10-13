@@ -388,3 +388,85 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T92. Ejecutar la validación final de cumplimiento de la especificación.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan; las pruebas de extremo a extremo cubren las brechas corregidas; y una revisión requisito por requisito confirma que no quedan URL internas resolubles, texto perdido, fondos de imagen resolubles, SVG incompleto ni assets tipográficos determinables ausentes.
+
+## Auto Layout, geometría y pinturas estructuradas
+
+- [ ] **T93. Añadir `grid-auto-flow` a la lista de propiedades visuales permitidas.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** la serialización raw incluye el valor computado serializable de `grid-auto-flow` y continúa omitiendo propiedades fuera de la lista cerrada.
+
+- [ ] **T94. Ampliar los tipos Figma para Auto Layout.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** los contratos tipados representan `layoutMode`, `itemSpacing`, `gap`, `padding`, `primaryAxisAlign`, `counterAxisAlign` y `layoutGrow` con los tipos y opcionalidad definidos en el plan.
+
+- [ ] **T95. Ampliar los tipos Figma para bordes por lado y sombras internas.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** los contratos representan `strokeWeight` uniforme, `strokeWeights` y `strokes` por lado, además de efectos `DROP_SHADOW` e `INNER_SHADOW` con color, desplazamiento, radio y extensión numéricos.
+
+- [ ] **T96. Crear una fixture de Auto Layout flex con padding y separación efectiva.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la fixture contiene un contenedor flex horizontal y otro vertical con `gap`, padding físico, `justify-content`, `align-items` e hijo con `flex-grow` verificables.
+
+- [ ] **T97. Crear una fixture de Auto Layout grid y casos sin equivalencia de alineación.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la fixture cubre `grid-auto-flow`, `row-gap` y `column-gap` distintos, `gap: normal`, dirección invertida y valores de alineación que deben omitirse.
+
+- [ ] **T98. Crear una fixture de bordes, sombras y geometría relativa.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la fixture incluye borde uniforme, bordes distintos por lado, sombras externa e interna múltiples, un margen negativo y un nodo `sticky` bajo un padre con caja conocida.
+
+- [ ] **T99. Corregir el cálculo de `relativeRect` mediante resta directa de rectángulos.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** para cada nodo no raíz con padre representado, `x` e `y` se calculan únicamente como la diferencia de los orígenes de `rect`, y `width` y `height` se conservan sin reajustes.
+
+- [ ] **T100. Probar `relativeRect` con margen negativo, `sticky` y caja cero.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** las pruebas prueban la resta exacta en los tres casos y verifican que no se aplican ajustes adicionales de margen, padding ni posicionamiento.
+
+- [ ] **T101. Implementar el mapeo de dirección flex a `layoutMode`.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** `row` y `row-reverse` producen `HORIZONTAL`, `column` y `column-reverse` producen `VERTICAL`, y los nodos que no son flex ni grid omiten las propiedades de Auto Layout.
+
+- [ ] **T102. Implementar la separación y el padding de Auto Layout para flex.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un contenedor flex emite `itemSpacing` y `gap` iguales según su eje principal, normaliza la separación no efectiva a `0` e incluye siempre los cuatro valores numéricos de `padding`.
+
+- [ ] **T103. Implementar el mapeo de alineación de Auto Layout.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** las equivalencias directas de `justify-content` y `align-items` producen los valores de eje definidos, mientras que `stretch`, `baseline`, `space-around`, `space-evenly` y otros valores inexactos omiten el campo correspondiente.
+
+- [ ] **T104. Implementar `layoutGrow` para hijos en flujo de Auto Layout.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un hijo con `flex-grow` positivo emite su valor numérico y los hijos con crecimiento cero, `absolute` o `fixed` no reciben un crecimiento de flujo incorrecto.
+
+- [ ] **T105. Implementar el mapeo de eje y separación de grid.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** el mapeador determina el eje principal conforme a `grid-auto-flow` o las pistas, usa `column-gap` u `row-gap` según ese eje y normaliza `normal` a `0`.
+
+- [ ] **T106. Añadir pruebas unitarias del mapeo de Auto Layout.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas cubren flex, grid, ejes invertidos, separaciones distintas, padding parcial, alineaciones directas e inexactas, y `layoutGrow` dentro y fuera de flujo.
+
+- [ ] **T107. Implementar el parseo de borde sólido uniforme.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un borde sólido perceptible e idéntico en sus cuatro lados emite una pintura `SOLID` RGBA normalizada y un `strokeWeight` numérico.
+
+- [ ] **T108. Implementar la preservación de bordes sólidos distintos por lado.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** colores o grosores distintos generan entradas de `strokes` identificadas por lado y `strokeWeights` sin colapsarlos a un único borde uniforme.
+
+- [ ] **T109. Implementar el parseo de sombras CSS externas e internas.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** cada sombra perceptible convertible conserva su orden y emite `DROP_SHADOW` o `INNER_SHADOW` con RGBA, `offset`, `radius` y `spread` numéricos.
+
+- [ ] **T110. Añadir pruebas unitarias del parseador de bordes y efectos.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** las pruebas cubren bordes uniformes y por lado, bordes transparentes, sombras múltiples internas y externas, y valores de desplazamiento, desenfoque o extensión cero.
+
+- [ ] **T111. Validar por integración el contrato Figma ampliado.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** una extracción Playwright de las nuevas fixtures y una solicitud a `/v1/figma` validan geometría relativa, Auto Layout, bordes y efectos contra el contrato versionado.
+
+- [ ] **T112. Ejecutar la regresión final de los ajustes de Auto Layout y pinturas.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las rutas mantienen sus errores normalizados y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
