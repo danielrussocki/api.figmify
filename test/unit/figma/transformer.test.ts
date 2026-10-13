@@ -206,16 +206,26 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test('maps flex layouts to their Figma axis and numeric gap', () => {
-    const horizontal = transformExtractionNode(node({
-      styles: { display: 'flex', 'flex-direction': 'row', gap: '16px' },
-    }));
-    const vertical = transformExtractionNode(node({
-      styles: { display: 'inline-flex', 'flex-direction': 'column-reverse', gap: '1.5px' },
+  test.each([
+    ['row', 'HORIZONTAL'],
+    ['row-reverse', 'HORIZONTAL'],
+    ['column', 'VERTICAL'],
+    ['column-reverse', 'VERTICAL'],
+  ] as const)('maps flex-direction %s to the %s Figma layout mode', (flexDirection, layoutMode) => {
+    const result = transformExtractionNode(node({
+      styles: { display: 'inline-flex', 'flex-direction': flexDirection, gap: '16px' },
     }));
 
-    expect(horizontal).toMatchObject({ layoutMode: 'HORIZONTAL', gap: 16 });
-    expect(vertical).toMatchObject({ layoutMode: 'VERTICAL', gap: 1.5 });
+    expect(result).toMatchObject({ layoutMode, gap: 16 });
+  });
+
+  test('omits Auto Layout properties for a node that is neither flex nor grid', () => {
+    const result = transformExtractionNode(node({
+      styles: { display: 'block', 'flex-direction': 'column', gap: '16px' },
+    }));
+
+    expect(result.layoutMode).toBeUndefined();
+    expect(result.gap).toBeUndefined();
   });
 
   test('maps grids to horizontal Auto Layout and omits non-numeric gaps', () => {

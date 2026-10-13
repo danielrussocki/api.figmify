@@ -280,10 +280,8 @@ function determineAutoLayout(styles: Record<string, string>): {
     return {};
   }
 
-  const flexDirection = styles['flex-direction']?.trim().toLowerCase();
-  const layoutMode: FigmaLayoutMode = (display === 'flex' || display === 'inline-flex')
-    && (flexDirection === 'column' || flexDirection === 'column-reverse')
-    ? 'VERTICAL'
+  const layoutMode: FigmaLayoutMode = display === 'flex' || display === 'inline-flex'
+    ? flexLayoutMode(styles['flex-direction'])
     : 'HORIZONTAL';
   const gap = cssNumber(styles.gap);
 
@@ -291,6 +289,19 @@ function determineAutoLayout(styles: Record<string, string>): {
     layoutMode,
     ...(gap === undefined || gap === 0 ? {} : { gap }),
   };
+}
+
+/** Maps the computed CSS flex main axis to its corresponding Figma layout axis. */
+function flexLayoutMode(flexDirection: string | undefined): FigmaLayoutMode {
+  switch (flexDirection?.trim().toLowerCase()) {
+    case 'column':
+    case 'column-reverse':
+      return 'VERTICAL';
+    case 'row':
+    case 'row-reverse':
+    default:
+      return 'HORIZONTAL';
+  }
 }
 
 function determinePositioning(styles: Record<string, string>): {

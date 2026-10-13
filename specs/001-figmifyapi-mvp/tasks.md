@@ -423,7 +423,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas prueban la resta exacta en los tres casos y verifican que no se aplican ajustes adicionales de margen, padding ni posicionamiento.
 
-- [ ] **T101. Implementar el mapeo de dirección flex a `layoutMode`.**
+- [x] **T101. Implementar el mapeo de dirección flex a `layoutMode`.**
   - **RF:** RF-5.
   - **Hecho cuando:** `row` y `row-reverse` producen `HORIZONTAL`, `column` y `column-reverse` producen `VERTICAL`, y los nodos que no son flex ni grid omiten las propiedades de Auto Layout.
 
