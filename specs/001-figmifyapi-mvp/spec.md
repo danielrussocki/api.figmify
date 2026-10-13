@@ -39,6 +39,9 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Cuando la escala de píxel del dispositivo no sea 1, 2 o 3, el sistema deberá rechazar la solicitud con un error normalizado en inglés.
 - Cuando el entorno sea de producción y la URL o un destino de la navegación principal resuelva a localhost, una dirección IP privada, reservada o de red interna, el sistema deberá rechazar la solicitud como URL no pública antes de cargarlo.
 - Cuando el entorno sea de desarrollo y la URL resuelva a localhost, una dirección IP privada, reservada o de red interna, el sistema podrá permitir la extracción.
+- Cuando un cliente envíe `includeHidden` a `/v1/figma`, el sistema deberá aceptar exclusivamente los valores booleanos `true` y `false`.
+- Cuando el cliente omita `includeHidden` en `/v1/figma`, el sistema deberá usar `false`.
+- Cuando `includeHidden` no sea un booleano válido, el sistema deberá rechazar la solicitud con un error normalizado en inglés.
 
 ### RF-2. Extracción sin transformar
 **Criterios de aceptación**
@@ -53,7 +56,7 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 
 ### RF-3. Extracción orientada a Figma
 **Criterios de aceptación**
-- Cuando la navegación principal complete el evento de carga y transcurran 30 segundos adicionales sin un error de carga, `/v1/figma` deberá devolver la misma información visual y estructural extraída por `/v1/extract` en un JSON apto para que un plugin de Figma lo interprete.
+- Cuando la navegación principal complete el evento de carga y transcurran 30 segundos adicionales sin un error de carga, `/v1/figma` deberá transformar la información visual y estructural aplicable de `/v1/extract` en un JSON compacto apto para que un plugin de Figma lo interprete.
 - Cuando la página se cargue sin errores, el segundo endpoint deberá usar un esquema JSON propio, estable y versionado para la integración con el plugin de Figma, definido en el plan de esta funcionalidad.
 - Cuando la página use colores, el segundo endpoint deberá incluir la información necesaria para que el plugin cree estilos de color reutilizables.
 - Cuando la página use tipografías, el segundo endpoint deberá incluir la información necesaria para que el plugin cree estilos tipográficos reutilizables.
@@ -69,6 +72,28 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Cuando una solicitud tenga parámetros ausentes o inválidos, ambos endpoints deberán responder con estado 400, `code` `INVALID_REQUEST` y un objeto JSON con `message` en inglés.
 - Cuando una URL no sea pública en producción, ambos endpoints deberán responder con estado 422, `code` `URL_NOT_PUBLIC` y un objeto JSON con `message` en inglés.
 - Cuando ocurra un fallo interno no atribuible a la solicitud ni al sitio de origen, ambos endpoints deberán responder con estado 500, `code` `INTERNAL_ERROR` y un objeto JSON con `message` en inglés.
+
+### RF-5. Contrato de nodos orientados a Figma
+**Criterios de aceptación**
+- Cuando `/v1/figma` represente un nodo, el sistema deberá devolver `id`, `tag`, `type`, `rect`, `relativeRect` e `isVisible`, además de sus propiedades visuales, contenido y recursos aplicables.
+- Cuando el sistema devuelva `rect` o `relativeRect`, deberá expresar `x`, `y`, `width`, `height`, `top` y `left` como números en píxeles CSS; `rect` será absoluto respecto al documento y `relativeRect` será relativo al área de contenido de su padre representado. El nodo raíz no tendrá `relativeRect`.
+- Cuando un nodo no tenga caja de diseño, el sistema deberá devolver una geometría numérica de tamaño cero en lugar de valores CSS textuales o valores no numéricos.
+- Cuando un nodo tenga `display: none`, no tenga `offsetParent` cuando dicha propiedad aplique, tenga opacidad calculada cero, ancho o alto cero, esté oculto por el atributo `hidden` o por `visibility: hidden` o `collapse`, el sistema deberá marcarlo con `isVisible: false`; esta comprobación no deberá marcar erróneamente como ocultos el nodo raíz, SVGs o elementos de posición fija que sí tengan caja renderizada.
+- Cuando `includeHidden` sea `false`, el sistema deberá excluir de `/v1/figma` los nodos con `isVisible: false` y sus descendientes; cuando sea `true`, deberá incluirlos y conservar `isVisible: false`.
+- Cuando el árbol contenga elementos no renderizables o de metadatos, incluidos `head`, `meta`, `title`, `script`, `link`, `style`, `base`, `template` y `noscript`, el sistema deberá excluirlos de `/v1/figma`.
+- Cuando un nodo sea un contenedor visual, el sistema deberá asignarle `type: "FRAME"`; cuando represente una ejecución de texto puro, deberá asignarle `type: "TEXT"`; cuando sea un elemento `img` o tenga una imagen de fondo renderizable, deberá asignarle `type: "IMAGE"`.
+- Cuando un nodo contenedor tenga texto descendiente, el sistema no deberá duplicar dicho texto en `characters`; solo los nodos `TEXT` hoja podrán incluir `characters`.
+- Cuando un bloque de texto contenga tramos con estilos distintos, el sistema deberá devolver sus ejecuciones en orden DOM, cada una con sus propios caracteres y estilo de texto. Cada ejecución deberá incluir una única familia en `fontFamily` sin fallbacks, `fontSize`, `fontWeight`, `lineHeight` numérico, `letterSpacing`, `textAlign` y `textAutoResize`.
+- Cuando un contenedor use `display: flex`, el sistema deberá devolver `layoutMode: "HORIZONTAL"` o `"VERTICAL"` según su dirección principal, y `gap` como número en píxeles. Cuando use `display: grid`, deberá devolver el modo equivalente a su eje principal y `gap` numérico. Cuando no use flex ni grid, deberá omitir `layoutMode` y `gap`.
+- Cuando un nodo tenga posición calculada `absolute` o `sticky`, el sistema deberá devolver `position` y `zIndex` numérico cuando sea aplicable, para que el consumidor pueda decidir su posicionamiento absoluto en Figma.
+- Cuando un nodo tenga estilos visuales, el sistema deberá limitar `styles` a las propiedades útiles para su recreación y deberá omitir valores calculados no significativos, incluidos `auto`, `normal`, `none`, `0px` y `visible`, salvo que su presencia cambie el resultado visual o el contrato estructurado requiera representarlos.
+- Cuando un nodo tenga rellenos, bordes o sombras perceptibles, el sistema deberá devolver `fills`, `strokes` y `effects` en formato estructurado compatible con Figma; las sombras deberán usar, por ejemplo, `type: "DROP_SHADOW"` con color RGBA y desplazamiento, radio y extensión numéricos. Cuando no exista un relleno, borde o efecto perceptible, deberá omitir la propiedad o devolver `null`, nunca una cadena CSS como `"none"`.
+- Cuando un nodo tenga un color sólido perceptible, el sistema deberá expresarlo con canales RGBA numéricos normalizados entre 0 y 1. El sistema no deberá registrar ni devolver como recurso reutilizable colores con alfa cero.
+- Cuando un nodo tenga un radio de esquina uniforme, el sistema deberá devolver `cornerRadius` numérico; cuando sus esquinas difieran, deberá devolver los cuatro radios numéricos identificados por esquina.
+- Cuando un nodo `IMAGE` provenga de `img`, el sistema deberá devolver `src`, `naturalWidth`, `naturalHeight` y el `objectFit` resuelto. Cuando la imagen provenga de un fondo, deberá devolver la fuente y el ajuste resueltos en la medida en que puedan determinarse sin inventar datos.
+- Cuando un nodo sea un SVG inline, el sistema deberá devolver su marcado SVG como cadena y no deberá convertirlo en un nodo `IMAGE` basado en una URL.
+- Cuando la página use familias tipográficas en nodos visibles, la respuesta deberá incluir una colección global `assets` con las fuentes detectadas, agrupadas por familia, pesos usados y URL de carga cuando esta pueda determinarse. No deberá incluir familias ni pesos usados exclusivamente por nodos no visibles o excluidos.
+- Cuando se construyan los recursos globales de colores y tipografías, el sistema deberá considerar únicamente nodos visibles incluidos y apariencias perceptibles; por tanto, deberá eliminar recursos no referenciados por esos nodos.
 
 ## Requisitos no funcionales
 - La API no debe persistir URLs, documentos, estilos extraídos ni datos de clientes.
@@ -91,6 +116,13 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Recursos secundarios que se redirigen sin que se redirija la navegación principal.
 - Colores producidos por gradientes, imágenes, filtros o modos de mezcla.
 - Página cuyo contenido o estilos cambien entre solicitudes.
+- Elemento con `display: none` incluido mediante `includeHidden=true` y excluido por omisión.
+- Elemento de posición fija, SVG o raíz sin `offsetParent` y con caja renderizada.
+- Nodo padre con texto concatenado y varios nodos `TEXT` hoja, incluidos tramos con estilos tipográficos distintos.
+- Contenedor flex o grid con `gap: normal`, sin separación efectiva, o con dirección invertida.
+- Imagen sin dimensiones naturales disponibles, imagen de fondo no resoluble y SVG inline.
+- Recursos de color con alfa cero o fuentes declaradas que no se usan en nodos visibles.
+- Nodo sin caja de diseño, con tamaño cero o posicionado de forma absoluta o `sticky`.
 
 ## Fuera de alcance
 - Iframes y su contenido.
@@ -101,9 +133,9 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Capturas de pantalla, comparación visual o edición de la página origen.
 
 ## Criterios de finalización
-- Ambos endpoints son solicitudes `GET` en `/v1/extract` y `/v1/figma`, y aceptan `url`, `width`, `height` y `deviceScaleFactor` mediante parámetros de consulta; la vista predeterminada es 1920 × 1080 con escala 1.
+- Ambos endpoints son solicitudes `GET` en `/v1/extract` y `/v1/figma`, y aceptan `url`, `width`, `height` y `deviceScaleFactor` mediante parámetros de consulta; `/v1/figma` acepta adicionalmente `includeHidden`, cuyo valor predeterminado es `false`; la vista predeterminada es 1920 × 1080 con escala 1.
 - El endpoint sin transformar entrega árbol, identificadores internos, orden DOM, etiqueta, atributos visuales y semánticos, recursos asociados, texto renderizado, propiedades visuales computadas, pseudoelementos y Shadow DOM accesible.
-- El endpoint orientado a Figma entrega una representación consumible por el plugin, con colores y tipografías reutilizables.
+- El endpoint orientado a Figma entrega una representación consumible por el plugin, con geometría absoluta y relativa, visibilidad real, nodos y texto sin duplicación, estilos compactos y estructurados, imágenes, SVGs, colores y tipografías reutilizables que se usan en nodos visibles.
 - Las redirecciones de la navegación principal y los fallos de carga devuelven los estados, códigos y mensajes normalizados en inglés sin resultados parciales.
 - Se han implementado y superan las pruebas automatizadas y de extremo a extremo requeridas.
 

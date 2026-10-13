@@ -204,3 +204,121 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T47. Validar la ejecución local de la API.**
   - **RF:** RF-1, RF-2, RF-3, RF-4.
   - **Hecho cuando:** `pnpm test` pasa, `pnpm build` genera el punto de entrada ejecutable y una ejecución manual confirma que el proceso acepta solicitudes en el host y puerto configurados, sin persistir datos.
+
+## Evolución del contrato compacto de Figma
+
+- [ ] **T48. Ampliar los contratos de extracción con los metadatos `layout`.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** los tipos de extracción representan el rectángulo de documento, los datos de `offsetParent`, las dimensiones naturales y `objectFit` sin usar valores CSS textuales para la geometría.
+
+- [ ] **T49. Definir los contratos tipados de geometría y visibilidad Figma.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** existen tipos para `rect`, `relativeRect` e `isVisible`, y cada rectángulo exige `x`, `y`, `width`, `height`, `top` y `left` numéricos.
+
+- [ ] **T50. Actualizar el contrato de nodo Figma compacto.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** el tipo exige `id`, `tag`, `type`, `rect` e `isVisible`, permite `relativeRect` fuera de la raíz y limita los tipos a `FRAME`, `TEXT` e `IMAGE`.
+
+- [ ] **T51. Definir los contratos Figma de pinturas, bordes, efectos y radios.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** existen tipos estructurados para RGBA normalizado, `fills`, `strokes`, `effects` con `DROP_SHADOW`, `cornerRadius` y radios por esquina.
+
+- [ ] **T52. Definir los contratos de texto, imágenes, SVG y assets Figma.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** los tipos representan runs `TEXT` con valores tipográficos normalizados, datos de `IMAGE`, cadena `svg` y la colección global `assets` por familia, pesos y URL opcional.
+
+- [ ] **T53. Añadir `includeHidden` al esquema de consulta de `/v1/figma`.**
+  - **RF:** RF-1, RF-4, RF-5.
+  - **Hecho cuando:** solo `true` y `false` son válidos, la omisión normaliza a `false` y un valor distinto produce `INVALID_REQUEST`.
+
+- [ ] **T54. Probar la normalización de `includeHidden`.**
+  - **RF:** RF-1, RF-4, RF-5.
+  - **Hecho cuando:** las pruebas cubren omisión, ambos valores válidos y valores inválidos con el error HTTP normalizado.
+
+- [ ] **T55. Extraer el rectángulo absoluto del documento en el inspector de layout.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** el serializador convierte `getBoundingClientRect()` a coordenadas de documento y entrega seis números, incluidos ceros para nodos sin caja.
+
+- [ ] **T56. Extraer los datos de layout necesarios para imágenes y visibilidad.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** el documento raw conserva la aplicabilidad de `offsetParent`, dimensiones naturales de `img` y `objectFit` calculado sin alterar el contrato de estilos raw.
+
+- [ ] **T57. Probar la serialización de metadatos de layout.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** las pruebas verifican coordenadas con desplazamiento de documento, caja cero y los datos de una imagen.
+
+- [ ] **T58. Crear fixtures para geometría, visibilidad y nodos excluidos.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** existen fixtures con metadatos HTML, `display: none`, `hidden`, opacidad cero, tamaño cero, posición fija y SVG con caja.
+
+- [ ] **T59. Crear fixtures para texto mixto, layout e imágenes.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** existen fixtures con runs de texto de estilos distintos, flex, grid, `gap: normal`, imágenes `img`, fondos de imagen y SVG inline.
+
+- [ ] **T60. Implementar la exclusión de etiquetas no renderizables en el mapeador Figma.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** `head`, `meta`, `title`, `script`, `link`, `style`, `base`, `template` y `noscript` no aparecen en el árbol Figma.
+
+- [ ] **T61. Implementar la clasificación `FRAME`, `TEXT` e `IMAGE`.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** los contenedores visuales son `FRAME`, los `img` y fondos renderizables son `IMAGE`, y solo ejecuciones de texto puro son `TEXT`.
+
+- [ ] **T62. Implementar el cálculo de `rect` y `relativeRect` en el mapeador Figma.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** el nodo raíz omite `relativeRect`, los descendientes lo calculan respecto al área de contenido del padre representado y no se emiten valores no numéricos.
+
+- [ ] **T63. Implementar la determinación de visibilidad real.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** se consideran `display`, `visibility`, `hidden`, opacidad, tamaño y `offsetParent` aplicable, sin ocultar falsamente raíz, SVG o elementos fijos con caja.
+
+- [ ] **T64. Implementar el filtrado de subárboles por `includeHidden`.**
+  - **RF:** RF-1, RF-5.
+  - **Hecho cuando:** con `false` se eliminan nodos invisibles y descendientes, y con `true` se conservan con `isVisible: false`.
+
+- [ ] **T65. Implementar runs `TEXT` hoja sin texto duplicado en contenedores.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un contenedor no tiene `characters` por texto descendiente y cada tramo de texto en orden DOM se emite como un nodo `TEXT` hoja.
+
+- [ ] **T66. Normalizar el estilo de cada run de texto.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** cada run incluye familia sin fallbacks, tamaño, peso, `lineHeight`, `letterSpacing`, `textAlign` y `textAutoResize` con los tipos establecidos por el plan.
+
+- [ ] **T67. Implementar el mapeo de Auto Layout y posicionamiento.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** flex y grid emiten `layoutMode` y `gap` numéricos, mientras que nodos `absolute` o `sticky` incluyen `position` y `zIndex` cuando aplica.
+
+- [ ] **T68. Implementar la poda de estilos CSS no significativos.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** el mapeador omite `auto`, `normal`, `none`, `0px` y `visible` salvo cuando cambien el resultado visual o sean exigidos por el contrato estructurado.
+
+- [ ] **T69. Implementar el parseo de rellenos, bordes, efectos y radios Figma.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** colores perceptibles se normalizan a RGBA, sombras se convierten a `DROP_SHADOW`, radios se expresan numéricamente y ausencias no se representan como cadenas CSS.
+
+- [ ] **T70. Implementar el mapeo de `IMAGE` y SVG inline.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un `img` incluye `src`, dimensiones naturales y `objectFit`; fondos resueltos no inventan datos; y SVG inline incluye `svg` como cadena.
+
+- [ ] **T71. Actualizar el catálogo de colores y tipografías tras el filtrado.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** los catálogos solo contienen recursos perceptibles referenciados por nodos visibles incluidos, sin colores de alfa cero ni entradas de gradientes, imágenes, filtros o mezclas.
+
+- [ ] **T72. Implementar la colección global de assets tipográficos usados.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** `assets` agrupa familias y pesos de nodos visibles incluidos y añade URL solo cuando puede determinarse.
+
+- [ ] **T73. Integrar `includeHidden` en el caso de uso y la ruta Figma.**
+  - **RF:** RF-1, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `/v1/figma` entrega el árbol compacto con el filtrado solicitado y mantiene la traducción de errores sin resultados parciales.
+
+- [ ] **T74. Añadir pruebas unitarias de la transformación Figma compacta.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas cubren tipos, geometría, visibilidad, exclusiones, runs, Auto Layout, pinturas, imágenes, SVG, assets y poda de catálogos.
+
+- [ ] **T75. Añadir pruebas de integración y extremo a extremo del nuevo contrato Figma.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** las fixtures y solicitudes reales validan `includeHidden` por omisión y habilitado, el JSON compacto versionado y los errores 400 sin respuestas parciales.
+
+- [ ] **T76. Ejecutar la regresión final del contrato y de no persistencia.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` pasa, los ejemplos de ambos contratos v1 validan sus esquemas y la revisión confirma que no se añadieron almacenamiento ni dependencias no justificadas.
