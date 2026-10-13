@@ -508,3 +508,21 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T121. Ejecutar la regresión final de rellenos transparentes e imágenes.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las pruebas nuevas quedan incluidas en la suite y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
+
+## Cierre final de brechas de Auto Layout y errores HTTP
+
+- [x] **T122. Emitir el `padding` estructurado para contenedores grid con Auto Layout.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** todo nodo `grid` o `inline-grid` que emita `layoutMode` incluye `padding` con `top`, `right`, `bottom` y `left` numéricos en píxeles CSS, normalizando los valores ausentes, no numéricos o no efectivos a `0`.
+
+- [ ] **T123. Probar el `padding` de Auto Layout para grid.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** las pruebas unitarias cubren grid con padding parcial y con padding cero, verifican los cuatro lados numéricos y confirman que flex conserva su comportamiento actual.
+
+- [ ] **T124. Completar la matriz E2E de errores de carga para ambas rutas.**
+  - **RF:** RF-4.
+  - **Hecho cuando:** las pruebas HTTP reales verifican que `/v1/extract` y `/v1/figma` devuelven `REDIRECT_NOT_ALLOWED` ante una redirección principal y `UPSTREAM_FAILURE` ante un fallo de origen, siempre con estado 502, mensaje en inglés y sin documento parcial.
+
+- [ ] **T125. Ejecutar la validación final de las brechas detectadas.**
+  - **RF:** RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, y la revisión requisito por requisito confirma que cada nodo con `layoutMode` incluye `padding` y que ambas rutas tienen cobertura E2E de redirección y fallo de origen.

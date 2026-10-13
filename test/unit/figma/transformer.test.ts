@@ -410,6 +410,22 @@ describe('transformExtractionNode', () => {
     expect(result).toMatchObject({ layoutMode: 'HORIZONTAL', itemSpacing: 0, gap: 0 });
   });
 
+  test('emits complete physical padding for a grid Auto Layout container', () => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'inline-grid',
+        'padding-top': '6px',
+        'padding-right': 'invalid',
+        'padding-bottom': '12px',
+      },
+    }));
+
+    expect(result).toMatchObject({
+      layoutMode: 'HORIZONTAL',
+      padding: { top: 6, right: 0, bottom: 12, left: 0 },
+    });
+  });
+
   test('maps perceptible paints, borders, shadows, and corner radii to structured Figma values', () => {
     const result = transformExtractionNode(node({
       styles: {

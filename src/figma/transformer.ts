@@ -305,6 +305,7 @@ function determineAutoLayout(styles: Record<string, string>): {
       layoutMode,
       itemSpacing: spacing,
       gap: spacing,
+      padding: autoLayoutPadding(styles),
     };
   }
 
@@ -315,7 +316,7 @@ function determineAutoLayout(styles: Record<string, string>): {
     layoutMode,
     itemSpacing: spacing,
     gap: spacing,
-    padding: flexPadding(styles),
+    padding: autoLayoutPadding(styles),
     ...(primaryAxisAlign(styles['justify-content']) === undefined
       ? {}
       : { primaryAxisAlign: primaryAxisAlign(styles['justify-content']) }),
@@ -412,7 +413,7 @@ function gridTrackCount(value: string | undefined): number {
 }
 
 /** Emits the complete physical padding required by every Figma Auto Layout node. */
-function flexPadding(styles: Record<string, string>): NonNullable<FigmaNode['padding']> {
+function autoLayoutPadding(styles: Record<string, string>): NonNullable<FigmaNode['padding']> {
   return {
     top: nonNegativeCssNumber(styles['padding-top']),
     right: nonNegativeCssNumber(styles['padding-right']),
