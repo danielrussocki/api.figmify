@@ -44,12 +44,13 @@ export function transformExtractionNode(
   node: ExtractionNode,
   options: TransformExtractionNodeOptions = {},
 ): FigmaNode {
-  return mapExtractionNode(node, undefined, true, true, options.includeHidden ?? true);
+  return mapExtractionNode(node, undefined, false, true, true, options.includeHidden ?? true);
 }
 
 function mapExtractionNode(
   node: ExtractionNode,
   parentRect: FigmaRect | undefined,
+  parentHasAutoLayout: boolean,
   parentIsVisible: boolean,
   isRoot: boolean,
   includeHidden: boolean,
@@ -60,6 +61,7 @@ function mapExtractionNode(
   const textStyle = type === 'TEXT' ? normalizeTextStyle(node.styles) : undefined;
   const autoLayout = determineAutoLayout(node.styles);
   const positioning = determinePositioning(node.styles);
+  const layoutGrow = determineLayoutGrow(node.styles, parentHasAutoLayout);
   const paints = parseFigmaPaints(node.styles);
   const image = imageData(node, type);
   const mapChild = (child: ExtractionNode): FigmaNode | undefined => {
@@ -80,6 +82,7 @@ function mapExtractionNode(
     return mapExtractionNode(
       child,
       rect,
+      autoLayout.layoutMode !== undefined,
       isVisible,
       false,
       includeHidden,
@@ -102,6 +105,7 @@ function mapExtractionNode(
     ...(autoLayout.padding === undefined ? {} : { padding: autoLayout.padding }),
     ...(autoLayout.primaryAxisAlign === undefined ? {} : { primaryAxisAlign: autoLayout.primaryAxisAlign }),
     ...(autoLayout.counterAxisAlign === undefined ? {} : { counterAxisAlign: autoLayout.counterAxisAlign }),
+    ...(layoutGrow === undefined ? {} : { layoutGrow }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     ...(paints.fills === null ? {} : { fills: paints.fills }),
@@ -381,6 +385,17 @@ function flexLayoutMode(flexDirection: string | undefined): FigmaLayoutMode {
     default:
       return 'HORIZONTAL';
   }
+}
+
+/** Emits flex growth only for an in-flow child of an Auto Layout container. */
+function determineLayoutGrow(styles: Record<string, string>, parentHasAutoLayout: boolean): number | undefined {
+  if (!parentHasAutoLayout) return undefined;
+
+  const position = styles.position?.trim().toLowerCase();
+  if (position === 'absolute' || position === 'fixed') return undefined;
+
+  const value = Number(styles['flex-grow']?.trim());
+  return Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
 function determinePositioning(styles: Record<string, string>): {

@@ -258,6 +258,27 @@ describe('transformExtractionNode', () => {
     });
   });
 
+  test('emits layoutGrow only for positive flex growth in-flow Auto Layout children', () => {
+    const result = transformExtractionNode(node({
+      id: 'node-parent',
+      styles: { display: 'flex' },
+      children: [
+        node({ id: 'node-growing', styles: { 'flex-grow': '1.5' } }),
+        node({ id: 'node-zero', styles: { 'flex-grow': '0' } }),
+        node({ id: 'node-absolute', styles: { 'flex-grow': '2', position: 'absolute' } }),
+        node({ id: 'node-fixed', styles: { 'flex-grow': '3', position: 'fixed' } }),
+      ],
+    }));
+
+    expect(result.children).toMatchObject([
+      { id: 'node-growing', layoutGrow: 1.5 },
+      { id: 'node-zero' },
+      { id: 'node-absolute' },
+      { id: 'node-fixed' },
+    ]);
+    expect(result.children.map((child) => child.layoutGrow)).toEqual([1.5, undefined, undefined, undefined]);
+  });
+
   test.each([
     ['flex-start', 'flex-start', 'MIN', 'MIN'],
     ['start', 'start', 'MIN', 'MIN'],

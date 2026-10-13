@@ -435,7 +435,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** las equivalencias directas de `justify-content` y `align-items` producen los valores de eje definidos, mientras que `stretch`, `baseline`, `space-around`, `space-evenly` y otros valores inexactos omiten el campo correspondiente.
 
-- [ ] **T104. Implementar `layoutGrow` para hijos en flujo de Auto Layout.**
+- [x] **T104. Implementar `layoutGrow` para hijos en flujo de Auto Layout.**
   - **RF:** RF-5.
   - **Hecho cuando:** un hijo con `flex-grow` positivo emite su valor numérico y los hijos con crecimiento cero, `absolute` o `fixed` no reciben un crecimiento de flujo incorrecto.
 
