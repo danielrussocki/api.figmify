@@ -335,13 +335,48 @@ describe('transformExtractionNode', () => {
     expect(result.gap).toBeUndefined();
   });
 
-  test('maps grids to horizontal Auto Layout and omits non-numeric gaps', () => {
+  test.each([
+    ['column', 'VERTICAL', '18px', '6px', 6],
+    ['row', 'HORIZONTAL', '4px', '14px', 4],
+  ] as const)('maps grid-auto-flow %s to its main axis and matching spacing', (
+    gridAutoFlow,
+    layoutMode,
+    columnGap,
+    rowGap,
+    spacing,
+  ) => {
     const result = transformExtractionNode(node({
-      styles: { display: 'grid', gap: 'normal' },
+      styles: {
+        display: 'grid',
+        'grid-auto-flow': gridAutoFlow,
+        'column-gap': columnGap,
+        'row-gap': rowGap,
+      },
     }));
 
-    expect(result.layoutMode).toBe('HORIZONTAL');
-    expect(result.gap).toBeUndefined();
+    expect(result).toMatchObject({ layoutMode, itemSpacing: spacing, gap: spacing });
+  });
+
+  test('uses the repeated grid track dimension when grid-auto-flow is unavailable', () => {
+    const result = transformExtractionNode(node({
+      styles: {
+        display: 'grid',
+        'grid-template-columns': '80px',
+        'grid-template-rows': '80px 80px 80px',
+        'column-gap': '4px',
+        'row-gap': '14px',
+      },
+    }));
+
+    expect(result).toMatchObject({ layoutMode: 'VERTICAL', itemSpacing: 14, gap: 14 });
+  });
+
+  test('normalizes an ineffective grid gap to zero', () => {
+    const result = transformExtractionNode(node({
+      styles: { display: 'grid', 'grid-auto-flow': 'row', 'column-gap': 'normal' },
+    }));
+
+    expect(result).toMatchObject({ layoutMode: 'HORIZONTAL', itemSpacing: 0, gap: 0 });
   });
 
   test('maps perceptible paints, borders, shadows, and corner radii to structured Figma values', () => {

@@ -295,10 +295,12 @@ function determineAutoLayout(styles: Record<string, string>): {
   }
 
   if (display === 'grid' || display === 'inline-grid') {
-    const gap = cssNumber(styles.gap);
+    const layoutMode = gridLayoutMode(styles);
+    const spacing = gridMainAxisSpacing(styles, layoutMode);
     return {
-      layoutMode: 'HORIZONTAL',
-      ...(gap === undefined || gap === 0 ? {} : { gap }),
+      layoutMode,
+      itemSpacing: spacing,
+      gap: spacing,
     };
   }
 
@@ -357,6 +359,52 @@ function counterAxisAlign(value: string | undefined): FigmaCounterAxisAlign | un
 function flexMainAxisSpacing(styles: Record<string, string>, layoutMode: FigmaLayoutMode): number {
   const property = layoutMode === 'HORIZONTAL' ? 'column-gap' : 'row-gap';
   return nonNegativeCssNumber(styles[property] ?? styles.gap);
+}
+
+/** Determines the grid flow axis, using explicit flow before the track shape. */
+function gridLayoutMode(styles: Record<string, string>): FigmaLayoutMode {
+  const autoFlow = styles['grid-auto-flow']?.trim().toLowerCase();
+  if (autoFlow?.split(/\s+/u).includes('column')) return 'VERTICAL';
+  if (autoFlow?.split(/\s+/u).includes('row')) return 'HORIZONTAL';
+
+  const columnTracks = gridTrackCount(styles['grid-template-columns']);
+  const rowTracks = gridTrackCount(styles['grid-template-rows']);
+  return rowTracks > columnTracks ? 'VERTICAL' : 'HORIZONTAL';
+}
+
+/** Returns the effective gap on the grid's main axis, normalizing `normal` to zero. */
+function gridMainAxisSpacing(styles: Record<string, string>, layoutMode: FigmaLayoutMode): number {
+  const property = layoutMode === 'HORIZONTAL' ? 'column-gap' : 'row-gap';
+  return nonNegativeCssNumber(styles[property] ?? styles.gap);
+}
+
+/** Counts explicit computed grid tracks, including a numeric CSS repeat(). */
+function gridTrackCount(value: string | undefined): number {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === undefined || normalized.length === 0 || normalized === 'none') return 0;
+
+  const repeat = /^repeat\(\s*(\d+)\s*,/u.exec(normalized);
+  if (repeat?.[1] !== undefined) {
+    const count = Number(repeat[1]);
+    return Number.isSafeInteger(count) && count > 0 ? count : 0;
+  }
+
+  let count = 0;
+  let depth = 0;
+  let inToken = false;
+  for (const character of normalized) {
+    if (character === '(') depth += 1;
+    if (character === ')' && depth > 0) depth -= 1;
+
+    if (/\s/u.test(character) && depth === 0) {
+      if (inToken) count += 1;
+      inToken = false;
+    } else {
+      inToken = true;
+    }
+  }
+
+  return count + (inToken ? 1 : 0);
 }
 
 /** Emits the complete physical padding required by every Figma Auto Layout node. */

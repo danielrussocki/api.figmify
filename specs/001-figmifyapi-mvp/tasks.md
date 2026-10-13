@@ -439,7 +439,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** un hijo con `flex-grow` positivo emite su valor numérico y los hijos con crecimiento cero, `absolute` o `fixed` no reciben un crecimiento de flujo incorrecto.
 
-- [ ] **T105. Implementar el mapeo de eje y separación de grid.**
+- [x] **T105. Implementar el mapeo de eje y separación de grid.**
   - **RF:** RF-5.
   - **Hecho cuando:** el mapeador determina el eje principal conforme a `grid-auto-flow` o las pistas, usa `column-gap` u `row-gap` según ese eje y normaliza `normal` a `0`.
 
