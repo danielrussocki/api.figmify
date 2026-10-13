@@ -377,7 +377,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `assets` agrupa solo familias y pesos de nodos `TEXT` visibles e incluidos, añade la URL de carga cuando corresponde a una fuente detectada y omite fuentes declaradas pero no usadas.
 
-- [ ] **T90. Probar la detección de URLs de fuentes y la poda de assets.**
+- [x] **T90. Probar la detección de URLs de fuentes y la poda de assets.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** fixtures y pruebas de transformación cubren una fuente accesible con URL, una fuente sin URL determinable y una fuente usada exclusivamente por nodos ocultos o excluidos.
 

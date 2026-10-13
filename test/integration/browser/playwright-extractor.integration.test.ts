@@ -165,8 +165,34 @@ describe('PlaywrightExtractor integration', () => {
         weight: 700,
         url: `${fixtureServer.url}/resources/fixture-font.woff2`,
       },
+      {
+        family: 'Hidden Fixture Sans',
+        weight: 400,
+        url: `${fixtureServer.url}/resources/hidden-fixture-font.woff2`,
+      },
     ]);
     expect(document.fontFaceSources).not.toContainEqual(expect.objectContaining({ family: 'Cross Origin Font' }));
+  });
+
+  test('keeps only determinable HTTP(S) font-face URLs from accessible stylesheets', async () => {
+    await shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+
+    const document = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: requestViewport,
+    });
+
+    expect(document.fontFaceSources).toEqual(expect.arrayContaining([
+      {
+        family: 'Hidden Fixture Sans',
+        weight: 400,
+        url: `${fixtureServer.url}/resources/hidden-fixture-font.woff2`,
+      },
+    ]));
+    expect(document.fontFaceSources).not.toContainEqual(expect.objectContaining({
+      family: 'Undetermined Fixture Sans',
+    }));
   });
 
   test('preserves ordered direct text runs without duplicating mixed text and omits hidden text runs', async () => {

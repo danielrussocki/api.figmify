@@ -12,6 +12,18 @@
         font-weight: 700;
         src: local("Fixture Sans"), url("/resources/fixture-font.woff2") format("woff2"), url("data:font/woff2;base64,AA==");
       }
+      @font-face {
+        font-family: "Undetermined Fixture Sans";
+        font-weight: 400;
+        src: local("Undetermined Fixture Sans"), url("data:font/woff2;base64,AA==");
+      }
+      @font-face {
+        font-family: "Hidden Fixture Sans";
+        font-weight: 400;
+        src: url("/resources/hidden-fixture-font.woff2") format("woff2");
+      }
+      #undetermined-font { font-family: "Undetermined Fixture Sans", sans-serif; }
+      #hidden-font { display: none; font-family: "Hidden Fixture Sans", sans-serif; }
       #hidden-display { display: none; }
       #hidden-opacity { opacity: 0; }
       #zero-size { width: 0; height: 0; overflow: hidden; }
@@ -40,6 +52,8 @@
        <p id="hidden-attribute" hidden>Hidden attribute text</p>
        <p id="hidden-display">Display hidden text</p>
        <p id="hidden-opacity">Transparent fixture text</p>
+       <div id="undetermined-font">Font with no determinate URL</div>
+       <div id="hidden-font">Font used only by a hidden node</div>
        <div id="zero-size">Zero-size fixture content</div>
        <div id="fixed-position">Fixed-position fixture content</div>
        <svg id="fixture-svg" width="80" height="40" viewBox="0 0 80 40" role="img" aria-label="Boxed SVG fixture">
