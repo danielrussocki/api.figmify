@@ -287,7 +287,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** flex y grid emiten `layoutMode` y `gap` numéricos, mientras que nodos `absolute` o `sticky` incluyen `position` y `zIndex` cuando aplica.
 
-- [ ] **T68. Implementar la poda de estilos CSS no significativos.**
+- [x] **T68. Implementar la poda de estilos CSS no significativos.**
   - **RF:** RF-5.
   - **Hecho cuando:** el mapeador omite `auto`, `normal`, `none`, `0px` y `visible` salvo cuando cambien el resultado visual o sean exigidos por el contrato estructurado.
 

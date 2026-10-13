@@ -117,7 +117,7 @@ function determineAutoLayout(styles: Record<string, string>): {
 
   return {
     layoutMode,
-    ...(gap === undefined ? {} : { gap }),
+    ...(gap === undefined || gap === 0 ? {} : { gap }),
   };
 }
 

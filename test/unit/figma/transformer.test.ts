@@ -165,6 +165,40 @@ describe('transformExtractionNode', () => {
     expect(result.gap).toBeUndefined();
   });
 
+  test('prunes a zero CSS gap while retaining the structural Auto Layout mode', () => {
+    const result = transformExtractionNode(node({
+      styles: { display: 'flex', 'flex-direction': 'row', gap: '0px' },
+    }));
+
+    expect(result.layoutMode).toBe('HORIZONTAL');
+    expect(result.gap).toBeUndefined();
+  });
+
+  test('keeps normalized typography values required by the structured text contract', () => {
+    const result = transformExtractionNode(node({
+      tagName: 'span',
+      text: 'Default typography',
+      styles: {
+        'font-family': 'Inter, sans-serif',
+        'font-size': '16px',
+        'font-weight': 'normal',
+        'line-height': 'normal',
+        'letter-spacing': 'normal',
+        'text-align': 'start',
+      },
+    }));
+
+    expect(result.styles).toEqual({
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: 400,
+      lineHeight: 19.2,
+      letterSpacing: 0,
+      textAlign: 'LEFT',
+      textAutoResize: 'HEIGHT',
+    });
+  });
+
   test('maps absolute and sticky positioning with a numeric z-index only', () => {
     const absolute = transformExtractionNode(node({
       styles: { position: 'absolute', 'z-index': '20' },
