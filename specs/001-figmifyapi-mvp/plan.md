@@ -99,6 +99,8 @@ Las claves de `styles` usan nombres CSS en *kebab-case* y contienen el valor tex
 
 Esta lista cierra la primera duda abierta y sustituye el término ambiguo “todos los estilos computados” por propiedades visuales verificables. **Cubre RF-2.**
 
+La serialización conserva siempre `styles.opacity` cuando el valor computado sea textual, serializable, estrictamente mayor que `0` y menor que `1`; por ejemplo, `opacity: 0.8` se representa como `"opacity": "0.8"`. Esta regla aplica tanto a los elementos como a las ejecuciones de texto directas y prevalece sobre cualquier filtrado de valores no significativos. **Cubre RF-2.**
+
 #### Metadatos de layout para la transformación
 
 Cada nodo de extracción incorpora `layout` como dato de medición, separado de `styles`: `rect` obtenido de `getBoundingClientRect()` trasladado a coordenadas del documento, `offsetParentId` cuando exista, `hasOffsetParent` cuando aplique, `naturalWidth` y `naturalHeight` para `img`, y el `objectFit` calculado. Este dato permite a la transformación calcular geometría y visibilidad sin volver a abrir el navegador. Los valores de Auto Layout se derivan de las propiedades computadas de la lista cerrada, no de una segunda medición ni de persistencia. No sustituye los estilos computados sin transformar de `/v1/extract`. **Cubre RF-2, RF-3 y RF-5.**
@@ -133,7 +135,7 @@ Para conservar texto directo sin convertirlo en elementos ni cambiar `children`,
       {
         "characters": "Hello ",
         "childNodeIndex": 0,
-        "styles": { "color": "rgb(17, 24, 39)", "font-size": "16px" }
+        "styles": { "color": "rgb(17, 24, 39)", "font-size": "16px", "opacity": "0.5" }
       }
     ],
     "layout": { "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080, "top": 0, "left": 0 } },
@@ -221,6 +223,7 @@ El contrato de `/v1/figma` usa `schemaVersion: "1.0"` y nombres basados en el mo
         "rect": { "x": 24, "y": 32, "width": 180, "height": 39, "top": 32, "left": 24 },
         "relativeRect": { "x": 24, "y": 32, "width": 180, "height": 39, "top": 32, "left": 24 },
         "isVisible": true,
+        "opacity": 0.5,
         "layoutGrow": 1,
         "fillStyleId": "color-111827",
         "textStyleId": "type-inter-32-700-normal-38.4-0-none",
@@ -238,7 +241,7 @@ Los tipos emitidos son solo `FRAME`, `TEXT` e `IMAGE`: un contenedor visual es `
 
 `isVisible` combina la caja, `display`, `visibility`, `hidden`, opacidad y `offsetParent` cuando aplique; no declara ocultos por ese último dato al nodo raíz, SVG o elementos fijos que tengan caja. Con `includeHidden=false` se descarta un nodo no visible y su subárbol; con `true` se incluye marcado como no visible. **Cubre RF-1 y RF-5.**
 
-Las claves de `styles` son *camelCase* y solo incluyen valores útiles. Se eliminan `auto`, `normal`, `none`, `0px` y `visible` cuando no cambian el resultado. Para un contenedor flex, `flex-direction` resuelve `layoutMode` (`row` y `row-reverse` a `HORIZONTAL`; `column` y `column-reverse` a `VERTICAL`). Para grid, el eje principal se determina con `grid-auto-flow` y, si no lo determina, por la dimensión con repetición de pistas; el resultado es `HORIZONTAL` o `VERTICAL`. Todo nodo con `layoutMode` incluye `itemSpacing` y `gap` iguales: se usa `column-gap` en un eje horizontal y `row-gap` en uno vertical; `normal` o una separación no efectiva se normaliza a `0`. También incluye `padding` físico completo con `top`, `right`, `bottom` y `left`, incluidos los ceros.
+Las claves de `styles` son *camelCase* y solo incluyen valores útiles. Se eliminan `auto`, `normal`, `none`, `0px` y `visible` cuando no cambian el resultado. La opacidad es una propiedad de nodo: cuando su valor computado sea estrictamente mayor que `0` y menor que `1`, se incluye como `opacity` numérico, no dentro de `styles`; el valor se convierte sin redondeos que alteren su valor computado. Una opacidad positiva no altera por sí misma `isVisible` ni activa la poda de `includeHidden`. Para un contenedor flex, `flex-direction` resuelve `layoutMode` (`row` y `row-reverse` a `HORIZONTAL`; `column` y `column-reverse` a `VERTICAL`). Para grid, el eje principal se determina con `grid-auto-flow` y, si no lo determina, por la dimensión con repetición de pistas; el resultado es `HORIZONTAL` o `VERTICAL`. Todo nodo con `layoutMode` incluye `itemSpacing` y `gap` iguales: se usa `column-gap` en un eje horizontal y `row-gap` en uno vertical; `normal` o una separación no efectiva se normaliza a `0`. También incluye `padding` físico completo con `top`, `right`, `bottom` y `left`, incluidos los ceros. **Cubre RF-5.**
 
 `justify-content` se mapea solo con equivalencias directas: `flex-start`/`start` a `MIN`, `center` a `CENTER`, `flex-end`/`end` a `MAX` y `space-between` a `SPACE_BETWEEN`; los demás valores omiten `primaryAxisAlign`. `align-items` se mapea de forma análoga, sin `SPACE_BETWEEN`, a `counterAxisAlign`; `stretch`, `baseline` y los valores sin equivalencia se omiten. Un hijo en flujo de un padre con `layoutMode` incluye `layoutGrow` con su `flex-grow` numérico si es mayor que cero; si es cero se devuelve `0` o se omite. Los hijos `absolute` o `fixed` no adquieren `layoutGrow`. `position` y `zIndex` se incluyen para nodos `absolute` o `sticky` cuando correspondan. **Cubre RF-5.**
 
@@ -296,13 +299,17 @@ function mapFigmaNode(rawNode, parent, includeHidden):
   if isExcludedFigmaTag(rawNode.tagName): return null
   visibility = determineVisibility(rawNode, parent)
   if !includeHidden and !visibility: return null
-  if isTextLeaf(rawNode): return mapTextRun(rawNode, parent, visibility)
+  if isTextLeaf(rawNode):
+    node = mapTextRun(rawNode, parent, visibility)
+    node.opacity = mapPositiveFractionalOpacity(rawNode.styles.opacity)
+    return node
   node = mapFrameOrImage(rawNode, parent, visibility)
+  node.opacity = mapPositiveFractionalOpacity(rawNode.styles.opacity)
   node.children = mapDirectChildrenAndTextRunsInDomOrder(rawNode, node, includeHidden)
   return node
 ```
 
-`inspectLayout` convierte el rectángulo de viewport en coordenadas de documento con el desplazamiento actual y conserva datos necesarios para la transformación. `mapFigmaNode` calcula `relativeRect` exclusivamente por la resta de los orígenes de `rect` padre-hijo, conserva `width` y `height` y usa ceros para nodos sin caja. El inspector de texto recorre nodos de texto directos y divide ejecuciones cuando cambian sus estilos computados, sin asignar el texto agregado a sus antecesores. El análisis de flex/grid resuelve eje, separación principal, padding, alineaciones y crecimiento conforme al contrato; normaliza la ausencia de separación efectiva a `0` y omite equivalencias de alineación inexactas. El parseador de pintura emite `fills: []` si no existe relleno perceptible; para una fuente de imagen determinable emite una pintura `IMAGE` con URL absoluta y `scaleMode: "FILL"`, sin degradarla a `SOLID`; además conserva bordes por lado y todas las sombras convertibles, sin inventar valores si el CSS no se puede convertir con certeza. **Cubre RF-2, RF-3 y RF-5.**
+`inspectLayout` convierte el rectángulo de viewport en coordenadas de documento con el desplazamiento actual y conserva datos necesarios para la transformación. `mapFigmaNode` calcula `relativeRect` exclusivamente por la resta de los orígenes de `rect` padre-hijo, conserva `width` y `height` y usa ceros para nodos sin caja. `mapPositiveFractionalOpacity` convierte el valor textual extraído a número y lo asigna solo si es mayor que `0` y menor que `1`; en cualquier otro caso omite el campo. El inspector de texto recorre nodos de texto directos y divide ejecuciones cuando cambian sus estilos computados, sin asignar el texto agregado a sus antecesores. El análisis de flex/grid resuelve eje, separación principal, padding, alineaciones y crecimiento conforme al contrato; normaliza la ausencia de separación efectiva a `0` y omite equivalencias de alineación inexactas. El parseador de pintura emite `fills: []` si no existe relleno perceptible; para una fuente de imagen determinable emite una pintura `IMAGE` con URL absoluta y `scaleMode: "FILL"`, sin degradarla a `SOLID`; además conserva bordes por lado y todas las sombras convertibles, sin inventar valores si el CSS no se puede convertir con certeza. **Cubre RF-2, RF-3 y RF-5.**
 
 La política pública se ejecuta antes de navegar y se vuelve a ejecutar para cada destino de navegación principal. En producción rechaza direcciones loopback, privadas, link-local, multicast, no especificadas, reservadas y rangos de documentación, tanto IPv4 como IPv6. En desarrollo se permite esa navegación. Los recursos secundarios no bloquean la extracción si fallan o se redirigen. No hay límite total de tiempo por decisión del MVP; una página que no complete `load` no produce extracción mientras permanezca pendiente. **Cubre RF-1, RF-2 y RF-4.**
 
@@ -325,11 +332,11 @@ La política pública se ejecuta antes de navegar y se vuelve a ejecutar para ca
 | --- | --- | --- |
 | Unitarias: validación | Valores predeterminados, límites de viewport, URL absoluta, esquema, `includeHidden` válido, error 400 y mensajes en inglés. | RF-1, RF-4, RF-5 |
 | Unitarias: política de red | Host público; localhost; IPv4/IPv6 privada, reservada, loopback y link-local; diferencia entre desarrollo y producción. | RF-1, RF-4 |
-| Unitarias: serialización | Orden DOM, IDs únicos, texto `null`, nodos ocultos, lista cerrada de estilos, atributos permitidos, recursos, pseudoelementos y Shadow DOM abierto/cerrado. | RF-2 |
-| Unitarias: transformación Figma | Tipos `FRAME`/`TEXT`/`IMAGE`; rectángulos absoluto y relativo calculado por resta, incluidos margen negativo y `sticky`; exclusión de metadatos; visibilidad y poda con `includeHidden`; texto por ejecuciones; flex/grid con eje, `itemSpacing`, `gap`, padding, alineación y `layoutGrow`; posición; bordes uniformes y por lado; sombras externas e internas ordenadas; radios; nodo sin relleno con `fills: []` y sin color de respaldo; `IMAGE` de `img` y de fondo con pintura `fills` de tipo `IMAGE`, `src` y `scaleMode: "FILL"`, nunca `SOLID`; SVG y omisión de valores de ruido. | RF-3, RF-5 |
+| Unitarias: serialización | Orden DOM, IDs únicos, texto `null`, nodos ocultos, lista cerrada de estilos, conservación de `styles.opacity` para elementos y ejecuciones de texto con valores serializables entre `0` y `1`, atributos permitidos, recursos, pseudoelementos y Shadow DOM abierto/cerrado. | RF-2 |
+| Unitarias: transformación Figma | Tipos `FRAME`/`TEXT`/`IMAGE`; rectángulos absoluto y relativo calculado por resta, incluidos margen negativo y `sticky`; exclusión de metadatos; visibilidad y poda con `includeHidden`; opacidad positiva fraccionaria como `opacity` numérico, sin marcar el nodo como oculto ni omitir el campo; texto por ejecuciones; flex/grid con eje, `itemSpacing`, `gap`, padding, alineación y `layoutGrow`; posición; bordes uniformes y por lado; sombras externas e internas ordenadas; radios; nodo sin relleno con `fills: []` y sin color de respaldo; `IMAGE` de `img` y de fondo con pintura `fills` de tipo `IMAGE`, `src` y `scaleMode: "FILL"`, nunca `SOLID`; SVG y omisión de valores de ruido. | RF-3, RF-5 |
 | Unitarias: catálogos y assets | RGBA exacto sin alfa cero; exclusión de gradientes/filtros/modos de mezcla; tipografías normalizadas; eliminación de recursos no referenciados; familias, pesos y URL de fuentes usadas. | RF-3, RF-5 |
-| Integración: navegador | Sitios de fixture con contenido asíncrono, recursos fallidos, recursos secundarios redirigidos, iframe, Shadow DOM, pseudoelementos, metadatos, textos mixtos, flex/grid con `gap: normal`, ejes invertidos y separaciones distintas, padding, hijos fuera de flujo o con `flex-grow`, bordes por lado, sombras múltiples, nodos sin fondo, imágenes de `img` y de fondo con URL resoluble, SVG y elementos ocultos/fijos o `sticky`. | RF-2, RF-3, RF-4, RF-5 |
+| Integración: navegador | Sitios de fixture con contenido asíncrono, recursos fallidos, recursos secundarios redirigidos, iframe, Shadow DOM, pseudoelementos, metadatos, textos mixtos y ejecuciones de texto con `opacity: 0.5`, elementos visibles con `opacity: 0.8`, flex/grid con `gap: normal`, ejes invertidos y separaciones distintas, padding, hijos fuera de flujo o con `flex-grow`, bordes por lado, sombras múltiples, nodos sin fondo, imágenes de `img` y de fondo con URL resoluble, SVG y elementos ocultos/fijos o `sticky`. | RF-2, RF-3, RF-4, RF-5 |
 | Extremo a extremo: rutas | Solicitudes reales a ambos endpoints y verificación de contratos de éxito, `includeHidden` por omisión y habilitado, 400, 422, 502 y 500; comprobación de que no hay respuestas parciales. | RF-1 a RF-5 |
-| Regresión de contrato | Ejemplos JSON validados contra los esquemas `ExtractionDocument` 1.0 y `FigmaDocument` 1.0, incluidos rectángulos, Auto Layout, bordes, efectos, `fills: []` para ausencia de relleno, pinturas `IMAGE` con `src` y `scaleMode: "FILL"`, y recursos globales. | RF-2, RF-3, RF-5 |
+| Regresión de contrato | Ejemplos JSON validados contra los esquemas `ExtractionDocument` 1.0 y `FigmaDocument` 1.0, incluidos `styles.opacity` textual en extracción y `opacity` numérico en Figma para valores positivos fraccionarios, rectángulos, Auto Layout, bordes, efectos, `fills: []` para ausencia de relleno, pinturas `IMAGE` con `src` y `scaleMode: "FILL"`, y recursos globales. | RF-2, RF-3, RF-5 |
 
 Las fixtures se sirven localmente solo durante las pruebas. No forman parte de la política de producción y permiten comprobar el comportamiento de desarrollo para destinos privados. Las pruebas de extremo a extremo ejercitan HTTP, casos de uso y el adaptador de navegador; no sustituyen las pruebas unitarias. Cada corrección incorpora una prueba que reproduzca el defecto antes de corregirlo. **Cubre RF-1, RF-2, RF-3, RF-4 y RF-5.**

@@ -526,3 +526,41 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T125. Ejecutar la validación final de las brechas detectadas.**
   - **RF:** RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, y la revisión requisito por requisito confirma que cada nodo con `layoutMode` incluye `padding` y que ambas rutas tienen cobertura E2E de redirección y fallo de origen.
+
+## Conservación de opacidad positiva fraccionaria
+
+- [x] **T126. Ampliar los contratos tipados para la opacidad positiva fraccionaria.**
+  - **RF:** RF-2, RF-5.
+  - **Hecho cuando:** el contrato raw permite `styles.opacity` textual y el contrato Figma permite `opacity` numérico opcional en nodos, sin incorporar persistencia ni dependencias nuevas.
+
+- [ ] **T127. Crear una fixture con opacidad positiva en un elemento y en una ejecución de texto directa.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la fixture contiene un elemento visible con `opacity: 0.8` y un nodo de texto directo visible con `opacity: 0.5`, con identificadores y contenido verificables.
+
+- [ ] **T128. Conservar la opacidad positiva fraccionaria al serializar el documento raw.**
+  - **RF:** RF-2.
+  - **Hecho cuando:** el serializador incluye el valor textual computado de `opacity` en `styles` para elementos y `directTextRuns` cuando sea mayor que `0` y menor que `1`, sin omitirlo como valor no significativo.
+
+- [ ] **T129. Añadir pruebas unitarias de serialización de opacidad positiva fraccionaria.**
+  - **RF:** RF-2.
+  - **Hecho cuando:** las pruebas verifican que `opacity: 0.8` y `opacity: 0.5` se conservan textualmente en `styles` de elementos y ejecuciones de texto, y que no se inventan valores para opacidades no serializables.
+
+- [ ] **T130. Mapear la opacidad positiva fraccionaria al nodo compacto de Figma.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** el mapeador convierte `styles.opacity` a `opacity` numérico en nodos `FRAME`, `IMAGE` y `TEXT` cuando el valor está entre `0` y `1`, sin alterar `isVisible` ni la poda de `includeHidden`.
+
+- [ ] **T131. Añadir pruebas unitarias del mapeo Figma de opacidad.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas verifican que nodos visibles con opacidad `0.8` y `0.5` emiten el mismo valor numérico, conservan `isVisible: true` y no incluyen `opacity` dentro de `styles`.
+
+- [ ] **T132. Añadir una prueba de integración Playwright para opacidad positiva fraccionaria.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la extracción de la fixture conserva las opacidades textuales en el documento raw y su transformación emite las opacidades numéricas en los nodos Figma correspondientes.
+
+- [ ] **T133. Añadir pruebas de extremo a extremo de opacidad en ambas rutas.**
+  - **RF:** RF-1, RF-2, RF-3, RF-5.
+  - **Hecho cuando:** solicitudes HTTP reales a `/v1/extract` y `/v1/figma` verifican respectivamente `styles.opacity` textual y `opacity` numérico para los nodos visibles de la fixture.
+
+- [ ] **T134. Ejecutar la regresión final de conservación de opacidad.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las pruebas de opacidad quedan incluidas en la suite y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.

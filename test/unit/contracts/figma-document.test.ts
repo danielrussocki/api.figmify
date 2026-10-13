@@ -81,6 +81,7 @@ test('models compact Figma nodes with required geometry and only permitted types
     rect: { x: 24, y: 32, width: 180, height: 39, top: 32, left: 24 },
     relativeRect: { x: 24, y: 32, width: 180, height: 39, top: 32, left: 24 },
     isVisible: false,
+    opacity: 0.8,
     children: [],
   };
 
@@ -91,6 +92,7 @@ test('models compact Figma nodes with required geometry and only permitted types
   expectTypeOf(root.isVisible).toEqualTypeOf<FigmaIsVisible>();
   expectTypeOf(root.relativeRect).toEqualTypeOf<FigmaRelativeRect | undefined>();
   expectTypeOf(child.relativeRect).toEqualTypeOf<FigmaRelativeRect | undefined>();
+  expectTypeOf(child.opacity).toEqualTypeOf<number | undefined>();
 });
 
 test('models optional Auto Layout values with their Figma value domains', () => {

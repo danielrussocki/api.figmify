@@ -177,6 +177,7 @@ export interface FigmaNode {
   rect: FigmaRect;
   relativeRect?: FigmaRelativeRect;
   isVisible: FigmaIsVisible;
+  opacity?: number;
   layoutMode?: FigmaLayoutMode;
   itemSpacing?: number;
   gap?: number;

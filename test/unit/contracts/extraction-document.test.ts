@@ -1,6 +1,7 @@
 import { expectTypeOf, test } from 'vitest';
 
 import type {
+  ComputedStyles,
   DirectTextRun,
   DocumentRect,
   ExtractionDocument,
@@ -63,7 +64,7 @@ test('models the versioned extraction document contract', () => {
     resources: [resource],
     text: null,
     layout,
-    styles: { display: 'block' },
+    styles: { display: 'block', opacity: '0.8' },
     pseudoElements: {
       before: { content: '""', styles: { display: 'inline' } },
       after: null,
@@ -71,7 +72,7 @@ test('models the versioned extraction document contract', () => {
     directTextRuns: [{
       characters: 'Hello ',
       childNodeIndex: 0,
-      styles: { color: 'rgb(17, 24, 39)', 'font-size': '16px' },
+      styles: { color: 'rgb(17, 24, 39)', 'font-size': '16px', opacity: '0.5' },
     }],
     children: [],
     shadowChildren: [],
@@ -96,14 +97,17 @@ test('models the versioned extraction document contract', () => {
   expectTypeOf(fontFaceSource.weight).toEqualTypeOf<number>();
   expectTypeOf(fontFaceSource.url).toEqualTypeOf<string>();
   expectTypeOf(document.document.pseudoElements.before).toEqualTypeOf<
-    { content: string | null; styles: Record<string, string> } | null
+    { content: string | null; styles: ComputedStyles } | null
   >();
   expectTypeOf(document.document.resources).toEqualTypeOf<ResourceReference[]>();
+  expectTypeOf(document.document.styles).toEqualTypeOf<ComputedStyles>();
+  expectTypeOf(document.document.styles.opacity).toEqualTypeOf<string | undefined>();
   expectTypeOf(document.document.svg).toEqualTypeOf<string | undefined>();
   expectTypeOf(document.document.directTextRuns).toEqualTypeOf<DirectTextRun[] | undefined>();
   expectTypeOf(node.directTextRuns?.[0]?.characters).toEqualTypeOf<string | undefined>();
   expectTypeOf(node.directTextRuns?.[0]?.childNodeIndex).toEqualTypeOf<number | undefined>();
-  expectTypeOf(node.directTextRuns?.[0]?.styles).toEqualTypeOf<Record<string, string> | undefined>();
+  expectTypeOf(node.directTextRuns?.[0]?.styles).toEqualTypeOf<ComputedStyles | undefined>();
+  expectTypeOf(node.directTextRuns?.[0]?.styles.opacity).toEqualTypeOf<string | undefined>();
   expectTypeOf(document.document.layout).toEqualTypeOf<ExtractionLayout | undefined>();
   expectTypeOf(layout.rect).toEqualTypeOf<DocumentRect>();
   expectTypeOf(layout.rect.x).toEqualTypeOf<number>();

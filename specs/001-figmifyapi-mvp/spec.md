@@ -52,6 +52,7 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Cuando haya elementos en un Shadow DOM accesible, el primer endpoint deberá incluirlos respetando su relación con el árbol que los contiene.
 - Cuando un elemento tenga los pseudoelementos `::before` o `::after`, el primer endpoint deberá incluir sus estilos y contenido calculables.
 - Cuando una propiedad visual computada no tenga un valor textual serializable o no pueda determinarse, el primer endpoint deberá omitir esa propiedad.
+- Cuando un elemento o una ejecución de texto tenga una opacidad computada serializable mayor que cero y menor que uno, `/v1/extract` deberá incluir `opacity` en `styles` con su valor textual computado; no deberá tratarla como una propiedad no significativa ni omitirla.
 - Cuando la página contenga un Shadow DOM cerrado, el primer endpoint deberá excluir su contenido y continuar con los elementos observables.
 - Cuando un elemento contenga nodos de texto renderizados que sean hijos directos, el contrato podrá representarlos en `directTextRuns` sin alterar el árbol de elementos `children`; cada ejecución deberá conservar sus caracteres, su posición entre `childNodes` y sus estilos calculados efectivos, sin inventar ni concatenar contenido descendiente.
 
@@ -92,6 +93,7 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Cuando un nodo hijo participe en el Auto Layout de un padre, el sistema deberá devolver `layoutGrow` como el valor numérico calculado de `flex-grow` cuando sea mayor que cero; en los demás casos deberá devolver `0` u omitirlo. Los elementos con posición `absolute` o `fixed` no deberán recibir `layoutGrow` por su participación en el flujo del padre.
 - Cuando un nodo tenga posición calculada `absolute` o `sticky`, el sistema deberá devolver `position` y `zIndex` numérico cuando sea aplicable, para que el consumidor pueda decidir su posicionamiento absoluto en Figma.
 - Cuando un nodo tenga estilos visuales, el sistema deberá limitar `styles` a las propiedades útiles para su recreación y deberá omitir valores calculados no significativos, incluidos `auto`, `normal`, `none`, `0px` y `visible`, salvo que su presencia cambie el resultado visual o el contrato estructurado requiera representarlos.
+- Cuando un nodo visible tenga una opacidad computada mayor que cero y menor que uno, `/v1/figma` deberá devolver `opacity` como número y conservar ese valor para su recreación; no deberá omitirla como estilo no significativo.
 - Cuando un nodo tenga un borde sólido perceptible, el sistema deberá devolver `strokes` como una colección de pinturas con `type: "SOLID"` y color RGBA normalizado, y `strokeWeight` como su grosor numérico en píxeles CSS. Cuando los lados del borde difieran en color o grosor, deberá preservar la información por lado sin reducirlos a un único borde uniforme.
 - Cuando un nodo tenga una sombra CSS perceptible, el sistema deberá devolver `effects` como una colección estructurada: las sombras externas usarán `type: "DROP_SHADOW"` y las internas `type: "INNER_SHADOW"`; cada efecto incluirá color RGBA normalizado, `offset` con `x` e `y`, `radius` y `spread` numéricos en píxeles CSS. Deberá conservar todas las sombras perceptibles declaradas y su orden de composición.
 - Cuando un nodo tenga rellenos, bordes o sombras perceptibles, el sistema deberá devolver `fills`, `strokes` y `effects` en formato estructurado compatible con Figma. Cuando no exista un relleno perceptible, deberá devolver `fills: []`, sin inventar un color de respaldo; cuando no exista un borde o efecto perceptible, deberá omitir la propiedad o devolver `null`. Nunca deberá devolver una cadena CSS como `"none"`.
@@ -135,6 +137,7 @@ El valor predeterminado limita el listener a la máquina local. Para aceptar con
 - Nodo `IMAGE` de `img` o de fondo con una URL determinable, que debe devolver una pintura `fills` de `type: "IMAGE"`, con `src` y `scaleMode: "FILL"`, y no una pintura `"SOLID"`.
 - Recursos de color con alfa cero o fuentes declaradas que no se usan en nodos visibles.
 - Nodo sin caja de diseño, con tamaño cero o posicionado de forma absoluta o `sticky`.
+- Elemento o ejecución de texto visible con `opacity: 0.8`, `opacity: 0.5` u otro valor computado estrictamente mayor que cero y menor que uno, que debe conservar la opacidad en ambas salidas JSON.
 
 ## Fuera de alcance
 - Iframes y su contenido.

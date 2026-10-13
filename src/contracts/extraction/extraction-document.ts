@@ -18,9 +18,14 @@ export interface ResourceReference {
   url: string;
 }
 
+/** Serializable textual computed styles, including fractional CSS opacity. */
+export type ComputedStyles = Record<string, string> & {
+  opacity?: string;
+};
+
 export interface PseudoElement {
   content: string | null;
-  styles: Record<string, string>;
+  styles: ComputedStyles;
 }
 
 export interface PseudoElements {
@@ -62,7 +67,7 @@ export interface ExtractionLayout {
 export interface DirectTextRun {
   characters: string;
   childNodeIndex: number;
-  styles: Record<string, string>;
+  styles: ComputedStyles;
 }
 
 /** A usable HTTP(S) source declared by an accessible CSS @font-face rule. */
@@ -79,7 +84,7 @@ export interface ExtractionNode {
   resources: ResourceReference[];
   text: string | null;
   layout?: ExtractionLayout;
-  styles: Record<string, string>;
+  styles: ComputedStyles;
   pseudoElements: PseudoElements;
   /** Complete serialized markup for an inline SVG root, when available. */
   svg?: string;
