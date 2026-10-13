@@ -78,6 +78,7 @@ describe('transformExtractionNode', () => {
           rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           isVisible: true,
+          characters: 'Welcome',
           children: [],
         },
         {
@@ -87,10 +88,35 @@ describe('transformExtractionNode', () => {
           rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
           isVisible: true,
+          characters: 'From shadow DOM',
           children: [],
         },
       ],
     });
+  });
+
+  test('emits ordered leaf TEXT runs without assigning descendant text to containers', () => {
+    const extraction = node({
+      id: 'node-root',
+      tagName: 'p',
+      text: 'First second third',
+      children: [
+        node({ id: 'node-first', tagName: 'span', text: 'First' }),
+        node({ id: 'node-second', tagName: 'strong', text: 'second' }),
+        node({ id: 'node-third', tagName: 'em', text: 'third' }),
+      ],
+    });
+
+    expect(transformExtractionNode(extraction)).toMatchObject({
+      id: 'node-root',
+      type: 'FRAME',
+      children: [
+        { id: 'node-first', type: 'TEXT', characters: 'First', children: [] },
+        { id: 'node-second', type: 'TEXT', characters: 'second', children: [] },
+        { id: 'node-third', type: 'TEXT', characters: 'third', children: [] },
+      ],
+    });
+    expect(transformExtractionNode(extraction).characters).toBeUndefined();
   });
 
   test('omits the root relative rect and positions descendants from their represented parent content area', () => {
@@ -358,6 +384,7 @@ describe('transformExtractionDocument', () => {
                 rect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
                 relativeRect: { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 },
                 isVisible: true,
+                characters: 'From shadow DOM',
                 children: [],
               },
             ],

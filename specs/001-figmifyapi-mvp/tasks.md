@@ -275,7 +275,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-5.
   - **Hecho cuando:** con `false` se eliminan nodos invisibles y descendientes, y con `true` se conservan con `isVisible: false`.
 
-- [ ] **T65. Implementar runs `TEXT` hoja sin texto duplicado en contenedores.**
+- [x] **T65. Implementar runs `TEXT` hoja sin texto duplicado en contenedores.**
   - **RF:** RF-5.
   - **Hecho cuando:** un contenedor no tiene `characters` por texto descendiente y cada tramo de texto en orden DOM se emite como un nodo `TEXT` hoja.
 

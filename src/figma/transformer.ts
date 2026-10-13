@@ -67,15 +67,18 @@ function mapExtractionNode(
     )];
   });
 
+  const type = determineFigmaNodeType(node);
+
   return {
     id: node.id,
     tag: node.tagName,
-    type: determineFigmaNodeType(node),
+    type,
     rect,
     ...(parentContentOrigin === undefined
       ? {}
       : { relativeRect: toRelativeRect(rect, parentContentOrigin) }),
     isVisible,
+    ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     children,
   };
 }
