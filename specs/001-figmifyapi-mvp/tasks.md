@@ -533,7 +533,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-2, RF-5.
   - **Hecho cuando:** el contrato raw permite `styles.opacity` textual y el contrato Figma permite `opacity` numérico opcional en nodos, sin incorporar persistencia ni dependencias nuevas.
 
-- [ ] **T127. Crear una fixture con opacidad positiva en un elemento y en una ejecución de texto directa.**
+- [x] **T127. Crear una fixture con opacidad positiva en un elemento y en una ejecución de texto directa.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la fixture contiene un elemento visible con `opacity: 0.8` y un nodo de texto directo visible con `opacity: 0.5`, con identificadores y contenido verificables.
 

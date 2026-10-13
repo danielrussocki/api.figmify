@@ -25,9 +25,11 @@
        #undetermined-font { font-family: "Undetermined Fixture Sans", sans-serif; }
        #determined-font { font-family: "Fixture Sans", sans-serif; font-weight: 700; }
        #hidden-font { display: none; font-family: "Hidden Fixture Sans", sans-serif; }
-      #hidden-display { display: none; }
-      #hidden-opacity { opacity: 0; }
-      #zero-size { width: 0; height: 0; overflow: hidden; }
+       #hidden-display { display: none; }
+       #hidden-opacity { opacity: 0; }
+       #fractional-opacity-element { opacity: 0.8; }
+       #fractional-opacity-direct-text { opacity: 0.5; }
+       #zero-size { width: 0; height: 0; overflow: hidden; }
       #fixed-position { position: fixed; top: 16px; left: 24px; width: 120px; height: 40px; }
       #pseudo-element::before { content: "Before fixture"; color: rgb(1, 2, 3); }
       #pseudo-element::after { content: "After fixture"; font-size: 16px; }
@@ -164,9 +166,11 @@
     <main>
       <p id="visible-text">Visible fixture text</p>
        <p id="hidden-attribute" hidden>Hidden attribute text</p>
-       <p id="hidden-display">Display hidden text</p>
-       <p id="hidden-opacity">Transparent fixture text</p>
-        <div id="undetermined-font">Font with no determinate URL</div>
+        <p id="hidden-display">Display hidden text</p>
+        <p id="hidden-opacity">Transparent fixture text</p>
+        <div id="fractional-opacity-element">Visible element with fractional opacity</div>
+        <p id="fractional-opacity-direct-text">Visible direct text with fractional opacity</p>
+         <div id="undetermined-font">Font with no determinate URL</div>
         <div id="determined-font">Font with a determinate URL</div>
         <div id="hidden-font">Font used only by a hidden node</div>
        <div id="zero-size">Zero-size fixture content</div>

@@ -85,6 +85,25 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves visible elements and direct text with positive fractional opacity', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="fractional-opacity-element"');
+      expect(document).toContain('opacity: 0.8');
+      expect(document).toContain('Visible element with fractional opacity');
+      expect(document).toContain('id="fractional-opacity-direct-text"');
+      expect(document).toContain('opacity: 0.5');
+      expect(document).toContain('Visible direct text with fractional opacity');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serves horizontal and vertical flex Auto Layout scenarios with effective spacing', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 
