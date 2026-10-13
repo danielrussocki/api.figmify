@@ -231,7 +231,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-4, RF-5.
   - **Hecho cuando:** solo `true` y `false` son válidos, la omisión normaliza a `false` y un valor distinto produce `INVALID_REQUEST`.
 
-- [ ] **T54. Probar la normalización de `includeHidden`.**
+- [x] **T54. Probar la normalización de `includeHidden`.**
   - **RF:** RF-1, RF-4, RF-5.
   - **Hecho cuando:** las pruebas cubren omisión, ambos valores válidos y valores inválidos con el error HTTP normalizado.
 

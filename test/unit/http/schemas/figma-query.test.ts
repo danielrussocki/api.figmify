@@ -10,7 +10,10 @@ function expectInvalidRequest(query: FigmaQuery): void {
     normalizeFigmaQuery(query);
     throw new Error('Expected query normalization to fail.');
   } catch (error) {
-    expect(error).toMatchObject({ code: 'INVALID_REQUEST' });
+    expect(error).toMatchObject({
+      code: 'INVALID_REQUEST',
+      message: 'The includeHidden query parameter must be true or false.',
+    });
   }
 }
 

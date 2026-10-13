@@ -83,6 +83,25 @@ describe('GET /v1/figma', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
+  test.each(['TRUE', 'False', '1', 'yes', ''])(
+    'returns a normalized HTTP error for invalid includeHidden=%s',
+    async (includeHidden) => {
+      const { application, execute } = createApplication();
+
+      const response = await application.inject({
+        method: 'GET',
+        url: `/v1/figma?url=https%3A%2F%2Fexample.com%2F&includeHidden=${includeHidden}`,
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json()).toEqual({
+        code: 'INVALID_REQUEST',
+        message: 'The includeHidden query parameter must be true or false.',
+      });
+      expect(execute).not.toHaveBeenCalled();
+    },
+  );
+
   test('delegates application errors to the global error handler', async () => {
     const { application } = createApplication(
       vi.fn().mockRejectedValue({
