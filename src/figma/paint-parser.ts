@@ -9,6 +9,7 @@ import type {
 export interface FigmaPaintProperties {
   fills: FigmaFills;
   strokes: FigmaStrokes;
+  strokeWeight?: number;
   effects: FigmaEffect[] | null;
   cornerRadius?: number;
   cornerRadii?: FigmaCornerRadii;
@@ -20,16 +21,17 @@ export function parseFigmaPaints(styles: Record<string, string>): FigmaPaintProp
   const textFill = perceptibleColor(styles.color);
   const fills = backgroundFill ?? textFill;
   const radii = parseCornerRadii(styles);
+  const strokes = parseStrokes(styles);
 
   return {
     fills: fills === null ? null : [{ type: 'SOLID', color: fills }],
-    strokes: parseStrokes(styles),
+    ...strokes,
     effects: parseEffects(styles),
     ...radii,
   };
 }
 
-function parseStrokes(styles: Record<string, string>): FigmaStrokes {
+function parseStrokes(styles: Record<string, string>): Pick<FigmaPaintProperties, 'strokes' | 'strokeWeight'> {
   const sides = ['top', 'right', 'bottom', 'left'] as const;
   const strokes = sides.flatMap((side) => {
     const style = styles[`border-${side}-style`]?.trim().toLowerCase();
@@ -42,7 +44,24 @@ function parseStrokes(styles: Record<string, string>): FigmaStrokes {
     return [{ type: 'SOLID' as const, weight, color }];
   });
 
-  return strokes.length === 0 ? null : strokes;
+  if (strokes.length === 0) return { strokes: null };
+  if (!isUniformStroke(strokes)) return { strokes };
+
+  return {
+    strokes: [{ type: 'SOLID', weight: strokes[0]!.weight, color: strokes[0]!.color }],
+    strokeWeight: strokes[0]!.weight,
+  };
+}
+
+function isUniformStroke(strokes: NonNullable<FigmaStrokes>): boolean {
+  if (strokes.length !== 4) return false;
+
+  const first = strokes[0]!;
+  return strokes.every((stroke) => stroke.weight === first.weight
+    && stroke.color.r === first.color.r
+    && stroke.color.g === first.color.g
+    && stroke.color.b === first.color.b
+    && stroke.color.a === first.color.a);
 }
 
 function parseEffects(styles: Record<string, string>): FigmaEffect[] | null {

@@ -447,7 +447,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas cubren flex, grid, ejes invertidos, separaciones distintas, padding parcial, alineaciones directas e inexactas, y `layoutGrow` dentro y fuera de flujo.
 
-- [ ] **T107. Implementar el parseo de borde sólido uniforme.**
+- [x] **T107. Implementar el parseo de borde sólido uniforme.**
   - **RF:** RF-5.
   - **Hecho cuando:** un borde sólido perceptible e idéntico en sus cuatro lados emite una pintura `SOLID` RGBA normalizada y un `strokeWeight` numérico.
 

@@ -25,6 +25,28 @@ describe('parseFigmaPaints', () => {
     ]);
   });
 
+  test('collapses an identical perceptible solid border into one stroke and weight', () => {
+    const border = {
+      'border-top-width': '2px',
+      'border-right-width': '2px',
+      'border-bottom-width': '2px',
+      'border-left-width': '2px',
+      'border-top-style': 'solid',
+      'border-right-style': 'solid',
+      'border-bottom-style': 'solid',
+      'border-left-style': 'solid',
+      'border-top-color': 'rgba(17, 34, 51, 0.5)',
+      'border-right-color': 'rgba(17, 34, 51, 0.5)',
+      'border-bottom-color': 'rgba(17, 34, 51, 0.5)',
+      'border-left-color': 'rgba(17, 34, 51, 0.5)',
+    };
+
+    expect(parseFigmaPaints(border)).toMatchObject({
+      strokes: [{ type: 'SOLID', color: { r: 0.067, g: 0.133, b: 0.2, a: 0.5 } }],
+      strokeWeight: 2,
+    });
+  });
+
   test('converts perceptible CSS box shadows to DROP_SHADOW effects', () => {
     expect(parseFigmaPaints({
       'box-shadow': 'rgba(0, 0, 0, 0.25) 2px -3px 4px 1px, 0 1px 2px rgb(10, 20, 30)',

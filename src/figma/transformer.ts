@@ -110,6 +110,7 @@ function mapExtractionNode(
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     ...(paints.fills === null ? {} : { fills: paints.fills }),
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
+    ...(paints.strokeWeight === undefined ? {} : { strokeWeight: paints.strokeWeight }),
     ...(paints.effects === null ? {} : { effects: paints.effects }),
     ...(paints.cornerRadius === undefined ? {} : { cornerRadius: paints.cornerRadius }),
     ...(paints.cornerRadii === undefined ? {} : { cornerRadii: paints.cornerRadii }),
