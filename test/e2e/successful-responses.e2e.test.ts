@@ -114,6 +114,30 @@ describe('successful HTTP responses', () => {
     expect(textNodes.filter((node) => node.characters === 'Hello world again')).toHaveLength(0);
   });
 
+  test('GET /v1/figma returns resolvable background images, complete inline SVG, and used font assets', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+
+    expect(flattenNodes(document.document).find((node) => node.image?.src === `${fixtureServer.url}/resources/fixture-image.svg`
+      && node.image !== undefined
+      && 'backgroundSize' in node.image
+      && node.image.backgroundSize === 'cover')).toMatchObject({
+      type: 'IMAGE',
+      image: {
+        src: `${fixtureServer.url}/resources/fixture-image.svg`,
+        backgroundSize: 'cover',
+      },
+    });
+    expect(flattenNodes(document.document).find((node) => node.tag === 'svg' && node.svg?.includes('<circle'))).toMatchObject({
+      type: 'FRAME',
+      svg: expect.stringContaining('<circle cx="24" cy="24" r="16" fill="rgb(20, 80, 160)"></circle>'),
+    });
+    expect(document.assets).toContainEqual({
+      family: 'Fixture Sans',
+      weights: [700],
+      url: `${fixtureServer.url}/resources/fixture-font.woff2`,
+    });
+  });
+
   test('GET /v1/figma applies includeHidden to the hidden text subtree', async () => {
     const withoutHidden = await requestJson<FigmaDocument>('/v1/figma');
     const withHidden = await requestJson<FigmaDocument>('/v1/figma', { includeHidden: 'true' });

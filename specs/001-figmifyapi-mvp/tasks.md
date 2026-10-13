@@ -385,6 +385,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** las solicitudes de prueba de `CreateFigmaDocumentUseCase` incluyen `includeHidden` y `pnpm typecheck` termina sin errores.
 
-- [ ] **T92. Ejecutar la validación final de cumplimiento de la especificación.**
+- [x] **T92. Ejecutar la validación final de cumplimiento de la especificación.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan; las pruebas de extremo a extremo cubren las brechas corregidas; y una revisión requisito por requisito confirma que no quedan URL internas resolubles, texto perdido, fondos de imagen resolubles, SVG incompleto ni assets tipográficos determinables ausentes.
