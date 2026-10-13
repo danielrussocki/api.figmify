@@ -463,7 +463,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-5.
   - **Hecho cuando:** las pruebas cubren bordes uniformes y por lado, bordes transparentes, sombras múltiples internas y externas, y valores de desplazamiento, desenfoque o extensión cero.
 
-- [ ] **T111. Validar por integración el contrato Figma ampliado.**
+- [x] **T111. Validar por integración el contrato Figma ampliado.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** una extracción Playwright de las nuevas fixtures y una solicitud a `/v1/figma` validan geometría relativa, Auto Layout, bordes y efectos contra el contrato versionado.
 

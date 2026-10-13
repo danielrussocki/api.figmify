@@ -131,7 +131,9 @@ function validateFigmaNode(value: unknown, path: string, errors: string[], isRoo
   const node = object(value, path, errors);
   if (node === undefined) return;
   keys(node, path, ['id', 'tag', 'type', 'rect', 'isVisible', 'children'], [
-    'relativeRect', 'layoutMode', 'gap', 'position', 'zIndex', 'fills', 'strokes', 'effects', 'cornerRadius', 'cornerRadii', 'characters', 'styles', 'image', 'svg',
+    'relativeRect', 'layoutMode', 'itemSpacing', 'gap', 'padding', 'primaryAxisAlign', 'counterAxisAlign', 'layoutGrow',
+    'position', 'zIndex', 'fills', 'strokes', 'strokeWeight', 'strokeWeights', 'effects', 'cornerRadius', 'cornerRadii',
+    'characters', 'styles', 'image', 'svg',
   ], errors);
   string(node.id, `${path}.id`, errors);
   string(node.tag, `${path}.tag`, errors);
@@ -141,11 +143,18 @@ function validateFigmaNode(value: unknown, path: string, errors: string[], isRoo
   if (!isRoot && !('relativeRect' in node)) errors.push(`${path}.relativeRect is required.`);
   if ('relativeRect' in node) rect(node.relativeRect, `${path}.relativeRect`, errors);
   if ('layoutMode' in node) enumValue(node.layoutMode, new Set(['HORIZONTAL', 'VERTICAL']), `${path}.layoutMode`, errors);
+  optionalNumber(node, 'itemSpacing', path, errors);
   optionalNumber(node, 'gap', path, errors);
+  if ('padding' in node) padding(node.padding, `${path}.padding`, errors);
+  if ('primaryAxisAlign' in node) enumValue(node.primaryAxisAlign, new Set(['MIN', 'CENTER', 'MAX', 'SPACE_BETWEEN']), `${path}.primaryAxisAlign`, errors);
+  if ('counterAxisAlign' in node) enumValue(node.counterAxisAlign, new Set(['MIN', 'CENTER', 'MAX']), `${path}.counterAxisAlign`, errors);
+  optionalNumber(node, 'layoutGrow', path, errors);
   if ('position' in node) enumValue(node.position, new Set(['absolute', 'sticky']), `${path}.position`, errors);
   optionalNumber(node, 'zIndex', path, errors);
   if ('fills' in node) paints(node.fills, `${path}.fills`, errors, false);
   if ('strokes' in node) paints(node.strokes, `${path}.strokes`, errors, true);
+  optionalNumber(node, 'strokeWeight', path, errors);
+  if ('strokeWeights' in node) strokeWeights(node.strokeWeights, `${path}.strokeWeights`, errors);
   if ('effects' in node) effects(node.effects, `${path}.effects`, errors);
   optionalNumber(node, 'cornerRadius', path, errors);
   if ('cornerRadii' in node) cornerRadii(node.cornerRadii, `${path}.cornerRadii`, errors);
@@ -168,10 +177,11 @@ function paints(value: unknown, path: string, errors: string[], includesWeight: 
   array(value, path, errors, (paint, paintPath) => {
     const entry = object(paint, paintPath, errors);
     if (entry === undefined) return;
-    keys(entry, paintPath, includesWeight ? ['type', 'color', 'weight'] : ['type', 'color'], [], errors);
+    keys(entry, paintPath, includesWeight ? ['type', 'color', 'weight'] : ['type', 'color'], includesWeight ? ['side'] : [], errors);
     literal(entry.type, 'SOLID', `${paintPath}.type`, errors);
     rgba(entry.color, `${paintPath}.color`, errors);
     if (includesWeight) number(entry.weight, `${paintPath}.weight`, errors);
+    if (includesWeight && 'side' in entry) enumValue(entry.side, new Set(['TOP', 'RIGHT', 'BOTTOM', 'LEFT']), `${paintPath}.side`, errors);
   });
 }
 
@@ -181,7 +191,7 @@ function effects(value: unknown, path: string, errors: string[]): void {
     const entry = object(effect, effectPath, errors);
     if (entry === undefined) return;
     keys(entry, effectPath, ['type', 'color', 'offset', 'radius', 'spread'], [], errors);
-    literal(entry.type, 'DROP_SHADOW', `${effectPath}.type`, errors);
+    enumValue(entry.type, new Set(['DROP_SHADOW', 'INNER_SHADOW']), `${effectPath}.type`, errors);
     rgba(entry.color, `${effectPath}.color`, errors);
     const offset = object(entry.offset, `${effectPath}.offset`, errors);
     if (offset !== undefined) {
@@ -192,6 +202,20 @@ function effects(value: unknown, path: string, errors: string[]): void {
     number(entry.radius, `${effectPath}.radius`, errors);
     number(entry.spread, `${effectPath}.spread`, errors);
   });
+}
+
+function padding(value: unknown, path: string, errors: string[]): void {
+  const candidate = object(value, path, errors);
+  if (candidate === undefined) return;
+  keys(candidate, path, ['top', 'right', 'bottom', 'left'], [], errors);
+  for (const key of ['top', 'right', 'bottom', 'left']) number(candidate[key], `${path}.${key}`, errors);
+}
+
+function strokeWeights(value: unknown, path: string, errors: string[]): void {
+  const candidate = object(value, path, errors);
+  if (candidate === undefined) return;
+  keys(candidate, path, ['top', 'right', 'bottom', 'left'], [], errors);
+  for (const key of ['top', 'right', 'bottom', 'left']) number(candidate[key], `${path}.${key}`, errors);
 }
 
 function cornerRadii(value: unknown, path: string, errors: string[]): void {

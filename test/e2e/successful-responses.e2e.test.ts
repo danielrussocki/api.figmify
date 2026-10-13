@@ -11,6 +11,7 @@ import { registerApplicationErrorHandler } from '../../src/http/error-handler/ap
 import { registerExtractRoute } from '../../src/http/routes/extract-route.js';
 import { registerFigmaRoute } from '../../src/http/routes/figma-route.js';
 import { startBrowserFixtureServer, type BrowserFixtureServer } from '../fixtures/browser/server.js';
+import { validateFigmaDocumentV1 } from '../support/json-contract-validator.js';
 
 let application: FastifyInstance;
 let applicationUrl: string;
@@ -171,6 +172,30 @@ describe('successful HTTP responses', () => {
       },
     });
   });
+
+  test('GET /v1/figma returns the extended layout and paint contract for browser fixtures', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+
+    expect(validateFigmaDocumentV1(document)).toEqual([]);
+    const growingItem = findParentOfCharacters(document.document, 'Vertical growing item');
+    const verticalFlex = growingItem === undefined ? undefined : findParentNode(document.document, growingItem);
+    expect(verticalFlex).toMatchObject({
+      layoutMode: 'VERTICAL', itemSpacing: 10, gap: 10,
+      padding: { top: 4, right: 12, bottom: 20, left: 28 },
+      primaryAxisAlign: 'MAX', counterAxisAlign: 'MIN',
+    });
+    expect(findParentOfCharacters(document.document, 'Per-side border fixture')).toMatchObject({
+      strokes: expect.arrayContaining([
+        expect.objectContaining({ side: 'TOP', weight: 1 }),
+        expect.objectContaining({ side: 'LEFT', weight: 4 }),
+      ]),
+      strokeWeights: { top: 1, right: 2, bottom: 3, left: 4 },
+    });
+    expect(findParentOfCharacters(document.document, 'Multiple shadow fixture')?.effects).toEqual([
+      expect.objectContaining({ type: 'DROP_SHADOW', offset: { x: 2, y: 4 }, radius: 6, spread: 1 }),
+      expect.objectContaining({ type: 'INNER_SHADOW', offset: { x: -1, y: -2 }, radius: 3, spread: 0 }),
+    ]);
+  });
 });
 
 async function requestJson<T>(
@@ -206,6 +231,34 @@ function findNodeByCharacters(
 
   for (const child of node.children) {
     const match = findNodeByCharacters(child, characters);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findParentOfCharacters(
+  node: FigmaDocument['document'],
+  characters: string,
+): FigmaDocument['document'] | undefined {
+  if (node.children.some((child) => child.characters === characters)) return node;
+
+  for (const child of node.children) {
+    const match = findParentOfCharacters(child, characters);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findParentNode(
+  node: FigmaDocument['document'],
+  target: FigmaDocument['document'],
+): FigmaDocument['document'] | undefined {
+  if (node.children.includes(target)) return node;
+
+  for (const child of node.children) {
+    const match = findParentNode(child, target);
     if (match !== undefined) return match;
   }
 

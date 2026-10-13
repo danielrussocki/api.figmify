@@ -5,6 +5,7 @@ import { PlaywrightExtractor } from '../../src/browser/playwright-extractor.js';
 import type { FigmaNode } from '../../src/contracts/figma/figma-document.js';
 import { transformExtractionDocument } from '../../src/figma/transformer.js';
 import { startBrowserFixtureServer, type BrowserFixtureServer } from '../fixtures/browser/server.js';
+import { validateFigmaDocumentV1 } from '../support/json-contract-validator.js';
 
 let browser: Browser;
 let fixtureServer: BrowserFixtureServer;
@@ -50,6 +51,58 @@ describe('Figma document browser integration', () => {
 
     expect(findNodesByTag(document.document, 'p').filter((node) => !node.isVisible)).toHaveLength(3);
   });
+
+  test('maps extracted layout, geometry, borders, and shadows to the extended Figma contract', async () => {
+    const document = await extractAndTransform();
+
+    expect(validateFigmaDocumentV1(document)).toEqual([]);
+    const growingItem = findParentOfCharacters(document.document, 'Horizontal growing item');
+    const horizontalFlex = growingItem === undefined ? undefined : findParentNode(document.document, growingItem);
+    expect(horizontalFlex).toMatchObject({
+      layoutMode: 'HORIZONTAL',
+      itemSpacing: 12,
+      gap: 12,
+      padding: { top: 8, right: 16, bottom: 24, left: 32 },
+      primaryAxisAlign: 'SPACE_BETWEEN',
+      counterAxisAlign: 'CENTER',
+    });
+    expect(growingItem).toMatchObject({ layoutGrow: 1 });
+    const columnFlowItem = findParentOfCharacters(document.document, 'Column-flow first item');
+    const columnFlowGrid = columnFlowItem === undefined ? undefined : findParentNode(document.document, columnFlowItem);
+    expect(columnFlowGrid).toMatchObject({
+      layoutMode: 'VERTICAL', itemSpacing: 6, gap: 6,
+    });
+
+    const negativeMarginChild = findParentOfCharacters(document.document, 'Negative margin fixture');
+    const geometryParent = negativeMarginChild === undefined ? undefined : findParentNode(document.document, negativeMarginChild);
+    expect(negativeMarginChild?.relativeRect).toEqual({
+      x: negativeMarginChild!.rect.x - geometryParent!.rect.x,
+      y: negativeMarginChild!.rect.y - geometryParent!.rect.y,
+      width: negativeMarginChild!.rect.width,
+      height: negativeMarginChild!.rect.height,
+      top: negativeMarginChild!.rect.y - geometryParent!.rect.y,
+      left: negativeMarginChild!.rect.x - geometryParent!.rect.x,
+    });
+    expect(findParentOfCharacters(document.document, 'Sticky fixture')).toMatchObject({ position: 'sticky' });
+
+    expect(findParentOfCharacters(document.document, 'Uniform border fixture')).toMatchObject({
+      strokes: [{ type: 'SOLID', weight: 3, color: { r: 0.078, g: 0.157, b: 0.235, a: 1 } }],
+      strokeWeight: 3,
+    });
+    expect(findParentOfCharacters(document.document, 'Per-side border fixture')).toMatchObject({
+      strokes: [
+        { side: 'TOP', weight: 1 }, { side: 'RIGHT', weight: 2 },
+        { side: 'BOTTOM', weight: 3 }, { side: 'LEFT', weight: 4 },
+      ],
+      strokeWeights: { top: 1, right: 2, bottom: 3, left: 4 },
+    });
+    expect(findParentOfCharacters(document.document, 'Multiple shadow fixture')).toMatchObject({
+      effects: [
+        { type: 'DROP_SHADOW', offset: { x: 2, y: 4 }, radius: 6, spread: 1 },
+        { type: 'INNER_SHADOW', offset: { x: -1, y: -2 }, radius: 3, spread: 0 },
+      ],
+    });
+  });
 });
 
 async function extractAndTransform(includeHidden = false) {
@@ -79,6 +132,28 @@ function findNodeByCharacters(node: FigmaNode, characters: string): FigmaNode | 
 
   for (const child of node.children) {
     const match = findNodeByCharacters(child, characters);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findParentOfCharacters(node: FigmaNode, characters: string): FigmaNode | undefined {
+  if (node.children.some((child) => child.characters === characters)) return node;
+
+  for (const child of node.children) {
+    const match = findParentOfCharacters(child, characters);
+    if (match !== undefined) return match;
+  }
+
+  return undefined;
+}
+
+function findParentNode(node: FigmaNode, target: FigmaNode): FigmaNode | undefined {
+  if (node.children.includes(target)) return node;
+
+  for (const child of node.children) {
+    const match = findParentNode(child, target);
     if (match !== undefined) return match;
   }
 
