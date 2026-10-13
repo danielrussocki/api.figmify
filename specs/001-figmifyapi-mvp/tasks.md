@@ -561,6 +561,6 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-1, RF-2, RF-3, RF-5.
   - **Hecho cuando:** solicitudes HTTP reales a `/v1/extract` y `/v1/figma` verifican respectivamente `styles.opacity` textual y `opacity` numérico para los nodos visibles de la fixture.
 
-- [ ] **T134. Ejecutar la regresión final de conservación de opacidad.**
+- [x] **T134. Ejecutar la regresión final de conservación de opacidad.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las pruebas de opacidad quedan incluidas en la suite y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
