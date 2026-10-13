@@ -8,7 +8,7 @@ import type {
 } from '../contracts/figma/figma-document.js';
 
 export interface FigmaPaintProperties {
-  fills: FigmaFills;
+  fills: FigmaFills | null;
   strokes: FigmaStrokes;
   strokeWeight?: number;
   strokeWeights?: FigmaStrokeWeights;

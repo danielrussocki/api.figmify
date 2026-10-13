@@ -11,6 +11,7 @@ import type {
   FigmaFills,
   FigmaFontAsset,
   FigmaImageData,
+  FigmaImagePaint,
   FigmaIsVisible,
   FigmaCounterAxisAlign,
   FigmaPadding,
@@ -21,6 +22,7 @@ import type {
   FigmaRect,
   FigmaRelativeRect,
   FigmaRgbaColor,
+  FigmaSolidPaint,
   FigmaStyleCatalog,
   FigmaStrokes,
   FigmaStrokeSide,
@@ -131,8 +133,13 @@ test('models optional Auto Layout values with their Figma value domains', () => 
 
 test('models structured paints, uniform and side-specific strokes, shadows, and corner radii', () => {
   const rgba: FigmaRgbaColor = { r: 0.067, g: 0.094, b: 0.153, a: 0.8 };
-  const paint: FigmaPaint = { type: 'SOLID', color: rgba };
-  const fills: FigmaFills = [paint];
+  const solidPaint: FigmaSolidPaint = { type: 'SOLID', color: rgba };
+  const imagePaint: FigmaImagePaint = {
+    type: 'IMAGE',
+    src: 'https://example.com/hero.png',
+    scaleMode: 'FILL',
+  };
+  const fills: FigmaFills = [solidPaint, imagePaint];
   const strokeSide: FigmaStrokeSide = 'TOP';
   const strokes: FigmaStrokes = [{ type: 'SOLID', color: rgba, side: strokeSide, weight: 2 }];
   const strokeWeights: FigmaStrokeWeights = { top: 2, right: 1, bottom: 3, left: 4 };
@@ -170,8 +177,9 @@ test('models structured paints, uniform and side-specific strokes, shadows, and 
   expectTypeOf(rgba.g).toEqualTypeOf<number>();
   expectTypeOf(rgba.b).toEqualTypeOf<number>();
   expectTypeOf(rgba.a).toEqualTypeOf<number>();
-  expectTypeOf(paint).toEqualTypeOf<FigmaPaint>();
-  expectTypeOf<FigmaFills>().toEqualTypeOf<FigmaPaint[] | null>();
+  expectTypeOf(solidPaint).toMatchTypeOf<FigmaPaint>();
+  expectTypeOf(imagePaint).toEqualTypeOf<FigmaImagePaint>();
+  expectTypeOf<FigmaFills>().toEqualTypeOf<FigmaPaint[]>();
   expectTypeOf<FigmaStrokes>().toEqualTypeOf<
     | { type: 'SOLID'; color: FigmaRgbaColor; side?: FigmaStrokeSide; weight: number }[]
     | null

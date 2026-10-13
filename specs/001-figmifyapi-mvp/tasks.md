@@ -473,7 +473,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Corrección de rellenos transparentes e imágenes
 
-- [ ] **T113. Ajustar el contrato tipado de pinturas Figma para distinguir rellenos sólidos y de imagen.**
+- [x] **T113. Ajustar el contrato tipado de pinturas Figma para distinguir rellenos sólidos y de imagen.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `fills` representa una colección que puede estar vacía y una pintura de imagen exige `type: "IMAGE"`, `src` y `scaleMode: "FILL"`, sin permitir que se modele como pintura sólida.
 

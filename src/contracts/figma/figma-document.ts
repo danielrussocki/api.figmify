@@ -49,9 +49,15 @@ export interface FigmaSolidPaint {
   color: FigmaRgbaColor;
 }
 
-export type FigmaPaint = FigmaSolidPaint;
+export interface FigmaImagePaint {
+  type: 'IMAGE';
+  src: string;
+  scaleMode: 'FILL';
+}
 
-export type FigmaFills = FigmaPaint[] | null;
+export type FigmaPaint = FigmaSolidPaint | FigmaImagePaint;
+
+export type FigmaFills = FigmaPaint[];
 
 export interface FigmaStroke extends FigmaSolidPaint {
   /** Identifies the physical border when strokes cannot be represented uniformly. */
