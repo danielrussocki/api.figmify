@@ -219,7 +219,7 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** el tipo exige `id`, `tag`, `type`, `rect` e `isVisible`, permite `relativeRect` fuera de la raíz y limita los tipos a `FRAME`, `TEXT` e `IMAGE`.
 
-- [ ] **T51. Definir los contratos Figma de pinturas, bordes, efectos y radios.**
+- [x] **T51. Definir los contratos Figma de pinturas, bordes, efectos y radios.**
   - **RF:** RF-5.
   - **Hecho cuando:** existen tipos estructurados para RGBA normalizado, `fills`, `strokes`, `effects` con `DROP_SHADOW`, `cornerRadius` y radios por esquina.
 
