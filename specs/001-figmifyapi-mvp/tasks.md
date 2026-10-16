@@ -624,3 +624,33 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T148. Ejecutar la regresión final del contrato Figma v1.1.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las regresiones de contratos validan Figma v1.1 y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
+
+## Modos de escala de pinturas de imagen
+
+- [ ] **T149. Ampliar el contrato tipado de pinturas `IMAGE` con los cuatro modos de escala.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** el tipo de pintura `IMAGE` limita `scaleMode` a `"FILL" | "FIT" | "CROP" | "TILE"` y no permite otros valores.
+
+- [ ] **T150. Resolver el `scaleMode` de las imágenes `img` a partir de `object-fit`.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** `cover` y `fill` producen `FILL`, `contain` y `scale-down` producen `FIT`, y `none` produce `CROP` en la pintura `IMAGE` de un `img`.
+
+- [ ] **T151. Resolver el `scaleMode` de una imagen CSS de fondo determinable.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** un fondo que repite en algún eje produce `TILE`; sin repetición, `cover` produce `FILL`, `contain` produce `FIT` y `auto` o un tamaño explícito producen `CROP`, manteniendo el nodo como `FRAME`.
+
+- [ ] **T152. Crear fixtures para los modos de escala de `img` y fondos CSS.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** las fixtures incluyen `img` con `object-fit` que cubren `FILL`, `FIT` y `CROP`, y fondos CSS de URL única determinable que cubren `FILL`, `FIT`, `CROP` y `TILE`.
+
+- [ ] **T153. Añadir pruebas unitarias del resolvedor de `scaleMode`.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas verifican cada mapeo de `object-fit`, `background-size` y `background-repeat`, y confirman que toda pintura emitida usa exclusivamente uno de los cuatro valores permitidos.
+
+- [ ] **T154. Añadir una prueba de integración Playwright para los modos de escala.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la extracción de las fixtures conserva los estilos necesarios y su transformación produce las pinturas `IMAGE` con los modos esperados, sin inventar pinturas para fondos ambiguos, múltiples o con gradiente.
+
+- [ ] **T155. Añadir regresión de contrato y prueba E2E de `scaleMode`.**
+  - **RF:** RF-1, RF-3, RF-5.
+  - **Hecho cuando:** una solicitud real a `/v1/figma` y los ejemplos de regresión validan que `scaleMode` solo es `FILL`, `FIT`, `CROP` o `TILE` para imágenes `img` y fondos CSS determinables.
