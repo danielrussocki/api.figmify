@@ -110,7 +110,7 @@ describe('PlaywrightExtractor integration', () => {
     expect(JSON.stringify(iframe)).not.toContain('Iframe-only content');
   });
 
-  test('extracts and transforms a resolvable background image with its known size', async () => {
+  test('transforms a resolvable background image into a FRAME paint', async () => {
     await shortenPostLoadWait();
     const extractor = new PlaywrightExtractor(browser, 'development');
 
@@ -122,11 +122,12 @@ describe('PlaywrightExtractor integration', () => {
 
     expect(background).toBeDefined();
     expect(transformExtractionNode(background as ExtractionNode)).toMatchObject({
-      type: 'IMAGE',
-      image: {
+      type: 'FRAME',
+      fills: [{
+        type: 'IMAGE',
         src: `${fixtureServer.url}/resources/fixture-image.svg`,
-        backgroundSize: 'cover',
-      },
+        scaleMode: 'FILL',
+      }],
     });
   });
 

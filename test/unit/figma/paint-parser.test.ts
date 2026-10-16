@@ -1,6 +1,24 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseFigmaPaints } from '../../../src/figma/paint-parser.js';
+import {
+  extractSingleAbsoluteBackgroundImageUrl,
+  parseFigmaPaints,
+} from '../../../src/figma/paint-parser.js';
+
+describe('extractSingleAbsoluteBackgroundImageUrl', () => {
+  test('extracts the source from a declaration with one absolute URL', () => {
+    expect(extractSingleAbsoluteBackgroundImageUrl('url("https://example.com/images/hero.png")'))
+      .toBe('https://example.com/images/hero.png');
+  });
+
+  test.each([
+    ['an empty URL', 'url("")'],
+    ['a relative URL', 'url("images/hero.png")'],
+    ['an invalid URL', 'url("https://")'],
+  ])('omits the source for %s', (_, backgroundImage) => {
+    expect(extractSingleAbsoluteBackgroundImageUrl(backgroundImage)).toBeUndefined();
+  });
+});
 
 describe('parseFigmaPaints', () => {
   test('normalizes perceptible solid fills and borders to RGBA', () => {

@@ -523,7 +523,30 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test('uses IMAGE paints rather than SOLID paints for img and resolvable background image nodes', () => {
+  test('keeps an element with a CSS background image as a FRAME with its children and Auto Layout', () => {
+    const result = transformExtractionNode(node({
+      id: 'node-background-frame',
+      styles: {
+        display: 'flex',
+        'flex-direction': 'row',
+        'column-gap': '12px',
+        'background-image': 'url("https://example.com/images/hero.png")',
+      },
+      children: [node({ id: 'node-background-child' })],
+    }));
+
+    expect(result).toMatchObject({
+      id: 'node-background-frame',
+      type: 'FRAME',
+      layoutMode: 'HORIZONTAL',
+      itemSpacing: 12,
+      gap: 12,
+      children: [{ id: 'node-background-child', type: 'FRAME' }],
+    });
+    expect(result).not.toHaveProperty('image');
+  });
+
+  test('uses an IMAGE paint rather than a SOLID paint for an img node', () => {
     const result = transformExtractionNode(node({
       id: 'node-root',
       children: [
@@ -538,27 +561,16 @@ describe('transformExtractionNode', () => {
             objectFit: 'contain',
           },
         }),
-        node({
-          id: 'node-background',
-          styles: {
-            'background-image': 'url("https://example.com/images/hero.png")',
-            'background-size': 'cover',
-          },
-        }),
       ],
     }));
 
     const imageNodes = result.children.filter((child) => child.type === 'IMAGE');
 
-    expect(imageNodes).toHaveLength(2);
+    expect(imageNodes).toHaveLength(1);
     expect(imageNodes).toEqual([
       expect.objectContaining({
         id: 'node-img',
         fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FILL' }],
-      }),
-      expect.objectContaining({
-        id: 'node-background',
-        fills: [{ type: 'IMAGE', src: 'https://example.com/images/hero.png', scaleMode: 'FILL' }],
       }),
     ]);
     expect(imageNodes.flatMap((imageNode) => imageNode.fills ?? []))
@@ -590,7 +602,7 @@ describe('transformExtractionNode', () => {
     });
   });
 
-  test('maps a single resolvable background image with its known size', () => {
+  test('emits a CSS background IMAGE paint in a FRAME without image metadata', () => {
     const result = transformExtractionNode(node({
       tagName: 'div',
       styles: {
@@ -600,13 +612,25 @@ describe('transformExtractionNode', () => {
     }));
 
     expect(result).toMatchObject({
-      type: 'IMAGE',
+      type: 'FRAME',
       fills: [{ type: 'IMAGE', src: 'https://example.com/background.png', scaleMode: 'FILL' }],
-      image: {
-        src: 'https://example.com/background.png',
-        backgroundSize: 'cover',
-      },
     });
+    expect(result.image).toBeUndefined();
+  });
+
+  test('orders a CSS background IMAGE paint before its perceptible solid background paint', () => {
+    const result = transformExtractionNode(node({
+      tagName: 'section',
+      styles: {
+        'background-image': 'url("https://example.com/background.png")',
+        'background-color': 'rgb(17, 34, 51)',
+      },
+    }));
+
+    expect(result.fills).toEqual([
+      { type: 'IMAGE', src: 'https://example.com/background.png', scaleMode: 'FILL' },
+      { type: 'SOLID', color: { r: 0.067, g: 0.133, b: 0.2, a: 1 } },
+    ]);
   });
 
   test.each([
@@ -620,8 +644,28 @@ describe('transformExtractionNode', () => {
       styles: { 'background-image': backgroundImage, 'background-size': backgroundSize },
     }));
 
-    expect(result.type).toBe('IMAGE');
+    expect(result.type).toBe('FRAME');
     expect(result.image).toBeUndefined();
+  });
+
+  test.each([
+    ['an unresolvable URL', 'url("/images/hero.png")'],
+    ['multiple background images', 'url("https://example.com/first.png"), url("https://example.com/second.png")'],
+    ['a gradient', 'linear-gradient(rgb(255, 0, 0), rgb(0, 0, 255))'],
+  ])('keeps a %s background as a FRAME without inventing an IMAGE paint', (_, backgroundImage) => {
+    const result = transformExtractionNode(node({
+      tagName: 'section',
+      styles: {
+        'background-image': backgroundImage,
+        'background-color': 'rgb(17, 34, 51)',
+      },
+    }));
+
+    expect(result.type).toBe('FRAME');
+    expect(result.fills).toEqual([
+      { type: 'SOLID', color: { r: 0.067, g: 0.133, b: 0.2, a: 1 } },
+    ]);
+    expect(result.fills).not.toContainEqual(expect.objectContaining({ type: 'IMAGE' }));
   });
 
   test('preserves complete inline SVG markup with graphical attributes in the Figma node', () => {
@@ -903,7 +947,7 @@ describe('transformExtractionNode', () => {
     ['html', null, [], {}, 'FRAME'],
     ['svg', null, [], {}, 'FRAME'],
     ['img', null, [], {}, 'IMAGE'],
-    ['div', null, [], { 'background-image': 'url("https://example.com/background.png")' }, 'IMAGE'],
+    ['div', null, [], { 'background-image': 'url("https://example.com/background.png")' }, 'FRAME'],
     ['div', null, [], { 'background-image': 'none' }, 'FRAME'],
     ['div', 'Visible text', [], {}, 'TEXT'],
     ['div', '', [], {}, 'FRAME'],
@@ -1181,7 +1225,7 @@ describe('transformExtractionDocument', () => {
     };
 
     expect(transformExtractionDocument(extraction)).toMatchObject({
-      schemaVersion: '1.0',
+      schemaVersion: '1.1',
       source: {
         url: 'https://example.com/',
         viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },

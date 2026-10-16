@@ -115,11 +115,35 @@
           background-size: cover;
         }
         #background-image {
-         width: 64px;
-         height: 48px;
-         background-image: url("/resources/fixture-image.svg");
-         background-size: cover;
-       }
+          width: 64px;
+          height: 48px;
+          background-image: url("/resources/fixture-image.svg");
+          background-size: cover;
+        }
+        #css-background-frame {
+          display: flex;
+          flex-direction: row;
+          gap: 12px;
+          padding: 8px;
+          background-image: url("/resources/fixture-image.svg");
+          background-color: rgb(30, 60, 90);
+          background-size: cover;
+        }
+        #css-background-unresolvable {
+          width: 64px;
+          height: 48px;
+          background-image: url(var(--missing-background-image));
+        }
+        #css-background-multiple {
+          width: 64px;
+          height: 48px;
+          background-image: url("/resources/fixture-image.svg"), url("/resources/fixture-image.svg");
+        }
+        #css-background-gradient {
+          width: 64px;
+          height: 48px;
+          background-image: linear-gradient(rgb(30, 60, 90), rgb(90, 60, 30));
+        }
        #uniform-border {
          width: 120px;
          height: 48px;
@@ -203,9 +227,16 @@
          <div id="no-perceptible-background">No perceptible background fixture</div>
          <img id="resolvable-img-image" src="/resources/fixture-image.svg" alt="Resolvable img fixture">
           <div id="resolvable-background-image" role="img" aria-label="Resolvable background image fixture"></div>
-         <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
-         <div id="background-image" role="img" aria-label="Background image fixture"></div>
-         <div id="uniform-border">Uniform border fixture</div>
+          <img id="fixture-image" src="/resources/fixture-image.svg" alt="Fixture image">
+          <div id="background-image" role="img" aria-label="Background image fixture"></div>
+          <div id="css-background-frame">
+            <div id="css-background-frame-first-child">CSS background first child</div>
+            <div id="css-background-frame-second-child">CSS background second child</div>
+          </div>
+          <div id="css-background-unresolvable">Unresolvable CSS background fixture</div>
+          <div id="css-background-multiple">Multiple CSS backgrounds fixture</div>
+          <div id="css-background-gradient">Gradient CSS background fixture</div>
+          <div id="uniform-border">Uniform border fixture</div>
          <div id="per-side-borders">Per-side border fixture</div>
          <div id="multiple-shadows">Multiple shadow fixture</div>
          <div id="relative-geometry-parent">

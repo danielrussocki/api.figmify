@@ -15,7 +15,7 @@ import {
   createColorStyleCatalog,
   createTypographyStyleCatalog,
 } from './style-catalog.js';
-import { parseFigmaPaints } from './paint-parser.js';
+import { extractSingleAbsoluteBackgroundImageUrl, parseFigmaPaints } from './paint-parser.js';
 import { collectUsedFontAssets } from './font-assets.js';
 
 const EMPTY_RECT = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0 };
@@ -64,6 +64,9 @@ function mapExtractionNode(
   const layoutGrow = determineLayoutGrow(node.styles, parentHasAutoLayout);
   const paints = parseFigmaPaints(node.styles, type === 'TEXT');
   const image = imageData(node, type);
+  const backgroundImageSrc = type === 'FRAME'
+    ? extractSingleAbsoluteBackgroundImageUrl(node.styles['background-image'])
+    : undefined;
   const mapChild = (child: ExtractionNode): FigmaNode | undefined => {
     if (isExcludedFigmaTag(child.tagName)) {
       return undefined;
@@ -111,9 +114,14 @@ function mapExtractionNode(
     ...(layoutGrow === undefined ? {} : { layoutGrow }),
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
-    fills: image === undefined
-      ? paints.fills ?? []
-      : [{ type: 'IMAGE', src: image.src, scaleMode: 'FILL' }],
+    fills: image !== undefined
+      ? [{ type: 'IMAGE', src: image.src, scaleMode: 'FILL' }]
+      : [
+        ...(backgroundImageSrc === undefined
+          ? []
+          : [{ type: 'IMAGE' as const, src: backgroundImageSrc, scaleMode: 'FILL' as const }]),
+        ...(paints.fills ?? []),
+      ],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
     ...(paints.strokeWeight === undefined ? {} : { strokeWeight: paints.strokeWeight }),
     ...(paints.strokeWeights === undefined ? {} : { strokeWeights: paints.strokeWeights }),
@@ -204,20 +212,11 @@ function mapDirectTextRun(
   };
 }
 
-interface LegacyBackgroundImageData {
-  src: string;
-  backgroundSize: string;
-}
-
 function imageData(
   node: ExtractionNode,
   type: FigmaNodeType,
-): FigmaNode['image'] | LegacyBackgroundImageData | undefined {
+): FigmaNode['image'] | undefined {
   if (type !== 'IMAGE') return undefined;
-
-  if (node.tagName.toLowerCase() !== 'img') {
-    return backgroundImageData(node);
-  }
 
   const src = node.resources.find((resource) => resource.kind === 'image')?.url;
   const { naturalWidth, naturalHeight, objectFit } = node.layout ?? {};
@@ -229,38 +228,6 @@ function imageData(
   }
 
   return { src, naturalWidth, naturalHeight, objectFit };
-}
-
-function backgroundImageData(node: ExtractionNode): LegacyBackgroundImageData | undefined {
-  const src = singleAbsoluteBackgroundUrl(node.styles['background-image']);
-  const backgroundSize = knownBackgroundSize(node.styles['background-size']);
-
-  return src === undefined || backgroundSize === undefined ? undefined : { src, backgroundSize };
-}
-
-function singleAbsoluteBackgroundUrl(value: string | undefined): string | undefined {
-  if (value === undefined) return undefined;
-
-  const match = /^\s*url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]+))\s*\)\s*$/iu.exec(value);
-  const reference = match?.[1] ?? match?.[2] ?? match?.[3];
-  if (reference === undefined || reference.length === 0) return undefined;
-
-  try {
-    return new URL(reference).href;
-  } catch {
-    return undefined;
-  }
-}
-
-function knownBackgroundSize(value: string | undefined): string | undefined {
-  const normalized = value?.trim();
-  if (normalized === undefined || normalized.length === 0 || normalized.includes(',')) return undefined;
-
-  const lowerCase = normalized.toLowerCase();
-  if (['auto', 'normal', 'initial', 'inherit', 'unset', 'revert', 'revert-layer'].includes(lowerCase)
-    || /(^|\s)auto(\s|$)/u.test(lowerCase)) return undefined;
-
-  return normalized;
 }
 
 function isNaturalDimension(value: number | undefined): value is number {
@@ -672,7 +639,7 @@ function rgbaKey({ r, g, b, a }: { r: number; g: number; b: number; a: number })
 function determineFigmaNodeType(node: ExtractionNode): FigmaNodeType {
   const tagName = node.tagName.toLowerCase();
 
-  if (tagName === 'img' || hasRenderableBackgroundImage(node)) {
+  if (tagName === 'img') {
     return 'IMAGE';
   }
 
@@ -682,15 +649,6 @@ function determineFigmaNodeType(node: ExtractionNode): FigmaNodeType {
 
   return 'FRAME';
 }
-
-function hasRenderableBackgroundImage(node: ExtractionNode): boolean {
-  const backgroundImage = node.styles['background-image'];
-  if (backgroundImage === undefined) return false;
-
-  return [...backgroundImage.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)]
-    .some((match) => match[2]?.trim().length !== 0);
-}
-
 function isPureTextLeaf(node: ExtractionNode): boolean {
   return node.text !== null
     && node.text.trim().length > 0

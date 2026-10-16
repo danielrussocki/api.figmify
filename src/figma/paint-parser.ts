@@ -36,6 +36,21 @@ export function parseFigmaPaints(
   };
 }
 
+/** Returns the sole absolute URL declared by a CSS background-image value. */
+export function extractSingleAbsoluteBackgroundImageUrl(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+
+  const match = /^\s*url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]+))\s*\)\s*$/iu.exec(value);
+  const reference = match?.[1] ?? match?.[2] ?? match?.[3];
+  if (reference === undefined || reference.length === 0) return undefined;
+
+  try {
+    return new URL(reference).href;
+  } catch {
+    return undefined;
+  }
+}
+
 function parseStrokes(styles: Record<string, string>): Pick<FigmaPaintProperties, 'strokes' | 'strokeWeight' | 'strokeWeights'> {
   const sides = ['top', 'right', 'bottom', 'left'] as const;
   const strokes = sides.flatMap((side) => {

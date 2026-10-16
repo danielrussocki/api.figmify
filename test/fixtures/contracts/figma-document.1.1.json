@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "source": {
     "url": "https://example.com/",
     "viewport": { "width": 1920, "height": 1080, "deviceScaleFactor": 1 }
@@ -28,7 +28,10 @@
     "type": "FRAME",
     "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080, "top": 0, "left": 0 },
     "isVisible": true,
-    "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1, "a": 1 } }],
+    "fills": [
+      { "type": "IMAGE", "src": "https://example.com/hero-background.png", "scaleMode": "FILL" },
+      { "type": "SOLID", "color": { "r": 0.067, "g": 0.094, "b": 0.153, "a": 1 } }
+    ],
     "children": [
       {
         "id": "node-2",

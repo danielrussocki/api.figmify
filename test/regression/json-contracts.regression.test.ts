@@ -14,30 +14,29 @@ describe('JSON contract regression', () => {
     expect(validateExtractionDocumentV1(document)).toEqual([]);
   });
 
-  test('validates the representative FigmaDocument example against contract 1.0', async () => {
-    const document = await readJsonFixture('figma-document.1.0.json');
+  test('validates the representative FigmaDocument example against contract 1.1', async () => {
+    const document = await readJsonFixture('figma-document.1.1.json');
 
     expect(validateFigmaDocumentV1(document)).toEqual([]);
   });
 
-  test('validates a background IMAGE without undeterminable natural dimensions', async () => {
-    const document = await readJsonFixture('figma-document.1.0.json') as {
-      document: { children: unknown[] };
+  test('validates a FRAME with ordered CSS background IMAGE and SOLID paints', async () => {
+    const document = await readJsonFixture('figma-document.1.1.json') as {
+      schemaVersion: string;
+      document: {
+        type: string;
+        fills: unknown[];
+        image?: unknown;
+      };
     };
-    document.document.children.push({
-      id: 'node-background',
-      tag: 'section',
-      type: 'IMAGE',
-      rect: { x: 0, y: 0, width: 640, height: 360, top: 0, left: 0 },
-      relativeRect: { x: 0, y: 0, width: 640, height: 360, top: 0, left: 0 },
-      isVisible: true,
-      image: {
-        src: 'https://example.com/hero-background.png',
-        backgroundSize: 'cover',
-      },
-      children: [],
-    });
 
+    expect(document.schemaVersion).toBe('1.1');
+    expect(document.document.type).toBe('FRAME');
+    expect(document.document.fills).toEqual([
+      { type: 'IMAGE', src: 'https://example.com/hero-background.png', scaleMode: 'FILL' },
+      { type: 'SOLID', color: { r: 0.067, g: 0.094, b: 0.153, a: 1 } },
+    ]);
+    expect(document.document.image).toBeUndefined();
     expect(validateFigmaDocumentV1(document)).toEqual([]);
   });
 

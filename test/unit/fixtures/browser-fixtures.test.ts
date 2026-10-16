@@ -85,6 +85,33 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves FRAME CSS background paint scenarios', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(document).toContain('id="css-background-frame"');
+      expect(document).toContain('display: flex');
+      expect(document).toContain('flex-direction: row');
+      expect(document).toContain('gap: 12px');
+      expect(document).toContain('background-image: url("/resources/fixture-image.svg")');
+      expect(document).toContain('background-color: rgb(30, 60, 90)');
+      expect(document).toContain('id="css-background-frame-first-child"');
+      expect(document).toContain('id="css-background-frame-second-child"');
+      expect(document).toContain('id="css-background-unresolvable"');
+      expect(document).toContain('url(var(--missing-background-image))');
+      expect(document).toContain('id="css-background-multiple"');
+      expect(document).toContain('url("/resources/fixture-image.svg"), url("/resources/fixture-image.svg")');
+      expect(document).toContain('id="css-background-gradient"');
+      expect(document).toContain('linear-gradient');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serves visible elements and direct text with positive fractional opacity', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 

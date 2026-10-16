@@ -24,7 +24,7 @@ export function validateFigmaDocumentV1(value: unknown): string[] {
   if (document === undefined) return errors;
 
   keys(document, '$', ['schemaVersion', 'source', 'styles', 'assets', 'document'], [], errors);
-  literal(document.schemaVersion, '1.0', '$.schemaVersion', errors);
+  literal(document.schemaVersion, '1.1', '$.schemaVersion', errors);
   validateFigmaSource(document.source, '$.source', errors);
   validateFigmaCatalog(document.styles, '$.styles', errors);
   fontAssets(document.assets, '$.assets', errors);

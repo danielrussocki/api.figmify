@@ -30,7 +30,7 @@ describe('Figma document browser integration', () => {
     const document = await extractAndTransform();
 
     expect(document).toMatchObject({
-      schemaVersion: '1.0',
+      schemaVersion: '1.1',
       source: {
         url: `${fixtureServer.url}/browser-fixtures.html`,
         viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
@@ -134,9 +134,42 @@ describe('Figma document browser integration', () => {
       fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
     });
     expect(findNodeById(document.document, background.id)).toMatchObject({
-      type: 'IMAGE',
+      type: 'FRAME',
       fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
     });
+  });
+
+  test('maps a CSS background image to ordered FRAME fills while retaining its children', async () => {
+    shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+    const extraction = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
+    });
+    const rawFrame = requireExtractionNode(extraction.document, 'css-background-frame');
+    const source = `${fixtureServer.url}/resources/fixture-image.svg`;
+
+    expect(rawFrame.styles).toMatchObject({
+      'background-image': `url("${source}")`,
+      'background-color': 'rgb(30, 60, 90)',
+    });
+
+    const document = transformExtractionDocument(extraction);
+    const frame = findNodeById(document.document, rawFrame.id);
+
+    expect(frame).toMatchObject({
+      type: 'FRAME',
+      layoutMode: 'HORIZONTAL',
+      fills: [
+        { type: 'IMAGE', src: source, scaleMode: 'FILL' },
+        { type: 'SOLID', color: { r: 0.118, g: 0.235, b: 0.353, a: 1 } },
+      ],
+      children: [
+        { id: requireExtractionNode(rawFrame, 'css-background-frame-first-child').id },
+        { id: requireExtractionNode(rawFrame, 'css-background-frame-second-child').id },
+      ],
+    });
+    expect(frame).not.toHaveProperty('image');
   });
 
   test('preserves positive fractional opacity in raw extraction and mapped Figma nodes', async () => {

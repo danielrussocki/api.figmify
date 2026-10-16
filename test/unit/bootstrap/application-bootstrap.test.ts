@@ -87,7 +87,7 @@ describe('application bootstrap', () => {
     expect(figmaResponse.statusCode).toBe(200);
     expect(figmaResponse.headers['access-control-allow-origin']).toBe('*');
     expect(figmaResponse.json()).toMatchObject({
-      schemaVersion: '1.0',
+      schemaVersion: '1.1',
       source: {
         url: 'https://example.com/',
         viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },

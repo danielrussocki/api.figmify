@@ -77,11 +77,11 @@ describe('successful HTTP responses', () => {
     });
   });
 
-  test('GET /v1/figma returns a FigmaDocument v1 with the default viewport', async () => {
+  test('GET /v1/figma returns a FigmaDocument v1.1 with the default viewport', async () => {
     const document = await requestJson<FigmaDocument>('/v1/figma');
 
     expect(document).toMatchObject({
-      schemaVersion: '1.0',
+      schemaVersion: '1.1',
       source: {
         url: `${fixtureServer.url}/browser-fixtures.html`,
         viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
@@ -104,6 +104,29 @@ describe('successful HTTP responses', () => {
     expect(findNodesByTag(document.document, 'p').filter((node) => !node.isVisible)).toHaveLength(3);
   });
 
+  test('GET /v1/figma returns the v1.1 CSS background FRAME with ordered fills and children', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+    const source = `${fixtureServer.url}/resources/fixture-image.svg`;
+    const firstChild = findParentOfCharacters(document.document, 'CSS background first child');
+    const frame = firstChild === undefined ? undefined : findParentNode(document.document, firstChild);
+
+    expect(document.schemaVersion).toBe('1.1');
+    expect(frame).toMatchObject({
+      tag: 'div',
+      type: 'FRAME',
+      layoutMode: 'HORIZONTAL',
+      fills: [
+        { type: 'IMAGE', src: source, scaleMode: 'FILL' },
+        { type: 'SOLID', color: { r: 0.118, g: 0.235, b: 0.353, a: 1 } },
+      ],
+      children: [
+        { tag: 'div' },
+        { tag: 'div' },
+      ],
+    });
+    expect(frame).not.toHaveProperty('image');
+  });
+
   test('GET /v1/figma emits direct and styled text leaves in DOM order without duplication', async () => {
     const document = await requestJson<FigmaDocument>('/v1/figma');
     const textNodes = flattenNodes(document.document).filter((node) => node.type === 'TEXT');
@@ -115,18 +138,17 @@ describe('successful HTTP responses', () => {
     expect(textNodes.filter((node) => node.characters === 'Hello world again')).toHaveLength(0);
   });
 
-  test('GET /v1/figma returns resolvable background images, complete inline SVG, and used font assets', async () => {
+  test('GET /v1/figma returns CSS background paints, complete inline SVG, and used font assets', async () => {
     const document = await requestJson<FigmaDocument>('/v1/figma');
 
-    expect(flattenNodes(document.document).find((node) => node.image?.src === `${fixtureServer.url}/resources/fixture-image.svg`
-      && node.image !== undefined
-      && 'backgroundSize' in node.image
-      && node.image.backgroundSize === 'cover')).toMatchObject({
-      type: 'IMAGE',
-      image: {
-        src: `${fixtureServer.url}/resources/fixture-image.svg`,
-        backgroundSize: 'cover',
-      },
+    expect(flattenNodes(document.document).find((node) => node.tag === 'div'
+      && node.type === 'FRAME'
+      && node.fills?.some((fill) => fill.type === 'IMAGE'
+        && fill.src === `${fixtureServer.url}/resources/fixture-image.svg`))).toMatchObject({
+      type: 'FRAME',
+      fills: expect.arrayContaining([
+        { type: 'IMAGE', src: `${fixtureServer.url}/resources/fixture-image.svg`, scaleMode: 'FILL' },
+      ]),
     });
     expect(flattenNodes(document.document).find((node) => node.tag === 'svg' && node.svg?.includes('<circle'))).toMatchObject({
       type: 'FRAME',
@@ -145,6 +167,9 @@ describe('successful HTTP responses', () => {
     const transparentNode = findParentOfCharacters(document.document, 'No perceptible background fixture');
     const imageNodes = flattenNodes(document.document)
       .filter((node) => node.type === 'IMAGE' && node.image?.src === source);
+    const backgroundNodes = flattenNodes(document.document)
+      .filter((node) => node.type === 'FRAME'
+        && node.fills?.some((fill) => fill.type === 'IMAGE' && fill.src === source));
 
     expect(validateFigmaDocumentV1(document)).toEqual([]);
     expect(transparentNode?.fills).toEqual([]);
@@ -153,14 +178,15 @@ describe('successful HTTP responses', () => {
         image: expect.objectContaining({ naturalWidth: expect.any(Number) }),
         fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
       }),
-      expect.objectContaining({
-        image: { src: source, backgroundSize: 'cover' },
-        fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
-      }),
     ]));
     expect(imageNodes.flatMap((node) => node.fills ?? [])).toEqual(
       imageNodes.map(() => ({ type: 'IMAGE', src: source, scaleMode: 'FILL' })),
     );
+    expect(backgroundNodes).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        fills: expect.arrayContaining([{ type: 'IMAGE', src: source, scaleMode: 'FILL' }]),
+      }),
+    ]));
   });
 
   test('GET /v1/figma applies includeHidden to the hidden text subtree', async () => {
@@ -197,7 +223,7 @@ describe('successful HTTP responses', () => {
     expect(directText).toMatchObject({ opacity: 0.5, isVisible: true });
   });
 
-  test('GET /v1/figma returns a FigmaDocument v1 with the configured viewport', async () => {
+  test('GET /v1/figma returns a FigmaDocument v1.1 with the configured viewport', async () => {
     const document = await requestJson<FigmaDocument>('/v1/figma', {
       width: '1440',
       height: '900',
@@ -205,7 +231,7 @@ describe('successful HTTP responses', () => {
     });
 
     expect(document).toMatchObject({
-      schemaVersion: '1.0',
+      schemaVersion: '1.1',
       source: {
         viewport: { width: 1440, height: 900, deviceScaleFactor: 3 },
       },

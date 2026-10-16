@@ -47,7 +47,7 @@ describe('CreateFigmaDocumentUseCase', () => {
     const useCase = new CreateFigmaDocumentUseCase(extractor);
 
     await expect(useCase.execute(request)).resolves.toEqual({
-      schemaVersion: '1.0',
+      schemaVersion: '1.1',
       source: { url: request.url, viewport: request.viewport },
       styles: { colors: [], typographies: [] },
       assets: [],

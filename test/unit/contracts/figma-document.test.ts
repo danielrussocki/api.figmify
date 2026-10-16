@@ -206,7 +206,7 @@ test('models structured paints, uniform and side-specific strokes, shadows, and 
   >();
 });
 
-test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () => {
+test('models normalized TEXT runs, IMAGE paints, img metadata, inline SVG, and font assets', () => {
   const textAlign: FigmaTextAlign = 'CENTER';
   const textAutoResize: FigmaTextAutoResize = 'HEIGHT';
   const textStyles: FigmaTextStyle = {
@@ -245,7 +245,25 @@ test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () 
     type: 'IMAGE',
     rect: { x: 0, y: 0, width: 100, height: 40, top: 0, left: 0 },
     isVisible: true,
+    fills: [{ type: 'IMAGE', src: image.src, scaleMode: 'FILL' }],
     image,
+    children: [],
+  };
+  const backgroundFrame: FigmaNode = {
+    id: 'node-6',
+    tag: 'section',
+    type: 'FRAME',
+    rect: { x: 0, y: 40, width: 100, height: 40, top: 40, left: 0 },
+    isVisible: true,
+    fills: [{ type: 'IMAGE', src: 'https://example.com/background.png', scaleMode: 'FILL' }],
+    children: [],
+  };
+  const svgNode: FigmaNode = {
+    id: 'node-7',
+    tag: 'svg',
+    type: 'FRAME',
+    rect: { x: 0, y: 80, width: 100, height: 40, top: 80, left: 0 },
+    isVisible: true,
     svg: '<svg viewBox="0 0 1 1"></svg>',
     children: [],
   };
@@ -259,9 +277,11 @@ test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () 
   expectTypeOf(textStyles.textAlign).toEqualTypeOf<FigmaTextAlign>();
   expectTypeOf(textStyles.textAutoResize).toEqualTypeOf<FigmaTextAutoResize>();
   expectTypeOf(imageNode.image).toEqualTypeOf<FigmaElementImageData | undefined>();
+  expectTypeOf(imageNode.fills).toEqualTypeOf<FigmaFills | undefined>();
+  expectTypeOf(backgroundFrame.fills).toEqualTypeOf<FigmaFills | undefined>();
   expectTypeOf(image.naturalWidth).toEqualTypeOf<number>();
   expectTypeOf(image.naturalHeight).toEqualTypeOf<number>();
-  expectTypeOf(imageNode.svg).toEqualTypeOf<string | undefined>();
+  expectTypeOf(svgNode.svg).toEqualTypeOf<string | undefined>();
   expectTypeOf(asset.weights).toEqualTypeOf<number[]>();
   expectTypeOf(asset.url).toEqualTypeOf<string | undefined>();
 });
