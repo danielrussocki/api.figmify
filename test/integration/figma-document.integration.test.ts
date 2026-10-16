@@ -135,7 +135,7 @@ describe('Figma document browser integration', () => {
     });
     expect(findNodeById(document.document, background.id)).toMatchObject({
       type: 'FRAME',
-      fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }],
+      fills: [{ type: 'IMAGE', src: source, scaleMode: 'TILE' }],
     });
   });
 
@@ -161,7 +161,7 @@ describe('Figma document browser integration', () => {
       type: 'FRAME',
       layoutMode: 'HORIZONTAL',
       fills: [
-        { type: 'IMAGE', src: source, scaleMode: 'FILL' },
+        { type: 'IMAGE', src: source, scaleMode: 'TILE' },
         { type: 'SOLID', color: { r: 0.118, g: 0.235, b: 0.353, a: 1 } },
       ],
       children: [

@@ -627,15 +627,15 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 
 ## Modos de escala de pinturas de imagen
 
-- [ ] **T149. Ampliar el contrato tipado de pinturas `IMAGE` con los cuatro modos de escala.**
+- [x] **T149. Ampliar el contrato tipado de pinturas `IMAGE` con los cuatro modos de escala.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** el tipo de pintura `IMAGE` limita `scaleMode` a `"FILL" | "FIT" | "CROP" | "TILE"` y no permite otros valores.
 
-- [ ] **T150. Resolver el `scaleMode` de las imágenes `img` a partir de `object-fit`.**
+- [x] **T150. Resolver el `scaleMode` de las imágenes `img` a partir de `object-fit`.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** `cover` y `fill` producen `FILL`, `contain` y `scale-down` producen `FIT`, y `none` produce `CROP` en la pintura `IMAGE` de un `img`.
 
-- [ ] **T151. Resolver el `scaleMode` de una imagen CSS de fondo determinable.**
+- [x] **T151. Resolver el `scaleMode` de una imagen CSS de fondo determinable.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** un fondo que repite en algún eje produce `TILE`; sin repetición, `cover` produce `FILL`, `contain` produce `FIT` y `auto` o un tamaño explícito producen `CROP`, manteniendo el nodo como `FRAME`.
 

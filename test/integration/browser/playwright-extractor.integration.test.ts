@@ -126,7 +126,7 @@ describe('PlaywrightExtractor integration', () => {
       fills: [{
         type: 'IMAGE',
         src: `${fixtureServer.url}/resources/fixture-image.svg`,
-        scaleMode: 'FILL',
+        scaleMode: 'TILE',
       }],
     });
   });

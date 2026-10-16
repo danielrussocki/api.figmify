@@ -2,6 +2,7 @@ import type { DirectTextRun, ExtractionDocument, ExtractionNode } from '../contr
 import type {
   FigmaDocument,
   FigmaCounterAxisAlign,
+  FigmaImageScaleMode,
   FigmaLayoutMode,
   FigmaNode,
   FigmaNodeType,
@@ -115,11 +116,11 @@ function mapExtractionNode(
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     fills: image !== undefined
-      ? [{ type: 'IMAGE', src: image.src, scaleMode: 'FILL' }]
+      ? [{ type: 'IMAGE', src: image.src, scaleMode: imageScaleMode(image.objectFit) }]
       : [
         ...(backgroundImageSrc === undefined
           ? []
-          : [{ type: 'IMAGE' as const, src: backgroundImageSrc, scaleMode: 'FILL' as const }]),
+          : [{ type: 'IMAGE' as const, src: backgroundImageSrc, scaleMode: backgroundImageScaleMode(node.styles) }]),
         ...(paints.fills ?? []),
       ],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
@@ -232,6 +233,41 @@ function imageData(
 
 function isNaturalDimension(value: number | undefined): value is number {
   return value !== undefined && Number.isFinite(value) && value >= 0;
+}
+
+function imageScaleMode(objectFit: string): FigmaImageScaleMode {
+  switch (objectFit) {
+    case 'contain':
+    case 'scale-down':
+      return 'FIT';
+    case 'none':
+      return 'CROP';
+    case 'cover':
+    case 'fill':
+    default:
+      return 'FILL';
+  }
+}
+
+/** Maps the single supported CSS background image layer to a Figma scale mode. */
+function backgroundImageScaleMode(styles: Record<string, string>): FigmaImageScaleMode {
+  if (backgroundRepeats(styles['background-repeat'])) return 'TILE';
+
+  switch (styles['background-size']?.trim().toLowerCase()) {
+    case 'cover':
+      return 'FILL';
+    case 'contain':
+      return 'FIT';
+    default:
+      return 'CROP';
+  }
+}
+
+/** Reports whether the computed background repeat mode tiles on either axis. */
+function backgroundRepeats(value: string | undefined): boolean {
+  const keywords = value?.trim().toLowerCase().split(/\s+/u) ?? [];
+  return keywords.some((keyword) => keyword === 'repeat' || keyword === 'repeat-x'
+    || keyword === 'repeat-y' || keyword === 'round' || keyword === 'space');
 }
 
 /** Reconstructs the retained inline SVG tree without treating it as an asset. */

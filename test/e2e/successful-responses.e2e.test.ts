@@ -116,7 +116,7 @@ describe('successful HTTP responses', () => {
       type: 'FRAME',
       layoutMode: 'HORIZONTAL',
       fills: [
-        { type: 'IMAGE', src: source, scaleMode: 'FILL' },
+        { type: 'IMAGE', src: source, scaleMode: 'TILE' },
         { type: 'SOLID', color: { r: 0.118, g: 0.235, b: 0.353, a: 1 } },
       ],
       children: [
@@ -147,7 +147,7 @@ describe('successful HTTP responses', () => {
         && fill.src === `${fixtureServer.url}/resources/fixture-image.svg`))).toMatchObject({
       type: 'FRAME',
       fills: expect.arrayContaining([
-        { type: 'IMAGE', src: `${fixtureServer.url}/resources/fixture-image.svg`, scaleMode: 'FILL' },
+        { type: 'IMAGE', src: `${fixtureServer.url}/resources/fixture-image.svg`, scaleMode: 'TILE' },
       ]),
     });
     expect(flattenNodes(document.document).find((node) => node.tag === 'svg' && node.svg?.includes('<circle'))).toMatchObject({
@@ -184,7 +184,7 @@ describe('successful HTTP responses', () => {
     );
     expect(backgroundNodes).toEqual(expect.arrayContaining([
       expect.objectContaining({
-        fills: expect.arrayContaining([{ type: 'IMAGE', src: source, scaleMode: 'FILL' }]),
+        fills: expect.arrayContaining([{ type: 'IMAGE', src: source, scaleMode: 'TILE' }]),
       }),
     ]));
   });

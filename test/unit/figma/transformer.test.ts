@@ -570,7 +570,7 @@ describe('transformExtractionNode', () => {
     expect(imageNodes).toEqual([
       expect.objectContaining({
         id: 'node-img',
-        fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FILL' }],
+        fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FIT' }],
       }),
     ]);
     expect(imageNodes.flatMap((imageNode) => imageNode.fills ?? []))
@@ -592,7 +592,7 @@ describe('transformExtractionNode', () => {
 
     expect(result).toMatchObject({
       type: 'IMAGE',
-      fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FILL' }],
+      fills: [{ type: 'IMAGE', src: 'https://example.com/images/logo.png', scaleMode: 'FIT' }],
       image: {
         src: 'https://example.com/images/logo.png',
         naturalWidth: 240,
@@ -600,6 +600,29 @@ describe('transformExtractionNode', () => {
         objectFit: 'contain',
       },
     });
+  });
+
+  test.each([
+    ['cover', 'FILL'],
+    ['fill', 'FILL'],
+    ['contain', 'FIT'],
+    ['scale-down', 'FIT'],
+    ['none', 'CROP'],
+  ] as const)('maps img object-fit %s to IMAGE paint scaleMode %s', (objectFit, scaleMode) => {
+    const result = transformExtractionNode(node({
+      tagName: 'img',
+      resources: [{ kind: 'image', url: 'https://example.com/images/photo.png' }],
+      layout: {
+        rect: { x: 0, y: 0, width: 120, height: 80, top: 0, left: 0 },
+        naturalWidth: 240,
+        naturalHeight: 160,
+        objectFit,
+      },
+    }));
+
+    expect(result.fills).toEqual([
+      { type: 'IMAGE', src: 'https://example.com/images/photo.png', scaleMode },
+    ]);
   });
 
   test('emits a CSS background IMAGE paint in a FRAME without image metadata', () => {
@@ -618,6 +641,35 @@ describe('transformExtractionNode', () => {
     expect(result.image).toBeUndefined();
   });
 
+  test.each([
+    ['repeats horizontally', 'cover', 'repeat-x', 'TILE'],
+    ['repeats vertically', 'contain', 'repeat-y', 'TILE'],
+    ['repeats in both axes', 'auto', 'repeat', 'TILE'],
+    ['covers without repeating', 'cover', 'no-repeat', 'FILL'],
+    ['contains without repeating', 'contain', 'no-repeat', 'FIT'],
+    ['uses automatic size without repeating', 'auto', 'no-repeat', 'CROP'],
+    ['uses an explicit size without repeating', '160px 80px', 'no-repeat', 'CROP'],
+  ] as const)('maps a CSS background that %s to IMAGE paint scaleMode %s', (
+    _,
+    backgroundSize,
+    backgroundRepeat,
+    scaleMode,
+  ) => {
+    const result = transformExtractionNode(node({
+      tagName: 'div',
+      styles: {
+        'background-image': 'url("https://example.com/background.png")',
+        'background-size': backgroundSize,
+        'background-repeat': backgroundRepeat,
+      },
+    }));
+
+    expect(result).toMatchObject({
+      type: 'FRAME',
+      fills: [{ type: 'IMAGE', src: 'https://example.com/background.png', scaleMode }],
+    });
+  });
+
   test('orders a CSS background IMAGE paint before its perceptible solid background paint', () => {
     const result = transformExtractionNode(node({
       tagName: 'section',
@@ -628,7 +680,7 @@ describe('transformExtractionNode', () => {
     }));
 
     expect(result.fills).toEqual([
-      { type: 'IMAGE', src: 'https://example.com/background.png', scaleMode: 'FILL' },
+      { type: 'IMAGE', src: 'https://example.com/background.png', scaleMode: 'CROP' },
       { type: 'SOLID', color: { r: 0.067, g: 0.133, b: 0.2, a: 1 } },
     ]);
   });

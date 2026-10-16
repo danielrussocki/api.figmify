@@ -49,10 +49,12 @@ export interface FigmaSolidPaint {
   color: FigmaRgbaColor;
 }
 
+export type FigmaImageScaleMode = 'FILL' | 'FIT' | 'CROP' | 'TILE';
+
 export interface FigmaImagePaint {
   type: 'IMAGE';
   src: string;
-  scaleMode: 'FILL';
+  scaleMode: FigmaImageScaleMode;
 }
 
 export type FigmaPaint = FigmaSolidPaint | FigmaImagePaint;

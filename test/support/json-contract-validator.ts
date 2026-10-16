@@ -181,7 +181,7 @@ function paints(value: unknown, path: string, errors: string[], includesWeight: 
     if (allowsImage && entry.type === 'IMAGE') {
       keys(entry, paintPath, ['type', 'src', 'scaleMode'], [], errors);
       url(entry.src, `${paintPath}.src`, errors);
-      literal(entry.scaleMode, 'FILL', `${paintPath}.scaleMode`, errors);
+      enumValue(entry.scaleMode, new Set(['FILL', 'FIT', 'CROP', 'TILE']), `${paintPath}.scaleMode`, errors);
       return;
     }
 

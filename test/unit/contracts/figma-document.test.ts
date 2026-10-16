@@ -12,6 +12,7 @@ import type {
   FigmaFontAsset,
   FigmaElementImageData,
   FigmaImagePaint,
+  FigmaImageScaleMode,
   FigmaIsVisible,
   FigmaCounterAxisAlign,
   FigmaPadding,
@@ -204,6 +205,43 @@ test('models structured paints, uniform and side-specific strokes, shadows, and 
     | { topLeft: number; topRight: number; bottomRight: number; bottomLeft: number }
     | undefined
   >();
+});
+
+test('limits IMAGE paint scale modes to the four supported values', () => {
+  const fill: FigmaImagePaint = {
+    type: 'IMAGE',
+    src: 'https://example.com/fill.png',
+    scaleMode: 'FILL',
+  };
+  const fit: FigmaImagePaint = {
+    type: 'IMAGE',
+    src: 'https://example.com/fit.png',
+    scaleMode: 'FIT',
+  };
+  const crop: FigmaImagePaint = {
+    type: 'IMAGE',
+    src: 'https://example.com/crop.png',
+    scaleMode: 'CROP',
+  };
+  const tile: FigmaImagePaint = {
+    type: 'IMAGE',
+    src: 'https://example.com/tile.png',
+    scaleMode: 'TILE',
+  };
+
+  expectTypeOf<FigmaImageScaleMode>().toEqualTypeOf<'FILL' | 'FIT' | 'CROP' | 'TILE'>();
+  expectTypeOf(fill.scaleMode).toEqualTypeOf<FigmaImageScaleMode>();
+  expectTypeOf(fit.scaleMode).toEqualTypeOf<FigmaImageScaleMode>();
+  expectTypeOf(crop.scaleMode).toEqualTypeOf<FigmaImageScaleMode>();
+  expectTypeOf(tile.scaleMode).toEqualTypeOf<FigmaImageScaleMode>();
+
+  const unsupported: FigmaImagePaint = {
+    type: 'IMAGE',
+    src: 'https://example.com/unsupported.png',
+    // @ts-expect-error Unsupported image paint scale modes must be rejected.
+    scaleMode: 'STRETCH',
+  };
+  expectTypeOf(unsupported).toEqualTypeOf<FigmaImagePaint>();
 });
 
 test('models normalized TEXT runs, IMAGE paints, img metadata, inline SVG, and font assets', () => {
