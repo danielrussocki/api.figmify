@@ -564,3 +564,9 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T134. Ejecutar la regresión final de conservación de opacidad.**
   - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
   - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las pruebas de opacidad quedan incluidas en la suite y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.
+
+## Acceso desde el plugin de Figma
+
+- [x] **T135. Habilitar CORS para el consumo de la API desde el plugin de Figma.**
+  - **RF:** RF-1, RF-4.
+  - **Hecho cuando:** las respuestas de `/v1/extract` y `/v1/figma`, incluidas las respuestas de error normalizadas, incluyen el encabezado `Access-Control-Allow-Origin: *`; las pruebas HTTP verifican el encabezado sin añadir persistencia ni dependencias no justificadas.

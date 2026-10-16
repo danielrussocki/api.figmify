@@ -5,6 +5,7 @@ import { CreateFigmaDocumentUseCase } from '../application/create-figma-document
 import { ExtractDocumentUseCase } from '../application/extract-document/extract-document.js';
 import { PlaywrightExtractor } from '../browser/playwright-extractor.js';
 import { registerApplicationErrorHandler } from '../http/error-handler/application-error-handler.js';
+import { registerCors } from '../http/cors/cors.js';
 import { registerExtractRoute } from '../http/routes/extract-route.js';
 import { registerFigmaRoute } from '../http/routes/figma-route.js';
 import type { ExtractionPort } from '../contracts/extraction/extraction-port.js';
@@ -33,6 +34,7 @@ export async function createApplication(
   const createFigmaDocument = new CreateFigmaDocumentUseCase(extractor);
   const application = Fastify();
 
+  registerCors(application);
   registerApplicationErrorHandler(application);
   registerExtractRoute(application, extractDocument);
   registerFigmaRoute(application, createFigmaDocument);

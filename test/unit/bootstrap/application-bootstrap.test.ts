@@ -28,11 +28,13 @@ describe('application bootstrap', () => {
 
     expect(launchBrowser).toHaveBeenCalledOnce();
     expect(extractResponse.statusCode).toBe(400);
+    expect(extractResponse.headers['access-control-allow-origin']).toBe('*');
     expect(extractResponse.json()).toEqual({
       code: 'INVALID_REQUEST',
       message: 'The url query parameter must be an absolute HTTP or HTTPS URL.',
     });
     expect(figmaResponse.statusCode).toBe(400);
+    expect(figmaResponse.headers['access-control-allow-origin']).toBe('*');
     expect(figmaResponse.json()).toEqual({
       code: 'INVALID_REQUEST',
       message: 'The url query parameter must be an absolute HTTP or HTTPS URL.',
@@ -80,8 +82,10 @@ describe('application bootstrap', () => {
     ]);
 
     expect(extractResponse.statusCode).toBe(200);
+    expect(extractResponse.headers['access-control-allow-origin']).toBe('*');
     expect(extractResponse.json()).toEqual(extractionDocument);
     expect(figmaResponse.statusCode).toBe(200);
+    expect(figmaResponse.headers['access-control-allow-origin']).toBe('*');
     expect(figmaResponse.json()).toMatchObject({
       schemaVersion: '1.0',
       source: {
