@@ -6,12 +6,12 @@ API HTTP que renderiza páginas web públicas y transforma su información visua
 
 ## Resumen general
 
-Figmify API recibe una URL pública HTTP(S), la carga con un navegador controlado y espera el evento `load` más 30 segundos. Después devuelve una de estas representaciones versionadas (`schemaVersion: "1.0"`):
+Figmify API recibe una URL pública HTTP(S), la carga con un navegador controlado y espera el evento `load` más 30 segundos. Después devuelve una de estas representaciones versionadas:
 
 | Endpoint | Propósito |
 | --- | --- |
-| `GET /v1/extract` | Expone el árbol del documento con atributos permitidos, recursos, texto, estilos computados, pseudoelementos, layout y Shadow DOM abierto. |
-| `GET /v1/figma` | Convierte la extracción en un esquema propio para Figma, con nodos `FRAME`, `TEXT` e `IMAGE`, geometría, Auto Layout, pinturas, efectos y catálogos reutilizables. |
+| `GET /v1/extract` | Expone el árbol del documento con atributos permitidos, recursos, texto, estilos computados, pseudoelementos, layout y Shadow DOM abierto (`schemaVersion: "1.0"`). |
+| `GET /v1/figma` | Convierte la extracción en un esquema propio para Figma, con nodos `FRAME`, `TEXT` e `IMAGE`, geometría, Auto Layout, pinturas, efectos y catálogos reutilizables (`schemaVersion: "1.1"`). |
 
 La API está dirigida a:
 
@@ -19,6 +19,8 @@ La API está dirigida a:
 - Diseñadores y desarrolladores que desean inspeccionar estilos computados de sitios públicos.
 
 Las respuestas y errores de la API se entregan en inglés. Esta documentación se mantiene en español.
+
+Todas las respuestas de la API, incluidas las de error, envían `Access-Control-Allow-Origin: *`, por lo que un plugin de Figma u otro cliente web puede consumir los endpoints sin configurar un proxy CORS.
 
 ## Stack tecnológico
 
@@ -112,7 +114,7 @@ src/
   browser/           Adaptador Playwright, serialización, layout y estilos visuales
   contracts/         Tipos de extracción, Figma, errores y puertos
   figma/             Transformación de nodos, pinturas, fuentes y catálogos
-  http/              Rutas, esquemas de consulta y traductor de errores
+  http/              Rutas, esquemas de consulta, CORS y traductor de errores
   security/          Política de URLs públicas
   main.ts            Arranque y validación de HOST/PORT
 test/
@@ -172,7 +174,7 @@ Los valores de opacidad fraccionaria se conservan como texto en `styles.opacity`
 
 ### `GET /v1/figma`
 
-Devuelve un `FigmaDocument` compacto para su interpretación por un plugin; no es una respuesta nativa de la API de Figma. El árbol excluye etiquetas no renderizables o de metadatos y representa nodos aplicables como `FRAME`, `TEXT` o `IMAGE`.
+Devuelve un `FigmaDocument` `1.1` compacto para su interpretación por un plugin; no es una respuesta nativa de la API de Figma. El árbol excluye etiquetas no renderizables o de metadatos y representa nodos aplicables como `FRAME`, `TEXT` o `IMAGE`.
 
 Acepta los mismos parámetros de `/v1/extract` y añade:
 
@@ -181,6 +183,8 @@ Acepta los mismos parámetros de `/v1/extract` y añade:
 | `includeHidden` | No | Literal `true` o `false`; predeterminado `false`. |
 
 Con `includeHidden=false`, se eliminan los nodos no visibles y sus descendientes. Con `true`, se incluyen con `isVisible: false`. La respuesta incluye geometría absoluta y relativa, estilos compactos, Auto Layout para flex/grid, rellenos, bordes, sombras, imágenes, SVG inline y catálogos de colores y tipografías usados por nodos visibles incluidos.
+
+Un elemento `img` se representa como `IMAGE` y conserva sus metadatos en `image`. Un contenedor con una única URL absoluta determinable en `background-image` continúa siendo `FRAME`; su fondo se expresa en `fills` como una pintura `IMAGE`, por delante de cualquier relleno sólido, para no perder hijos ni propiedades de layout. Fondos con varias imágenes, gradientes o URLs no determinables no generan pinturas de imagen.
 
 ### Errores
 
@@ -203,7 +207,7 @@ Los errores no incluyen resultados parciales y tienen este formato:
 
 ## Tipado de respuestas
 
-Los contratos TypeScript están en `src/contracts/` y ambos documentos usan `schemaVersion: "1.0"`.
+Los contratos TypeScript están en `src/contracts/`. La extracción usa `schemaVersion: "1.0"` y el documento para Figma usa `schemaVersion: "1.1"`.
 
 ```ts
 type DocumentRect = {
@@ -242,7 +246,7 @@ type ExtractionNode = {
 
 ```ts
 type FigmaDocument = {
-  schemaVersion: '1.0';
+  schemaVersion: '1.1';
   source: { url: string; viewport: { width: number; height: number; deviceScaleFactor: 1 | 2 | 3 } };
   styles: { colors: ColorStyle[]; typographies: TypographyStyle[] };
   assets: Array<{ family: string; weights: number[]; url?: string }>;
@@ -257,7 +261,7 @@ type FigmaNode = {
   relativeRect?: DocumentRect;
   isVisible: boolean;
   opacity?: number;
-  fills?: Array<{ type: 'SOLID'; color: Rgba } | { type: 'IMAGE'; src: string; scaleMode: 'FILL' }>;
+  fills: Array<{ type: 'SOLID'; color: Rgba } | { type: 'IMAGE'; src: string; scaleMode: 'FILL' }>;
   characters?: string;
   children: FigmaNode[];
 };
@@ -265,7 +269,7 @@ type FigmaNode = {
 type Rgba = { r: number; g: number; b: number; a: number };
 ```
 
-En `/v1/figma`, `rect` está en coordenadas del documento y `relativeRect` se calcula respecto al rectángulo de su padre representado. Los valores se expresan como números en píxeles CSS. Los colores sólidos usan canales RGBA normalizados de `0` a `1` y los catálogos globales solo contienen recursos perceptibles referenciados por nodos visibles incluidos.
+En `/v1/figma`, `rect` está en coordenadas del documento y `relativeRect` se calcula respecto al rectángulo de su padre representado. Los valores se expresan como números en píxeles CSS. Los colores sólidos usan canales RGBA normalizados de `0` a `1` y los catálogos globales solo contienen recursos perceptibles referenciados por nodos visibles incluidos. `fills` siempre se emite: es `[]` cuando no existe un relleno perceptible; cuando hay varias pinturas se ordenan de primer plano a fondo.
 
 ## Limitaciones
 
