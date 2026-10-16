@@ -8,7 +8,7 @@ import { registerFigmaRoute } from '../../../../src/http/routes/figma-route.js';
 const applications = new Set<ReturnType<typeof Fastify>>();
 
 const figmaDocument: FigmaDocument = {
-  schemaVersion: '1.0',
+  schemaVersion: '1.1',
   source: {
     url: 'https://example.com/',
     viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },

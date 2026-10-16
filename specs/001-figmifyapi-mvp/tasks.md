@@ -570,3 +570,57 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
 - [x] **T135. Habilitar CORS para el consumo de la API desde el plugin de Figma.**
   - **RF:** RF-1, RF-4.
   - **Hecho cuando:** las respuestas de `/v1/extract` y `/v1/figma`, incluidas las respuestas de error normalizadas, incluyen el encabezado `Access-Control-Allow-Origin: *`; las pruebas HTTP verifican el encabezado sin añadir persistencia ni dependencias no justificadas.
+
+## Fondos CSS como pinturas de `FRAME` en Figma v1.1
+
+- [ ] **T136. Versionar el contrato tipado de `FigmaDocument` a `1.1`.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** los tipos de contrato aceptan exclusivamente `schemaVersion: "1.1"` para la salida Figma y eliminan los metadatos `image` específicos de fondos CSS.
+
+- [ ] **T137. Actualizar las pruebas unitarias de tipos del contrato Figma v1.1.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas de tipos verifican `schemaVersion: "1.1"`, pinturas `IMAGE` y que `image` solo representa los metadatos aplicables a `img`.
+
+- [ ] **T138. Clasificar como `FRAME` los elementos con imagen CSS de fondo.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un elemento que no es `img` conserva `type: "FRAME"` aunque su `background-image` tenga una URL, y sus hijos y propiedades de Auto Layout se siguen mapeando.
+
+- [ ] **T139. Extraer una única URL absoluta determinable de `background-image` para usarla como pintura.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** una declaración con una sola `url(...)` absoluta produce su URL de pintura y las URLs vacías, relativas o inválidas no producen fuente de imagen.
+
+- [ ] **T140. Emitir la pintura `IMAGE` de un fondo CSS en los `fills` del `FRAME`.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** un `FRAME` con una única imagen CSS de fondo determinable devuelve `{ "type": "IMAGE", "src": "<URL absoluta>", "scaleMode": "FILL" }` en `fills` y no duplica esos datos en `image`.
+
+- [ ] **T141. Componer las pinturas de fondo CSS en orden de primer plano a fondo.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** un `FRAME` con imagen CSS y color de fondo perceptibles devuelve primero la pintura `IMAGE` y después la pintura `SOLID`, sin sustituir ninguna de las dos.
+
+- [ ] **T142. Omitir de forma segura pinturas de fondos CSS ambiguos o no soportados.**
+  - **RF:** RF-5.
+  - **Hecho cuando:** fondos con URL no resoluble, varias imágenes o gradientes permanecen como `FRAME` y no emiten una pintura `IMAGE` inventada.
+
+- [ ] **T143. Crear fixtures de navegador para fondos CSS de un `FRAME`.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** las fixtures incluyen un contenedor con imagen y color de fondo, hijos y Auto Layout, y casos separados para fondo no resoluble, múltiple y gradiente.
+
+- [ ] **T144. Añadir pruebas unitarias del mapeo de fondos CSS a `FRAME` y `fills`.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** las pruebas verifican el tipo `FRAME`, preservación de hijos, pintura `IMAGE`, orden `IMAGE`/`SOLID`, ausencia de `image` y omisión segura de casos ambiguos.
+
+- [ ] **T145. Actualizar el fixture y la validación de regresión del contrato Figma a v1.1.**
+  - **RF:** RF-3, RF-5.
+  - **Hecho cuando:** el ejemplo JSON de contrato declara `schemaVersion: "1.1"` y la validación acepta un `FRAME` con pinturas `IMAGE` y `SOLID` ordenadas.
+
+- [ ] **T146. Añadir una prueba de integración Playwright para fondos CSS como pinturas.**
+  - **RF:** RF-2, RF-3, RF-5.
+  - **Hecho cuando:** la extracción de la fixture conserva los estilos de fondo y su transformación produce el `FRAME` esperado con fills ordenados e hijos incluidos.
+
+- [ ] **T147. Añadir una prueba E2E de `/v1/figma` para `FigmaDocument` v1.1.**
+  - **RF:** RF-1, RF-3, RF-5.
+  - **Hecho cuando:** una solicitud HTTP real devuelve `schemaVersion: "1.1"` y valida el `FRAME` de la fixture con sus pinturas de fondo y descendientes.
+
+- [ ] **T148. Ejecutar la regresión final del contrato Figma v1.1.**
+  - **RF:** RF-1, RF-2, RF-3, RF-4, RF-5.
+  - **Hecho cuando:** `pnpm test` y `pnpm typecheck` pasan, las regresiones de contratos validan Figma v1.1 y la revisión confirma que no se añadieron persistencia ni dependencias sin justificar.

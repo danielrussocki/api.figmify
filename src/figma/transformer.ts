@@ -120,7 +120,7 @@ function mapExtractionNode(
     ...(paints.effects === null ? {} : { effects: paints.effects }),
     ...(paints.cornerRadius === undefined ? {} : { cornerRadius: paints.cornerRadius }),
     ...(paints.cornerRadii === undefined ? {} : { cornerRadii: paints.cornerRadii }),
-    ...(image === undefined ? {} : { image }),
+    ...(image === undefined ? {} : { image: image as FigmaNode['image'] }),
     ...(node.tagName.toLowerCase() === 'svg' ? { svg: node.svg ?? serializeInlineSvg(node) } : {}),
     ...(type === 'TEXT' ? { characters: node.text as string } : {}),
     ...(textStyle === undefined ? {} : { styles: textStyle }),
@@ -204,7 +204,15 @@ function mapDirectTextRun(
   };
 }
 
-function imageData(node: ExtractionNode, type: FigmaNodeType): FigmaNode['image'] | undefined {
+interface LegacyBackgroundImageData {
+  src: string;
+  backgroundSize: string;
+}
+
+function imageData(
+  node: ExtractionNode,
+  type: FigmaNodeType,
+): FigmaNode['image'] | LegacyBackgroundImageData | undefined {
   if (type !== 'IMAGE') return undefined;
 
   if (node.tagName.toLowerCase() !== 'img') {
@@ -223,20 +231,11 @@ function imageData(node: ExtractionNode, type: FigmaNodeType): FigmaNode['image'
   return { src, naturalWidth, naturalHeight, objectFit };
 }
 
-/**
- * Retains background image data only when the computed declarations identify a
- * single, absolute source and an unambiguous size. Relative declarations have
- * already been resolved by the browser when computed styles are extracted.
- */
-function backgroundImageData(node: ExtractionNode): FigmaNode['image'] | undefined {
+function backgroundImageData(node: ExtractionNode): LegacyBackgroundImageData | undefined {
   const src = singleAbsoluteBackgroundUrl(node.styles['background-image']);
   const backgroundSize = knownBackgroundSize(node.styles['background-size']);
 
-  if (src === undefined || backgroundSize === undefined) {
-    return undefined;
-  }
-
-  return { src, backgroundSize };
+  return src === undefined || backgroundSize === undefined ? undefined : { src, backgroundSize };
 }
 
 function singleAbsoluteBackgroundUrl(value: string | undefined): string | undefined {
@@ -255,15 +254,11 @@ function singleAbsoluteBackgroundUrl(value: string | undefined): string | undefi
 
 function knownBackgroundSize(value: string | undefined): string | undefined {
   const normalized = value?.trim();
-  if (normalized === undefined || normalized.length === 0 || normalized.includes(',')) {
-    return undefined;
-  }
+  if (normalized === undefined || normalized.length === 0 || normalized.includes(',')) return undefined;
 
   const lowerCase = normalized.toLowerCase();
   if (['auto', 'normal', 'initial', 'inherit', 'unset', 'revert', 'revert-layer'].includes(lowerCase)
-    || /(^|\s)auto(\s|$)/u.test(lowerCase)) {
-    return undefined;
-  }
+    || /(^|\s)auto(\s|$)/u.test(lowerCase)) return undefined;
 
   return normalized;
 }
@@ -627,7 +622,7 @@ export function transformExtractionDocument(
     .filter((color) => referencedNodeIds.solidFillKeys.has(rgbaKey(color.rgba)));
   const typographies = createTypographyStyleCatalog(extraction.document, referencedNodeIds.typographies);
   return {
-    schemaVersion: '1.0',
+    schemaVersion: '1.1',
     source: {
       url: extraction.source.url,
       viewport: { ...extraction.source.viewport },

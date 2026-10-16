@@ -10,7 +10,7 @@ import type {
   FigmaInnerShadowEffect,
   FigmaFills,
   FigmaFontAsset,
-  FigmaImageData,
+  FigmaElementImageData,
   FigmaImagePaint,
   FigmaIsVisible,
   FigmaCounterAxisAlign,
@@ -223,7 +223,7 @@ test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () 
     naturalWidth: 1600,
     naturalHeight: 900,
     objectFit: 'cover',
-  } satisfies FigmaImageData;
+  } satisfies FigmaElementImageData;
   const asset: FigmaFontAsset = {
     family: 'Inter',
     weights: [400, 700],
@@ -258,31 +258,12 @@ test('models normalized TEXT runs, IMAGE data, inline SVG, and font assets', () 
   expectTypeOf(textStyles.letterSpacing).toEqualTypeOf<number>();
   expectTypeOf(textStyles.textAlign).toEqualTypeOf<FigmaTextAlign>();
   expectTypeOf(textStyles.textAutoResize).toEqualTypeOf<FigmaTextAutoResize>();
-  expectTypeOf(imageNode.image).toEqualTypeOf<FigmaImageData | undefined>();
+  expectTypeOf(imageNode.image).toEqualTypeOf<FigmaElementImageData | undefined>();
   expectTypeOf(image.naturalWidth).toEqualTypeOf<number>();
   expectTypeOf(image.naturalHeight).toEqualTypeOf<number>();
   expectTypeOf(imageNode.svg).toEqualTypeOf<string | undefined>();
   expectTypeOf(asset.weights).toEqualTypeOf<number[]>();
   expectTypeOf(asset.url).toEqualTypeOf<string | undefined>();
-});
-
-test('models resolved background IMAGE data without natural dimensions', () => {
-  const image = {
-    src: 'https://example.com/hero-background.png',
-    backgroundSize: 'cover',
-  } satisfies FigmaImageData;
-  const imageNode: FigmaNode = {
-    id: 'node-6',
-    tag: 'section',
-    type: 'IMAGE',
-    rect: { x: 0, y: 0, width: 100, height: 40, top: 0, left: 0 },
-    isVisible: true,
-    image,
-    children: [],
-  };
-
-  expectTypeOf(image.backgroundSize).toEqualTypeOf<string>();
-  expectTypeOf(imageNode.image).toEqualTypeOf<FigmaImageData | undefined>();
 });
 
 test('models the versioned Figma document contract and reusable style catalogs', () => {
@@ -328,7 +309,7 @@ test('models the versioned Figma document contract and reusable style catalogs',
   };
 
   const document: FigmaDocument = {
-    schemaVersion: '1.0',
+    schemaVersion: '1.1',
     source: {
       url: 'https://example.com/',
       viewport,
@@ -338,7 +319,7 @@ test('models the versioned Figma document contract and reusable style catalogs',
     document: node,
   };
 
-  expectTypeOf(document.schemaVersion).toEqualTypeOf<'1.0'>();
+  expectTypeOf(document.schemaVersion).toEqualTypeOf<'1.1'>();
   expectTypeOf(document.source.viewport).toEqualTypeOf<Viewport>();
   expectTypeOf(document.styles.colors).toEqualTypeOf<ColorStyle[]>();
   expectTypeOf(document.styles.typographies).toEqualTypeOf<TypographyStyle[]>();

@@ -1,6 +1,6 @@
 import type { ResourceReference, Viewport } from '../extraction/extraction-document.js';
 
-export type FigmaSchemaVersion = '1.0';
+export type FigmaSchemaVersion = '1.1';
 
 export interface FigmaRect {
   x: number;
@@ -154,15 +154,6 @@ export interface FigmaElementImageData {
   objectFit: string;
 }
 
-/** Rendered source data for an IMAGE node originating from a CSS background. */
-export interface FigmaBackgroundImageData {
-  src: string;
-  backgroundSize: string;
-}
-
-/** Rendered source data preserved for an IMAGE node. */
-export type FigmaImageData = FigmaElementImageData | FigmaBackgroundImageData;
-
 /** A font family used by included text runs, optionally linked to its source. */
 export interface FigmaFontAsset {
   family: string;
@@ -196,7 +187,8 @@ export interface FigmaNode {
   cornerRadii?: FigmaCornerRadii;
   characters?: string;
   styles?: FigmaTextStyle;
-  image?: FigmaImageData;
+  /** Rendered source data preserved only for an IMAGE node originating from an img element. */
+  image?: FigmaElementImageData;
   svg?: string;
   children: FigmaNode[];
 }
