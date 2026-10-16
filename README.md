@@ -84,7 +84,7 @@ Las dependencias de producción son Fastify y Playwright. TypeScript, `tsx`, Vit
 
 ## Variables de entorno
 
-`HOST` y `PORT` son las únicas variables que configuran el listener HTTP. Su validación ocurre antes de abrir el puerto.
+`HOST` y `PORT` son las únicas variables que configuran el listener HTTP. Su validación ocurre antes de abrir el puerto. `NODE_ENV` no configura el listener: solo determina la política de direcciones de destino.
 
 | Variable | Predeterminado | Valor válido | Uso |
 | --- | --- | --- | --- |
@@ -155,7 +155,11 @@ Consideraciones de navegación:
 - No se permiten redirecciones HTTP, `meta refresh` ni navegación JavaScript del documento principal.
 - Los recursos secundarios que fallen o se redirijan no bloquean por sí solos la extracción.
 - No se atraviesan `iframe` ni Shadow DOM cerrado. Sí se serializa Shadow DOM abierto.
-- La API no establece un tiempo máximo total: una página que no complete `load` no genera extracción.
+- Tras una navegación principal satisfactoria, espera `load` y 30 segundos antes de serializar. La API no define un límite total propio para la extracción; los límites operativos del navegador pueden terminar una navegación que no progrese.
+
+### Entorno de renderizado reproducible
+
+Además del viewport solicitado, cada extracción crea un contexto aislado de Chromium con valores fijos: locale `en-US`, zona horaria `UTC`, esquema claro, movimiento y contraste `no-preference`, y un user agent de escritorio Chromium. No hay parámetros para cambiar estos valores. `/v1/extract` devuelve los valores aplicables en `source.environment`; `/v1/figma` conserva la URL y el viewport de origen.
 
 ## Endpoints principales
 
@@ -182,9 +186,11 @@ Acepta los mismos parámetros de `/v1/extract` y añade:
 | --- | --- | --- |
 | `includeHidden` | No | Literal `true` o `false`; predeterminado `false`. |
 
-Con `includeHidden=false`, se eliminan los nodos no visibles y sus descendientes. Con `true`, se incluyen con `isVisible: false`. La respuesta incluye geometría absoluta y relativa, estilos compactos, Auto Layout para flex/grid, rellenos, bordes, sombras, imágenes, SVG inline y catálogos de colores y tipografías usados por nodos visibles incluidos.
+Con `includeHidden=false`, se eliminan los nodos no visibles y sus descendientes. Con `true`, se incluyen con `isVisible: false`. La visibilidad considera `display`, `visibility`, `hidden`, opacidad nula, caja sin tamaño y `offsetParent` cuando corresponde; no invalida indebidamente la raíz, SVG ni elementos `fixed` con caja renderizada.
 
-Un elemento `img` se representa como `IMAGE` y conserva sus metadatos en `image`. Un contenedor con una única URL absoluta determinable en `background-image` continúa siendo `FRAME`; su fondo se expresa en `fills` como una pintura `IMAGE`, por delante de cualquier relleno sólido, para no perder hijos ni propiedades de layout. Fondos con varias imágenes, gradientes o URLs no determinables no generan pinturas de imagen.
+La respuesta incluye geometría absoluta y relativa, estilos tipográficos normalizados, Auto Layout para flex/grid, rellenos, bordes, sombras, radios, imágenes, SVG inline y catálogos de colores y tipografías usados por nodos visibles incluidos. Los elementos de metadatos o no renderizables (`head`, `meta`, `title`, `script`, `link`, `style`, `base`, `template` y `noscript`) se excluyen. Las ejecuciones de texto directo se reconstruyen entre sus hermanos de elemento como nodos `TEXT` hoja; un contenedor no duplica el texto de sus descendientes.
+
+Un elemento `img` se representa como `IMAGE`; cuando sus mediciones están disponibles conserva `src`, dimensiones naturales y `objectFit` en `image`. Sus pinturas usan `scaleMode` `FILL`, `FIT` o `CROP`, según `object-fit`. Un contenedor con una única URL absoluta determinable en `background-image` continúa siendo `FRAME`; su fondo se expresa en `fills` como una pintura `IMAGE`, por delante de cualquier relleno sólido, para no perder hijos ni propiedades de layout. Para ese fondo, la repetición produce `TILE`; `cover` produce `FILL`, `contain` `FIT` y los demás tamaños `CROP`. Fondos con varias imágenes, gradientes o URLs no determinables no generan pinturas de imagen.
 
 ### Errores
 
@@ -226,6 +232,7 @@ type ExtractionDocument = {
     viewport: { width: number; height: number; deviceScaleFactor: 1 | 2 | 3 };
     environment: { locale: string; timezone: string; colorScheme: 'light'; reducedMotion: 'no-preference' };
   };
+  fontFaceSources?: Array<{ family: string; weight: number; url: string }>;
   document: ExtractionNode;
 };
 
@@ -235,9 +242,17 @@ type ExtractionNode = {
   attributes: Record<string, string>;
   resources: Array<{ kind: 'image' | 'media' | 'stylesheet'; url: string }>;
   text: string | null;
-  layout?: { rect: DocumentRect };
+  layout?: {
+    rect: DocumentRect;
+    offsetParentId?: string;
+    hasOffsetParent?: boolean;
+    naturalWidth?: number;
+    naturalHeight?: number;
+    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
+  };
   styles: Record<string, string>;
   pseudoElements: { before: PseudoElement | null; after: PseudoElement | null };
+  svg?: string;
   directTextRuns?: Array<{ characters: string; childNodeIndex: number; styles: Record<string, string> }>;
   children: ExtractionNode[];
   shadowChildren?: ExtractionNode[];
@@ -261,15 +276,45 @@ type FigmaNode = {
   relativeRect?: DocumentRect;
   isVisible: boolean;
   opacity?: number;
-  fills: Array<{ type: 'SOLID'; color: Rgba } | { type: 'IMAGE'; src: string; scaleMode: 'FILL' }>;
+  layoutMode?: 'HORIZONTAL' | 'VERTICAL';
+  itemSpacing?: number;
+  gap?: number;
+  padding?: { top: number; right: number; bottom: number; left: number };
+  primaryAxisAlign?: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+  counterAxisAlign?: 'MIN' | 'CENTER' | 'MAX';
+  layoutGrow?: number;
+  position?: 'absolute' | 'sticky';
+  zIndex?: number;
+  fills: Array<
+    | { type: 'SOLID'; color: Rgba }
+    | { type: 'IMAGE'; src: string; scaleMode: 'FILL' | 'FIT' | 'CROP' | 'TILE' }
+  >;
+  strokes?: Array<{ type: 'SOLID'; color: Rgba; weight: number; side?: 'TOP' | 'RIGHT' | 'BOTTOM' | 'LEFT' }>;
+  strokeWeight?: number;
+  strokeWeights?: { top: number; right: number; bottom: number; left: number };
+  effects?: Array<{
+    type: 'DROP_SHADOW' | 'INNER_SHADOW'; color: Rgba;
+    offset: { x: number; y: number }; radius: number; spread: number;
+  }>;
+  cornerRadius?: number;
+  cornerRadii?: { topLeft: number; topRight: number; bottomRight: number; bottomLeft: number };
   characters?: string;
+  styles?: {
+    fontFamily: string; fontSize: number; fontWeight: number; lineHeight: number;
+    letterSpacing: number; textAlign: 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFIED';
+    textAutoResize: 'NONE' | 'WIDTH_AND_HEIGHT' | 'HEIGHT' | 'TRUNCATE';
+  };
+  image?: { src: string; naturalWidth: number; naturalHeight: number; objectFit: string };
+  svg?: string;
   children: FigmaNode[];
 };
 
 type Rgba = { r: number; g: number; b: number; a: number };
 ```
 
-En `/v1/figma`, `rect` está en coordenadas del documento y `relativeRect` se calcula respecto al rectángulo de su padre representado. Los valores se expresan como números en píxeles CSS. Los colores sólidos usan canales RGBA normalizados de `0` a `1` y los catálogos globales solo contienen recursos perceptibles referenciados por nodos visibles incluidos. `fills` siempre se emite: es `[]` cuando no existe un relleno perceptible; cuando hay varias pinturas se ordenan de primer plano a fondo.
+En `/v1/figma`, `rect` está en coordenadas del documento y `relativeRect` se calcula exclusivamente restando los orígenes de los rectángulos padre e hijo representados; el nodo raíz no incluye `relativeRect`. Los valores se expresan como números en píxeles CSS y una caja indeterminable se representa con ceros. Los colores sólidos usan canales RGBA normalizados de `0` a `1`. Los catálogos globales se generan después del filtrado, por lo que solo contienen recursos perceptibles usados por nodos visibles incluidos. `fills` siempre se emite: es `[]` cuando no existe un relleno perceptible; cuando hay varias pinturas se ordenan de primer plano a fondo.
+
+Los catálogos son globales y deterministas: `styles.colors` deduplica colores sólidos RGBA y excluye apariencias producidas por imágenes, gradientes, filtros o mezcla; `styles.typographies` usa la combinación computada de familia, tamaño, peso, estilo, interlineado, espaciado y transformación. `assets` agrupa por familia los pesos usados por nodos `TEXT` visibles y, cuando se puede determinar desde una regla `@font-face` accesible, incluye una URL HTTP(S) de la fuente. Los nodos no llevan identificadores de catálogo: el consumidor relaciona los recursos por sus valores normalizados.
 
 ## Limitaciones
 
