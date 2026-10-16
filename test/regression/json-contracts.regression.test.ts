@@ -40,6 +40,19 @@ describe('JSON contract regression', () => {
     expect(validateFigmaDocumentV1(document)).toEqual([]);
   });
 
+  test('validates only supported scale modes for representative img and CSS background paints', async () => {
+    const document = await readJsonFixture('figma-document.1.1.json') as {
+      document: { children: Array<{ tag: string; type: string; fills?: Array<{ type: string; scaleMode?: string }> }> };
+    };
+
+    const imagePaints = flattenFigmaNodes(document.document)
+      .flatMap((node) => node.fills ?? [])
+      .filter((paint) => paint.type === 'IMAGE');
+
+    expect(imagePaints.map((paint) => paint.scaleMode)).toEqual(['FILL', 'FILL', 'FIT', 'CROP', 'FIT', 'CROP', 'TILE']);
+    expect(validateFigmaDocumentV1(document)).toEqual([]);
+  });
+
   test('rejects an extraction node with incomplete layout metadata', async () => {
     const document = await readJsonFixture('extraction-document.1.0.json') as {
       document: { layout: { rect: Record<string, unknown> } };
@@ -110,4 +123,8 @@ async function readSourceTree(directory: URL): Promise<string> {
     return entry.isFile() && entry.name.endsWith('.ts') ? readFile(entryUrl, 'utf8') : '';
   }));
   return contents.join('\n');
+}
+
+function flattenFigmaNodes(node: { children: Array<{ tag: string; type: string; fills?: Array<{ type: string; scaleMode?: string }> }> }): Array<{ tag: string; type: string; fills?: Array<{ type: string; scaleMode?: string }> }> {
+  return [node, ...node.children.flatMap(flattenFigmaNodes)];
 }

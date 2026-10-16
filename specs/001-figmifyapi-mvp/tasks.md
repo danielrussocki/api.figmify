@@ -639,18 +639,18 @@ Las tareas están ordenadas por dependencia y deben mantenerse dentro de 20–30
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** un fondo que repite en algún eje produce `TILE`; sin repetición, `cover` produce `FILL`, `contain` produce `FIT` y `auto` o un tamaño explícito producen `CROP`, manteniendo el nodo como `FRAME`.
 
-- [ ] **T152. Crear fixtures para los modos de escala de `img` y fondos CSS.**
+- [x] **T152. Crear fixtures para los modos de escala de `img` y fondos CSS.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** las fixtures incluyen `img` con `object-fit` que cubren `FILL`, `FIT` y `CROP`, y fondos CSS de URL única determinable que cubren `FILL`, `FIT`, `CROP` y `TILE`.
 
-- [ ] **T153. Añadir pruebas unitarias del resolvedor de `scaleMode`.**
+- [x] **T153. Añadir pruebas unitarias del resolvedor de `scaleMode`.**
   - **RF:** RF-3, RF-5.
   - **Hecho cuando:** las pruebas verifican cada mapeo de `object-fit`, `background-size` y `background-repeat`, y confirman que toda pintura emitida usa exclusivamente uno de los cuatro valores permitidos.
 
-- [ ] **T154. Añadir una prueba de integración Playwright para los modos de escala.**
+- [x] **T154. Añadir una prueba de integración Playwright para los modos de escala.**
   - **RF:** RF-2, RF-3, RF-5.
   - **Hecho cuando:** la extracción de las fixtures conserva los estilos necesarios y su transformación produce las pinturas `IMAGE` con los modos esperados, sin inventar pinturas para fondos ambiguos, múltiples o con gradiente.
 
-- [ ] **T155. Añadir regresión de contrato y prueba E2E de `scaleMode`.**
+- [x] **T155. Añadir regresión de contrato y prueba E2E de `scaleMode`.**
   - **RF:** RF-1, RF-3, RF-5.
   - **Hecho cuando:** una solicitud real a `/v1/figma` y los ejemplos de regresión validan que `scaleMode` solo es `FILL`, `FIT`, `CROP` o `TILE` para imágenes `img` y fondos CSS determinables.

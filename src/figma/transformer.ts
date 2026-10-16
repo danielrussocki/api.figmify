@@ -116,11 +116,11 @@ function mapExtractionNode(
     ...(positioning.position === undefined ? {} : { position: positioning.position }),
     ...(positioning.zIndex === undefined ? {} : { zIndex: positioning.zIndex }),
     fills: image !== undefined
-      ? [{ type: 'IMAGE', src: image.src, scaleMode: imageScaleMode(image.objectFit) }]
+      ? [{ type: 'IMAGE', src: image.src, scaleMode: resolveImageScaleMode(image.objectFit) }]
       : [
         ...(backgroundImageSrc === undefined
           ? []
-          : [{ type: 'IMAGE' as const, src: backgroundImageSrc, scaleMode: backgroundImageScaleMode(node.styles) }]),
+          : [{ type: 'IMAGE' as const, src: backgroundImageSrc, scaleMode: resolveBackgroundImageScaleMode(node.styles) }]),
         ...(paints.fills ?? []),
       ],
     ...(paints.strokes === null ? {} : { strokes: paints.strokes }),
@@ -235,7 +235,8 @@ function isNaturalDimension(value: number | undefined): value is number {
   return value !== undefined && Number.isFinite(value) && value >= 0;
 }
 
-function imageScaleMode(objectFit: string): FigmaImageScaleMode {
+/** Resolves an img computed object-fit value to its Figma image paint scale mode. */
+export function resolveImageScaleMode(objectFit: string): FigmaImageScaleMode {
   switch (objectFit) {
     case 'contain':
     case 'scale-down':
@@ -249,8 +250,8 @@ function imageScaleMode(objectFit: string): FigmaImageScaleMode {
   }
 }
 
-/** Maps the single supported CSS background image layer to a Figma scale mode. */
-function backgroundImageScaleMode(styles: Record<string, string>): FigmaImageScaleMode {
+/** Resolves the single supported CSS background image layer to a Figma scale mode. */
+export function resolveBackgroundImageScaleMode(styles: Record<string, string>): FigmaImageScaleMode {
   if (backgroundRepeats(styles['background-repeat'])) return 'TILE';
 
   switch (styles['background-size']?.trim().toLowerCase()) {

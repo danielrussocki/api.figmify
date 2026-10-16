@@ -51,6 +51,69 @@
           "textAutoResize": "HEIGHT"
         },
         "children": []
+      },
+      {
+        "id": "node-3",
+        "tag": "img",
+        "type": "IMAGE",
+        "rect": { "x": 24, "y": 80, "width": 64, "height": 48, "top": 80, "left": 24 },
+        "relativeRect": { "x": 24, "y": 80, "width": 64, "height": 48, "top": 80, "left": 24 },
+        "isVisible": true,
+        "image": { "src": "https://example.com/image-fill.png", "naturalWidth": 640, "naturalHeight": 480, "objectFit": "fill" },
+        "fills": [{ "type": "IMAGE", "src": "https://example.com/image-fill.png", "scaleMode": "FILL" }],
+        "children": []
+      },
+      {
+        "id": "node-4",
+        "tag": "img",
+        "type": "IMAGE",
+        "rect": { "x": 104, "y": 80, "width": 64, "height": 48, "top": 80, "left": 104 },
+        "relativeRect": { "x": 104, "y": 80, "width": 64, "height": 48, "top": 80, "left": 104 },
+        "isVisible": true,
+        "image": { "src": "https://example.com/image-fit.png", "naturalWidth": 640, "naturalHeight": 480, "objectFit": "contain" },
+        "fills": [{ "type": "IMAGE", "src": "https://example.com/image-fit.png", "scaleMode": "FIT" }],
+        "children": []
+      },
+      {
+        "id": "node-5",
+        "tag": "img",
+        "type": "IMAGE",
+        "rect": { "x": 184, "y": 80, "width": 64, "height": 48, "top": 80, "left": 184 },
+        "relativeRect": { "x": 184, "y": 80, "width": 64, "height": 48, "top": 80, "left": 184 },
+        "isVisible": true,
+        "image": { "src": "https://example.com/image-crop.png", "naturalWidth": 640, "naturalHeight": 480, "objectFit": "none" },
+        "fills": [{ "type": "IMAGE", "src": "https://example.com/image-crop.png", "scaleMode": "CROP" }],
+        "children": []
+      },
+      {
+        "id": "node-6",
+        "tag": "div",
+        "type": "FRAME",
+        "rect": { "x": 24, "y": 144, "width": 64, "height": 48, "top": 144, "left": 24 },
+        "relativeRect": { "x": 24, "y": 144, "width": 64, "height": 48, "top": 144, "left": 24 },
+        "isVisible": true,
+        "fills": [{ "type": "IMAGE", "src": "https://example.com/background-fit.png", "scaleMode": "FIT" }],
+        "children": []
+      },
+      {
+        "id": "node-7",
+        "tag": "div",
+        "type": "FRAME",
+        "rect": { "x": 104, "y": 144, "width": 64, "height": 48, "top": 144, "left": 104 },
+        "relativeRect": { "x": 104, "y": 144, "width": 64, "height": 48, "top": 144, "left": 104 },
+        "isVisible": true,
+        "fills": [{ "type": "IMAGE", "src": "https://example.com/background-crop.png", "scaleMode": "CROP" }],
+        "children": []
+      },
+      {
+        "id": "node-8",
+        "tag": "div",
+        "type": "FRAME",
+        "rect": { "x": 184, "y": 144, "width": 64, "height": 48, "top": 144, "left": 184 },
+        "relativeRect": { "x": 184, "y": 144, "width": 64, "height": 48, "top": 144, "left": 184 },
+        "isVisible": true,
+        "fills": [{ "type": "IMAGE", "src": "https://example.com/background-tile.png", "scaleMode": "TILE" }],
+        "children": []
       }
     ]
   }

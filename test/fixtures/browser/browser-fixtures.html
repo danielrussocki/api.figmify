@@ -144,6 +144,22 @@
           height: 48px;
           background-image: linear-gradient(rgb(30, 60, 90), rgb(90, 60, 30));
         }
+         #scale-mode-img-fill, #scale-mode-img-fit, #scale-mode-img-crop {
+           width: 64px;
+           height: 48px;
+         }
+         #scale-mode-img-fill { object-fit: fill; }
+         #scale-mode-img-fit { object-fit: contain; }
+         #scale-mode-img-crop { object-fit: none; }
+         #scale-mode-background-fill, #scale-mode-background-fit, #scale-mode-background-crop, #scale-mode-background-tile {
+           width: 64px;
+           height: 48px;
+           background-image: url("/resources/fixture-image.svg");
+         }
+          #scale-mode-background-fill { background-size: cover; background-repeat: no-repeat; }
+          #scale-mode-background-fit { background-size: contain; background-repeat: no-repeat; }
+          #scale-mode-background-crop { background-size: auto; background-repeat: no-repeat; }
+         #scale-mode-background-tile { background-size: 16px 12px; background-repeat: repeat-x; }
        #uniform-border {
          width: 120px;
          height: 48px;
@@ -236,6 +252,13 @@
           <div id="css-background-unresolvable">Unresolvable CSS background fixture</div>
           <div id="css-background-multiple">Multiple CSS backgrounds fixture</div>
           <div id="css-background-gradient">Gradient CSS background fixture</div>
+           <img id="scale-mode-img-fill" src="/resources/fixture-image.svg" alt="Image fill scale mode fixture">
+           <img id="scale-mode-img-fit" src="/resources/fixture-image.svg" alt="Image fit scale mode fixture">
+           <img id="scale-mode-img-crop" src="/resources/fixture-image.svg" alt="Image crop scale mode fixture">
+           <div id="scale-mode-background-fill">CSS background fill scale mode fixture</div>
+           <div id="scale-mode-background-fit">CSS background fit scale mode fixture</div>
+           <div id="scale-mode-background-crop">CSS background crop scale mode fixture</div>
+           <div id="scale-mode-background-tile">CSS background tile scale mode fixture</div>
           <div id="uniform-border">Uniform border fixture</div>
          <div id="per-side-borders">Per-side border fixture</div>
          <div id="multiple-shadows">Multiple shadow fixture</div>

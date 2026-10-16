@@ -112,6 +112,35 @@ describe('browser fixtures', () => {
     }
   });
 
+  test('serves img and CSS background image scale mode scenarios', async () => {
+    const fixtureServer = await startBrowserFixtureServer();
+
+    try {
+      const response = await fetch(`${fixtureServer.url}/browser-fixtures.html`);
+      const document = await response.text();
+
+      expect(response.status).toBe(200);
+
+      expect(document).toContain('id="scale-mode-img-fill"');
+      expect(document).toContain('id="scale-mode-img-fit"');
+      expect(document).toContain('id="scale-mode-img-crop"');
+      expect(document).toContain('object-fit: fill');
+      expect(document).toContain('object-fit: contain');
+      expect(document).toContain('object-fit: none');
+
+      expect(document).toContain('id="scale-mode-background-fill"');
+      expect(document).toContain('id="scale-mode-background-fit"');
+      expect(document).toContain('id="scale-mode-background-crop"');
+      expect(document).toContain('id="scale-mode-background-tile"');
+      expect(document).toContain('background-size: cover');
+      expect(document).toContain('background-size: contain');
+      expect(document).toContain('background-size: auto');
+      expect(document).toContain('background-repeat: repeat-x');
+    } finally {
+      await fixtureServer.close();
+    }
+  });
+
   test('serves visible elements and direct text with positive fractional opacity', async () => {
     const fixtureServer = await startBrowserFixtureServer();
 

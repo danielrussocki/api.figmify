@@ -166,7 +166,9 @@ describe('successful HTTP responses', () => {
     const source = `${fixtureServer.url}/resources/fixture-image.svg`;
     const transparentNode = findParentOfCharacters(document.document, 'No perceptible background fixture');
     const imageNodes = flattenNodes(document.document)
-      .filter((node) => node.type === 'IMAGE' && node.image?.src === source);
+      .filter((node) => node.type === 'IMAGE'
+        && node.image?.src === source
+        && node.image.objectFit === 'fill');
     const backgroundNodes = flattenNodes(document.document)
       .filter((node) => node.type === 'FRAME'
         && node.fills?.some((fill) => fill.type === 'IMAGE' && fill.src === source));
@@ -187,6 +189,32 @@ describe('successful HTTP responses', () => {
         fills: expect.arrayContaining([{ type: 'IMAGE', src: source, scaleMode: 'TILE' }]),
       }),
     ]));
+  });
+
+  test('GET /v1/figma emits only supported scale modes for determinable img and CSS background paints', async () => {
+    const document = await requestJson<FigmaDocument>('/v1/figma');
+    const source = `${fixtureServer.url}/resources/fixture-image.svg`;
+    const imagePaints = flattenNodes(document.document)
+      .flatMap((node) => node.fills ?? [])
+      .filter((fill): fill is Extract<FigmaDocument['document']['fills'][number], { type: 'IMAGE' }> => fill.type === 'IMAGE');
+
+    expect(imagePaints).not.toHaveLength(0);
+    expect(imagePaints.every((paint) => ['FILL', 'FIT', 'CROP', 'TILE'].includes(paint.scaleMode))).toBe(true);
+    expect(flattenNodes(document.document).filter((node) => node.type === 'IMAGE' && node.image?.src === source))
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }] }),
+        expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'FIT' }] }),
+        expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'CROP' }] }),
+      ]));
+    expect(flattenNodes(document.document).filter((node) => node.type === 'FRAME' && node.fills?.some(
+      (fill) => fill.type === 'IMAGE' && fill.src === source,
+    ))).toEqual(expect.arrayContaining([
+      expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'FILL' }] }),
+      expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'FIT' }] }),
+      expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'CROP' }] }),
+      expect.objectContaining({ fills: [{ type: 'IMAGE', src: source, scaleMode: 'TILE' }] }),
+    ]));
+    expect(validateFigmaDocumentV1(document)).toEqual([]);
   });
 
   test('GET /v1/figma applies includeHidden to the hidden text subtree', async () => {

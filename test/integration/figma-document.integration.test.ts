@@ -172,6 +172,58 @@ describe('Figma document browser integration', () => {
     expect(frame).not.toHaveProperty('image');
   });
 
+  test('preserves image scale styles and maps determinable img and CSS backgrounds without inventing ambiguous paints', async () => {
+    shortenPostLoadWait();
+    const extractor = new PlaywrightExtractor(browser, 'development');
+    const extraction = await extractor.extract({
+      url: `${fixtureServer.url}/browser-fixtures.html`,
+      viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
+    });
+    const source = `${fixtureServer.url}/resources/fixture-image.svg`;
+    const imgCases = [
+      ['scale-mode-img-fill', 'fill', 'FILL'],
+      ['scale-mode-img-fit', 'contain', 'FIT'],
+      ['scale-mode-img-crop', 'none', 'CROP'],
+    ] as const;
+    const backgroundCases = [
+      ['scale-mode-background-fill', 'cover', 'no-repeat', 'FILL'],
+      ['scale-mode-background-fit', 'contain', 'no-repeat', 'FIT'],
+      ['scale-mode-background-crop', 'auto', 'no-repeat', 'CROP'],
+      ['scale-mode-background-tile', '16px 12px', 'repeat-x', 'TILE'],
+    ] as const;
+
+    for (const [id, objectFit, scaleMode] of imgCases) {
+      const rawNode = requireExtractionNode(extraction.document, id);
+      expect(rawNode.styles['object-fit']).toBe(objectFit);
+      expect(findNodeById(transformExtractionDocument(extraction).document, rawNode.id)).toMatchObject({
+        type: 'IMAGE',
+        fills: [{ type: 'IMAGE', src: source, scaleMode }],
+      });
+    }
+
+    for (const [id, backgroundSize, backgroundRepeat, scaleMode] of backgroundCases) {
+      const rawNode = requireExtractionNode(extraction.document, id);
+      expect(rawNode.styles).toMatchObject({
+        'background-image': `url("${source}")`,
+        'background-size': backgroundSize,
+        'background-repeat': backgroundRepeat,
+      });
+      expect(findNodeById(transformExtractionDocument(extraction).document, rawNode.id)).toMatchObject({
+        type: 'FRAME',
+        fills: [{ type: 'IMAGE', src: source, scaleMode }],
+      });
+    }
+
+    const document = transformExtractionDocument(extraction);
+    for (const id of ['css-background-unresolvable', 'css-background-multiple', 'css-background-gradient']) {
+      const rawNode = requireExtractionNode(extraction.document, id);
+      expect(findNodeById(document.document, rawNode.id)).toMatchObject({
+        type: 'FRAME',
+        fills: [],
+      });
+    }
+  });
+
   test('preserves positive fractional opacity in raw extraction and mapped Figma nodes', async () => {
     shortenPostLoadWait();
     const extractor = new PlaywrightExtractor(browser, 'development');
